@@ -40,7 +40,7 @@ public final class Constants {
     public static final double DRIVETRAIN_WHEELBASE_METERS = 0.447675;
 
     // public static final int DRIVETRAIN_PIGEON_ID = 0; // Set Pigeon ID
-    public static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+    public static SwerveDriveKinematics kinematics = new SwerveDriveKinematics( 
         // Front left
         new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
         // Front right
