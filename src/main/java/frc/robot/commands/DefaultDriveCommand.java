@@ -16,26 +16,27 @@ public class DefaultDriveCommand extends CommandBase {
 
   private final DoubleSupplier m_x;
   private final DoubleSupplier m_y;
-  private final DoubleSupplier m_rot; 
-  public DefaultDriveCommand (DrivetrainSubsystem subsystem, DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot ) {
+  private final DoubleSupplier m_rot;
+
+  public DefaultDriveCommand(DrivetrainSubsystem subsystem, DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
     drivetrainSubsystem = subsystem;
     m_x = x;
     m_y = y;
     m_rot = rot;
     addRequirements(drivetrainSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
-  } 
+  }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(m_x.getAsDouble(), m_y.getAsDouble(), m_rot.getAsDouble()), drivetrainSubsystem.getGyroscopeRotation())); 
-
-
+    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(m_x.getAsDouble(), m_y.getAsDouble(),
+        m_rot.getAsDouble(), drivetrainSubsystem.getGyroscopeRotation()));
   }
 
   // Called once the command ends or is interrupted.
