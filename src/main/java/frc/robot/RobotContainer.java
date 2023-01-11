@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import static frc.robot.Constants.Swerve.*;
+
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a
@@ -43,10 +45,9 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    DoubleSupplier testLeftY = () -> m_driverController.getLeftY() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
-    DoubleSupplier testLeftX = () -> m_driverController.getLeftX() * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
-    DoubleSupplier testRightX = () -> m_driverController.getRightX()
-        * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND;
+    DoubleSupplier testLeftY = () -> m_driverController.getLeftY() * MAX_VELOCITY_METERS_PER_SECOND;
+    DoubleSupplier testLeftX = () -> m_driverController.getLeftX() * MAX_VELOCITY_METERS_PER_SECOND;
+    DoubleSupplier testRightX = () -> m_driverController.getRightX() * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
     ShuffleboardTab tab = Shuffleboard.getTab("tab");
     tab.addNumber("testLeftY", testLeftY);
@@ -59,10 +60,12 @@ public class RobotContainer {
   }
 
   public void setDefaultCommands() {
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
-        () -> -modifyAxis(m_driverController.getLeftY(), false) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(m_driverController.getLeftX(), false) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(m_driverController.getRightX(), false) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
+    m_drivetrainSubsystem
+        .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
+            () -> m_driverController.getLeftY() * MAX_VELOCITY_METERS_PER_SECOND,
+            () -> m_driverController.getLeftX() * MAX_VELOCITY_METERS_PER_SECOND,
+            () -> m_driverController.getRightX() * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            angleEnableCurrentLimit));
   }
 
   /**
@@ -88,7 +91,8 @@ public class RobotContainer {
     // pressed,
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-    m_driverController.back().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyroscope()));
+    // m_driverController.back().onTrue(new InstantCommand(() ->
+    // m_drivetrainSubsystem.zeroGyroscope()));
   }
 
   /**

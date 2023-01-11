@@ -6,25 +6,27 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class DefaultDriveCommand extends CommandBase {
+  DrivetrainSubsystem m_DrivetrainSubsystem;
+  DoubleSupplier x;
+  DoubleSupplier y;
+  DoubleSupplier theta;
+  boolean fieldRelative;
+
   /** Creates a new DefaultDriveCommand. */
-  private final DrivetrainSubsystem drivetrainSubsystem;
-
-  private final DoubleSupplier m_x;
-  private final DoubleSupplier m_y;
-  private final DoubleSupplier m_rot;
-
-  public DefaultDriveCommand(DrivetrainSubsystem subsystem, DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
-    drivetrainSubsystem = subsystem;
-    m_x = x;
-    m_y = y;
-    m_rot = rot;
-    addRequirements(drivetrainSubsystem);
+  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem, DoubleSupplier x, DoubleSupplier y,
+      DoubleSupplier theta, boolean fieldRelative) {
+    m_DrivetrainSubsystem = drivetrainSubsystem;
+    this.x = x;
+    this.y = y;
+    this.theta = theta;
+    this.fieldRelative = fieldRelative;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(drivetrainSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -35,14 +37,14 @@ public class DefaultDriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(m_x.getAsDouble(), m_y.getAsDouble(),
-        m_rot.getAsDouble(), drivetrainSubsystem.getGyroscopeRotation()));
+    m_DrivetrainSubsystem.drive(new Translation2d(x.getAsDouble(), y.getAsDouble()), theta.getAsDouble(), fieldRelative,
+        true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    drivetrainSubsystem.drive(new ChassisSpeeds());
+    m_DrivetrainSubsystem.drive(new Translation2d(), 0, true, true);
   }
 
   // Returns true when the command should end.
