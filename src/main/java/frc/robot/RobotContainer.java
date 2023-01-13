@@ -60,12 +60,18 @@ public class RobotContainer {
   }
 
   public void setDefaultCommands() {
+    // m_drivetrainSubsystem
+    //     .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
+    //         () -> m_driverController.getLeftY() * MAX_VELOCITY_METERS_PER_SECOND,
+    //         () -> m_driverController.getLeftX() * MAX_VELOCITY_METERS_PER_SECOND,
+    //         () -> m_driverController.getRightX() * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    //         true));
     m_drivetrainSubsystem
         .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
-            () -> m_driverController.getLeftY() * MAX_VELOCITY_METERS_PER_SECOND,
-            () -> m_driverController.getLeftX() * MAX_VELOCITY_METERS_PER_SECOND,
-            () -> m_driverController.getRightX() * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-            angleEnableCurrentLimit));
+            () -> modifyAxis(m_driverController.getLeftY(), true) * MAX_VELOCITY_METERS_PER_SECOND / 2,
+            () -> modifyAxis(m_driverController.getLeftX(), true) * MAX_VELOCITY_METERS_PER_SECOND / 2,
+            () -> modifyAxis(m_driverController.getRightX(), true) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2,
+            true));
   }
 
   /**
@@ -90,7 +96,6 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
     // m_driverController.back().onTrue(new InstantCommand(() ->
     // m_drivetrainSubsystem.zeroGyroscope()));
   }
