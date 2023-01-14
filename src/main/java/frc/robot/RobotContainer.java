@@ -67,11 +67,12 @@ public class RobotContainer {
     // () -> m_driverController.getRightX() *
     // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
     // true));
+    double speedCap = Constants.Swerve.maxSpeed;
     m_drivetrainSubsystem
         .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
-            () -> modifyAxis(m_driverController.getLeftY(), false) * MAX_VELOCITY_METERS_PER_SECOND / 2,
-            () -> modifyAxis(m_driverController.getLeftX(), false) * MAX_VELOCITY_METERS_PER_SECOND / 2,
-            () -> modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2,
+            () -> modifyAxis(m_driverController.getLeftY(), false) * speedCap,
+            () -> modifyAxis(m_driverController.getLeftX(), false) * speedCap,
+            () -> modifyAxis(m_driverController.getRightX(), false) * speedCap,
             true));
   }
 
