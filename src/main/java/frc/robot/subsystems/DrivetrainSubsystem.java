@@ -24,6 +24,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     public frc.lib.util.SwerveModule[] mSwerveMods;
     public AHRS m_navX;
 
+
+    
     public DrivetrainSubsystem() {
         
         m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
@@ -36,7 +38,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 new SwerveModule(2, Constants.Swerve.Mod2.constants),
                 new SwerveModule(3, Constants.Swerve.Mod3.constants)
         };
-
+        for (SwerveModule mod : mSwerveMods){
+            mod.reset();
+        }
         swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
     }
 
@@ -64,7 +68,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed / 10);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
 
         for (SwerveModule mod : mSwerveMods) {
             mod.setDesiredState(desiredStates[mod.moduleNumber]);
@@ -77,6 +81,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         swerveOdometry.resetPosition(getYaw(), getModulePositions(), pose);
+        for (SwerveModule mod : mSwerveMods) {
+            mod.reset();
+        }
     }
 
     public SwerveModuleState[] getModuleStates() {
@@ -114,6 +121,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
 
+        SmartDashboard.putNumber("ROT VALUE", m_navX.getYaw());
         SmartDashboard.putNumber("x", swerveOdometry.getPoseMeters().getX());
         SmartDashboard.putNumber("y", swerveOdometry.getPoseMeters().getY());
         SmartDashboard.putNumber("Odom Rotation", swerveOdometry.getPoseMeters().getRotation().getDegrees());

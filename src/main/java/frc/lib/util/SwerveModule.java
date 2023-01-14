@@ -33,7 +33,6 @@ import static frc.robot.Constants.Swerve.*;
 
 public class SwerveModule {
     public int moduleNumber;
-    private Rotation2d angleOffset;
     private Rotation2d lastAngle;
 
     private TalonFX jacobBublitz;
@@ -45,7 +44,6 @@ public class SwerveModule {
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants) {
         this.moduleNumber = moduleNumber;
-        this.angleOffset = moduleConstants.angleOffset;
 
         /* Motor & Encoder Config */
         m_angleMotor = new CANSparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
@@ -71,18 +69,19 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        desiredState = CTREModuleState.optimize(desiredState, Rotation2d.fromRadians(getTurningPosition()));
+        desiredState = SwerveModuleState.optimize(desiredState, Rotation2d.fromRadians(getTurningPosition()));
         setAngle(desiredState);
         setSpeed(desiredState);
     }
 
     private void setSpeed(SwerveModuleState desiredState) {
-        double percentOutput = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed;
+        double percentOutput = (Math.abs(desiredState.speedMetersPerSecond) <= Constants.Swerve.maxSpeed * 0.01) ? 0
+                : desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed;
         m_driveMotor.set(percentOutput);
     }
 
     private void setAngle(SwerveModuleState desiredState) {
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.Swerve.maxSpeed * 0.01))
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.Swerve.maxSpeed * 0.001))
                 ? lastAngle
                 : desiredState.angle; // Prevent rotating module if speed is less then 1%. Prevents Jittering.
 
@@ -118,7 +117,7 @@ public class SwerveModule {
 
     private void configDriveMotor() {
         m_driveMotor.setInverted(driveMotorInvert);
-        m_driveMotor.setIdleMode(IdleMode.kCoast);
+        m_driveMotor.setIdleMode(IdleMode.kBrake);
         m_driveMotor.burnFlash();
         driveEncoder.setPositionConversionFactor(kDriveEncoderRot2Meter);
         driveEncoder.setVelocityConversionFactor(kDriveEncoderRPM2MeterPerSec);
@@ -134,6 +133,12 @@ public class SwerveModule {
 
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(getDrivePosition(), Rotation2d.fromRadians(getTurningPosition()));
+    }
+
+    public void reset() {
+        driveEncoder.setPosition(0);
+        angleEncoder.setPosition(0);
+        turningPidController.reset(0);
     }
 
     public void stop() {
