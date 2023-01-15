@@ -113,7 +113,7 @@ public final class Constants {
          */
         // Here we calculate the theoretical maximum angular velocity. You can also
         // replace this with a measured amount.
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 4.4 /
                 Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
         /*
          * Swerve Kinematics
@@ -178,7 +178,7 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = 4.5; // TODO: This must be tuned to specific robot
+        public static final double maxSpeed = 4.4; // TODO: This must be tuned to specific robot
         /** Radians per Second */
         public static final double maxAngularVelocity = 10.0; // TODO: This must be tuned to specific robot
 

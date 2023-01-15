@@ -72,7 +72,8 @@ public class RobotContainer {
         .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
             () -> modifyAxis(m_driverController.getLeftY(), false) * speedCap,
             () -> modifyAxis(m_driverController.getLeftX(), false) * speedCap,
-            () -> modifyAxis(m_driverController.getRightX(), false) * speedCap,
+            () -> modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            () -> m_driverController.getLeftTriggerAxis(),
             true));
   }
 
