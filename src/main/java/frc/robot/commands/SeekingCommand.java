@@ -4,21 +4,41 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.Constants.VisionConstants;
+import frc.robot.Constants.VisionConstants.*;
+
+import org.photonvision.PhotonUtils;
 
 public class SeekingCommand extends CommandBase {
+  private final VisionSubsystem m_VisionSubsystem;
+  private final DrivetrainSubsystem m_DrivetrainSubsystem;
+
+
   /** Creates a new SeekingCommand. */
-  public SeekingCommand() {
+  public SeekingCommand(VisionSubsystem visionSubsystem, DrivetrainSubsystem drivetrainSubsystem) 
+  {
     // Use addRequirements() here to declare subsystem dependencies.
+    m_DrivetrainSubsystem = drivetrainSubsystem;
+    m_VisionSubsystem = visionSubsystem;
+    addRequirements(visionSubsystem, drivetrainSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+
+  }
+
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+  }
 
   // Called once the command ends or is interrupted.
   @Override

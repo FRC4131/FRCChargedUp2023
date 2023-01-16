@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.SeekingCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -102,6 +103,9 @@ public class RobotContainer {
     // pressed,
     // cancelling on release.
     m_driverController.back().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyro()));
+    //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
+
+    
   }
 
   /**

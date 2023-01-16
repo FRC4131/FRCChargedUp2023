@@ -126,12 +126,4 @@ public class DrivetrainSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("y", swerveOdometry.getPoseMeters().getY());
         SmartDashboard.putNumber("Odom Rotation", swerveOdometry.getPoseMeters().getRotation().getDegrees());
     }
-    public CommandBase rawSetFL(double drive, double turn) {
-        // Inline construction of command goes here.
-        // Subsystem::RunOnce implicitly requires `this` subsystem.
-        return runOnce(
-            () -> {
-                mSwerveMods[0].rawSet(drive, turn);
-            });
-      }
 }
