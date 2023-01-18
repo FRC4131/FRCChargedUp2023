@@ -63,13 +63,7 @@ public class RobotContainer {
   }
 
   public void setDefaultCommands() {
-    // m_drivetrainSubsystem
-    // .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
-    // () -> m_driverController.getLeftY() * MAX_VELOCITY_METERS_PER_SECOND,
-    // () -> m_driverController.getLeftX() * MAX_VELOCITY_METERS_PER_SECOND,
-    // () -> m_driverController.getRightX() *
-    // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    // true));
+
     double speedCap = Constants.Swerve.maxSpeed;
     m_drivetrainSubsystem
         .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
@@ -80,20 +74,7 @@ public class RobotContainer {
             true));
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
+
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
@@ -103,7 +84,7 @@ public class RobotContainer {
     // pressed,
     // cancelling on release.
     m_driverController.back().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyro()));
-    //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
+    m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
 
     
   }

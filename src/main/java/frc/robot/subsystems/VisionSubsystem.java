@@ -23,12 +23,13 @@ import frc.robot.Constants.VisionConstants;
 
 public class VisionSubsystem extends SubsystemBase {
   PhotonCamera camera = new PhotonCamera("Limelight1");
-  double yaw;
-  double pitch;
-  double area;
-  double skew;
-  boolean hasTargets;
-  PhotonPipelineResult result;
+  public PhotonPipelineResult result;
+  public double yaw;
+  public double pitch;
+  public double area;
+  public double skew;
+  public boolean hasTargets;
+  
 
   @Override
   public void periodic() {
@@ -63,19 +64,5 @@ public class VisionSubsystem extends SubsystemBase {
 
 
   }
-
-  /*
-   * public double seek(){
-   * if(hasTargets){
-   * 
-   * 
-   * return range;
-   * } else return 0.0;
-   * }
-   */
-  // public double getPitch() {
-  //   var new_result = result.getBestTarget().getPitch();
-  //   return new_result;
-  // }
 
 }
