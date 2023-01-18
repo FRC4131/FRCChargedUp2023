@@ -12,6 +12,8 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
@@ -30,11 +32,14 @@ public class VisionSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    var result = camera.getLatestResult(); 
+    result = camera.getLatestResult();
     boolean hasTargets = result.hasTargets();
-    if(!hasTargets){
-      return;
-    }
+
+    SmartDashboard.putNumber("Distance to Target", -1);
+    SmartDashboard.putBoolean("hasTargets", result.hasTargets());
+    if (!hasTargets){ 
+      return;}
+    
     PhotonTrackedTarget target = result.getBestTarget();
     int targetID = target.getFiducialId();
 
@@ -42,33 +47,35 @@ public class VisionSubsystem extends SubsystemBase {
     pitch = target.getPitch();
     area = target.getArea();
     skew = target.getSkew();
-    
-    
-    SmartDashboard.putNumber("Distance to Target", seek());
-    SmartDashboard.putBoolean("hasTargets", result.hasTargets());
-    if(hasTargets){
-      SmartDashboard.putNumber("Target ID", targetID);
-      SmartDashboard.putNumber("Yaw", yaw);
-      SmartDashboard.putNumber("Pitch", pitch);
-      SmartDashboard.putNumber("Area", area);
-      SmartDashboard.putNumber("Skew", skew);
-    }
+
+    double dist = PhotonUtils.calculateDistanceToTargetMeters(
+        VisionConstants.CAMERA_HEIGHT_METERS,
+        VisionConstants.TARGET_HEIGHT_METERS,
+        VisionConstants.CAMERA_PITCH_RADIANS,
+        Units.degreesToRadians(pitch));
+
+    SmartDashboard.putNumber("Distance to Target", -dist);
+    SmartDashboard.putNumber("Target ID", targetID);
+    SmartDashboard.putNumber("Yaw", yaw);
+    SmartDashboard.putNumber("Pitch", pitch);
+    SmartDashboard.putNumber("Area", area);
+    SmartDashboard.putNumber("Skew", skew);
+
+
   }
 
-  public double seek(){
-    if(hasTargets){
-    double range =
-    PhotonUtils.calculateDistanceToTargetMeters(
-            VisionConstants.CAMERA_HEIGHT_METERS,
-            VisionConstants.TARGET_HEIGHT_METERS,
-            VisionConstants.CAMERA_PITCH_RADIANS,
-            Units.degreesToRadians(getPitch()));
+  /*
+   * public double seek(){
+   * if(hasTargets){
+   * 
+   * 
+   * return range;
+   * } else return 0.0;
+   * }
+   */
+  // public double getPitch() {
+  //   var new_result = result.getBestTarget().getPitch();
+  //   return new_result;
+  // }
 
-    return range;
-  } else return 0.0;
-}
-  public double getPitch(){
-    var new_result = result.getBestTarget().getPitch();
-    return new_result;
-  }
 }
