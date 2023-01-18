@@ -39,6 +39,7 @@ public class DefaultDriveCommand extends CommandBase {
     this.throttle = throttle;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrainSubsystem);
+    addRequirements(poseEstimationSubsystem);
   }
 
   // Called when the command is initially scheduled.

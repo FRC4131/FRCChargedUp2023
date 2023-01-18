@@ -65,11 +65,11 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   public void periodic() 
   {
     m_swerveDriveOdometry.update(getYaw(), m_drivetrainSubsystem.getModulePositions());
-    
+
     // This method will be called once per scheduler run
-        SmartDashboard.putNumber("ROT VALUE", m_navX.getYaw());
-        SmartDashboard.putNumber("x", m_swerveDriveOdometry.getPoseMeters().getX());
-        SmartDashboard.putNumber("y", m_swerveDriveOdometry.getPoseMeters().getY());
-        SmartDashboard.putNumber("Odom Rotation", m_swerveDriveOdometry.getPoseMeters().getRotation().getDegrees()); 
+    SmartDashboard.putNumber("RawGyroYaw", m_navX.getYaw());
+    SmartDashboard.putNumber("x", m_swerveDriveOdometry.getPoseMeters().getX());
+    SmartDashboard.putNumber("y", m_swerveDriveOdometry.getPoseMeters().getY());
+    SmartDashboard.putNumber("Odom Rotation", m_swerveDriveOdometry.getPoseMeters().getRotation().getDegrees()); 
   }
 }
