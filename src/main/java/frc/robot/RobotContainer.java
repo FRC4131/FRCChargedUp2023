@@ -11,6 +11,7 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.SeekingCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 import java.util.function.DoubleSupplier;
@@ -39,6 +40,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+  private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem, m_visionSubsystem);
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(
@@ -63,16 +65,9 @@ public class RobotContainer {
   }
 
   public void setDefaultCommands() {
-    // m_drivetrainSubsystem
-    // .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
-    // () -> m_driverController.getLeftY() * MAX_VELOCITY_METERS_PER_SECOND,
-    // () -> m_driverController.getLeftX() * MAX_VELOCITY_METERS_PER_SECOND,
-    // () -> m_driverController.getRightX() *
-    // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    // true));
     double speedCap = Constants.Swerve.maxSpeed;
     m_drivetrainSubsystem
-        .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
+        .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             () -> modifyAxis(m_driverController.getLeftY(), false) * speedCap,
             () -> modifyAxis(m_driverController.getLeftX(), false) * speedCap,
             () -> modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
@@ -102,7 +97,7 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
     // cancelling on release.
-    m_driverController.back().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyro()));
+    m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
 
     
