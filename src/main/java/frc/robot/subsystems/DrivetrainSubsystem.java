@@ -21,19 +21,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DrivetrainSubsystem extends SubsystemBase {
     public SwerveDriveOdometry swerveOdometry;
-    public frc.lib.util.SwerveModule[] mSwerveMods;
     public AHRS m_navX;
+    public frc.lib.util.SwerveModule[] mSwerveMods;
 
-
-    
     public DrivetrainSubsystem() {
         
-        m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
-
-        zeroGyro();
-
         mSwerveMods = new SwerveModule[] {
-                new SwerveModule(0, Constants.Swerve.Mod0.constants),
+                new SwerveModule(
+                    0, Constants.Swerve.Mod0.constants),
                 new SwerveModule(1, Constants.Swerve.Mod1.constants),
                 new SwerveModule(2, Constants.Swerve.Mod2.constants),
                 new SwerveModule(3, Constants.Swerve.Mod3.constants)
@@ -41,7 +36,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
         for (SwerveModule mod : mSwerveMods){
             mod.reset();
         }
-        swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
     }
 
     /**
@@ -75,16 +69,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         }
     }
 
-    public Pose2d getPose() {
-        return swerveOdometry.getPoseMeters();
-    }
 
-    public void resetOdometry(Pose2d pose) {
-        swerveOdometry.resetPosition(getYaw(), getModulePositions(), pose);
-        for (SwerveModule mod : mSwerveMods) {
-            mod.reset();
-        }
-    }
+    
 
     public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
@@ -102,18 +88,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return positions;
     }
 
-    public void zeroGyro() {
-        m_navX.reset();
-    }
-
-    public Rotation2d getYaw() {
-        return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - m_navX.getYaw())
-                : Rotation2d.fromDegrees(m_navX.getYaw());
-    }
+   
 
     @Override
     public void periodic() {
-        swerveOdometry.update(getYaw(), getModulePositions());
 
         for (SwerveModule mod : mSwerveMods) {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Drive Position", mod.getDrivePosition());
