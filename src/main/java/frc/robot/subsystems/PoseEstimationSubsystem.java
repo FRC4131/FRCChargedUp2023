@@ -9,7 +9,6 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -44,7 +43,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     m_navX.reset();
   }
 
-  public Rotation2d getYaw() 
+  private Rotation2d getGyroYaw() 
   {
     return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - m_navX.getYaw())
             : Rotation2d.fromDegrees(m_navX.getYaw());
@@ -52,7 +51,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   
   public void resetOdometry(Pose2d pose) 
   {
-    m_swerveDrivePoseEst.resetPosition(getYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
+    m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
     for (SwerveModule mod : mSwerveMods) {
         mod.reset();
     }
@@ -66,12 +65,11 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   @Override
   public void periodic() 
   {
-    m_swerveDrivePoseEst.addVisionMeasurement(m_visionSubsystem.getPose(), m_visionSubsystem.getTimestamp());
-    
-    m_swerveDrivePoseEst.update(getYaw(), m_drivetrainSubsystem.getModulePositions());
+    //m_swerveDrivePoseEst.addVisionMeasurement(m_visionSubsystem.getPose(), m_visionSubsystem.getTimestamp());
+    m_swerveDrivePoseEst.update(getGyroYaw(), m_drivetrainSubsystem.getModulePositions());
 
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("RawGyroYaw", m_navX.getYaw());
+    SmartDashboard.putNumber("RawGyroYaw", getGyroYaw().getDegrees());
     SmartDashboard.putNumber("x", m_swerveDrivePoseEst.getEstimatedPosition().getX());
     SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
     SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees()); 

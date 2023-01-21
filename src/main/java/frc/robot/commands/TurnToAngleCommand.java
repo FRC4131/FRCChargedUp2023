@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 
@@ -44,9 +43,8 @@ public class TurnToAngleCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Double rotateVel = m_pidController.calculate(m_poseEstimationSubsystem.getYaw().getRadians());
-    m_drivetrainSubsystem.drive(new Translation2d(), rotateVel, m_poseEstimationSubsystem.getYaw().getRadians(), false, true);
-
+    Double rotateVel = m_pidController.calculate(m_poseEstimationSubsystem.getPose().getRotation().getRadians());
+    m_drivetrainSubsystem.drive(new Translation2d(), rotateVel, m_poseEstimationSubsystem.getPose().getRotation(), false, true);
   }
 
   // Called once the command ends or is interrupted.
