@@ -12,6 +12,8 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
+import com.fasterxml.jackson.databind.deser.ValueInstantiator.Gettable;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -33,27 +35,27 @@ public class VisionSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    result = camera.getLatestResult();
-    boolean hasTargets = result.hasTargets();
-
-    SmartDashboard.putNumber("Distance to Target", -1);
-    SmartDashboard.putBoolean("hasTargets", result.hasTargets());
-    if (!hasTargets){ 
-      return;}
     
-    PhotonTrackedTarget target = result.getBestTarget();
+    var target = getTarget();
+
+    if(target == null)
+      return;
+
     int targetID = target.getFiducialId();
 
     yaw = target.getYaw();
     pitch = target.getPitch();
     area = target.getArea();
     skew = target.getSkew();
+    
 
     double dist = PhotonUtils.calculateDistanceToTargetMeters(
         VisionConstants.CAMERA_HEIGHT_METERS,
         VisionConstants.TARGET_HEIGHT_METERS,
         VisionConstants.CAMERA_PITCH_RADIANS,
         Units.degreesToRadians(pitch));
+        
+        var roboPose = PhotonUtils.estimateFieldToRobotAprilTag(target.getBestCameraToTarget(), new Pose3d(), new Transform3d());
 
     SmartDashboard.putNumber("Distance to Target", -dist);
     SmartDashboard.putNumber("Target ID", targetID);
@@ -63,6 +65,28 @@ public class VisionSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Skew", skew);
 
 
+    SmartDashboard.putNumber("photon x", roboPose.getX());
+    SmartDashboard.putNumber("photon y", roboPose.getY());
+  }
+
+  public Pose2d getPose(){
+    return PhotonUtils.estimateFieldToRobotAprilTag(getTarget().getBestCameraToTarget(), new Pose3d(), new Transform3d()).toPose2d();
+  }
+
+  public PhotonTrackedTarget getTarget(){
+    result = camera.getLatestResult();
+    boolean hasTargets = result.hasTargets();
+
+    if (!hasTargets){ 
+      return null;
+    
+    }
+    
+    return result.getBestTarget(); 
+  }
+
+  public double getTimestamp(){
+    return camera.getLatestResult().getTimestampSeconds();
   }
 
 }

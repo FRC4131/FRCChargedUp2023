@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -18,7 +19,7 @@ import frc.robot.Constants;
 public class PoseEstimationSubsystem extends SubsystemBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   VisionSubsystem m_visionSubsystem;
-  SwerveDriveOdometry m_swerveDriveOdometry;
+  SwerveDrivePoseEstimator m_swerveDrivePoseEst;
   AHRS m_navX;
   public frc.lib.util.SwerveModule[] mSwerveMods;
 
@@ -29,11 +30,12 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
 
     zeroGyro();
-
-    m_swerveDriveOdometry = new SwerveDriveOdometry(
+    
+    m_swerveDrivePoseEst = new SwerveDrivePoseEstimator(
                                     Constants.Swerve.swerveKinematics, 
                                     getYaw(), 
-                                    m_drivetrainSubsystem.getModulePositions()
+                                    m_drivetrainSubsystem.getModulePositions(),
+                                    new Pose2d()
                                   );
   }
   
@@ -50,7 +52,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   
   public void resetOdometry(Pose2d pose) 
   {
-    m_swerveDriveOdometry.resetPosition(getYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
+    m_swerveDrivePoseEst.resetPosition(getYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
     for (SwerveModule mod : mSwerveMods) {
         mod.reset();
     }
@@ -58,18 +60,20 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   
   public Pose2d getPose() 
   {
-    return m_swerveDriveOdometry.getPoseMeters();
+    return m_swerveDrivePoseEst.getEstimatedPosition();
   }
 
   @Override
   public void periodic() 
   {
-    m_swerveDriveOdometry.update(getYaw(), m_drivetrainSubsystem.getModulePositions());
+    m_swerveDrivePoseEst.addVisionMeasurement(m_visionSubsystem.getPose(), m_visionSubsystem.getTimestamp());
+    
+    m_swerveDrivePoseEst.update(getYaw(), m_drivetrainSubsystem.getModulePositions());
 
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("RawGyroYaw", m_navX.getYaw());
-    SmartDashboard.putNumber("x", m_swerveDriveOdometry.getPoseMeters().getX());
-    SmartDashboard.putNumber("y", m_swerveDriveOdometry.getPoseMeters().getY());
-    SmartDashboard.putNumber("Odom Rotation", m_swerveDriveOdometry.getPoseMeters().getRotation().getDegrees()); 
+    SmartDashboard.putNumber("x", m_swerveDrivePoseEst.getEstimatedPosition().getX());
+    SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
+    SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees()); 
   }
 }
