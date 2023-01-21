@@ -6,12 +6,15 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.PoseEstimationSubsystem;
 
 public class DefaultDriveCommand extends CommandBase {
-  DrivetrainSubsystem m_DrivetrainSubsystem;
+  DrivetrainSubsystem m_drivetrainSubsystem;
+  PoseEstimationSubsystem m_poseEstimationSubsystem;
   DoubleSupplier x;
   DoubleSupplier y;
   DoubleSupplier theta;
@@ -20,9 +23,15 @@ public class DefaultDriveCommand extends CommandBase {
   double minThrottle = 0.2;
 
   /** Creates a new DefaultDriveCommand. */
-  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem, DoubleSupplier x, DoubleSupplier y,
-      DoubleSupplier theta, DoubleSupplier throttle, boolean fieldRelative) {
-    m_DrivetrainSubsystem = drivetrainSubsystem;
+  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem, 
+                             PoseEstimationSubsystem poseEstimationSubsystem, 
+                             DoubleSupplier x, 
+                             DoubleSupplier y,
+                             DoubleSupplier theta, 
+                             DoubleSupplier throttle, 
+                             boolean fieldRelative) {
+    m_drivetrainSubsystem = drivetrainSubsystem;
+    m_poseEstimationSubsystem = poseEstimationSubsystem;
     this.x = x;
     this.y = y;
     this.theta = theta;
@@ -30,6 +39,7 @@ public class DefaultDriveCommand extends CommandBase {
     this.throttle = throttle;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrainSubsystem);
+    addRequirements(poseEstimationSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -43,14 +53,18 @@ public class DefaultDriveCommand extends CommandBase {
     double slope = 1 - minThrottle;
     double scale = slope * this.throttle.getAsDouble() + minThrottle;
 
-    m_DrivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale, y.getAsDouble() * scale), theta.getAsDouble() * scale, true,
-        true);
+    m_drivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale,
+                                y.getAsDouble() * scale),
+                                theta.getAsDouble() * scale,
+                                m_poseEstimationSubsystem.getYaw(),
+                                true,
+                                true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_DrivetrainSubsystem.drive(new Translation2d(), 0, true, true);
+    m_drivetrainSubsystem.drive(new Translation2d(), 0, new Rotation2d(), true, true);
   }
 
   // Returns true when the command should end.
