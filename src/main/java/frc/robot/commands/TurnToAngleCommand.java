@@ -19,7 +19,7 @@ public class TurnToAngleCommand extends CommandBase {
   PoseEstimationSubsystem m_poseEstimationSubsystem;
   Double m_setPointAngle;
 
-  ProfiledPIDController m_pidController;
+  PIDController m_pidController;
 
   public TurnToAngleCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem, Double angle) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -27,8 +27,9 @@ public class TurnToAngleCommand extends CommandBase {
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     m_setPointAngle = angle;
 
-    m_pidController = new ProfiledPIDController(0.4, 0, 0,
-                            new TrapezoidProfile.Constraints(20 * 2 * Math.PI, 20 * 2 * Math.PI));
+    m_pidController = new PIDController(0.4, 0, 0);
+    // m_pidController = new ProfiledPIDController(0.8, 0, 0,
+    //                         new TrapezoidProfile.Constraints(20 * 2 * Math.PI, 20 * 2 * Math.PI));
     m_pidController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
@@ -37,14 +38,15 @@ public class TurnToAngleCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_pidController.setGoal(m_setPointAngle);
+    // m_pidController.setGoal(m_setPointAngle);
+    m_pidController.setSetpoint(m_setPointAngle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Double rotateVel = m_pidController.calculate(m_poseEstimationSubsystem.getPose().getRotation().getRadians());
-    m_drivetrainSubsystem.drive(new Translation2d(), rotateVel, m_poseEstimationSubsystem.getPose().getRotation(), false, true);
+    Double desiredRotation = m_pidController.calculate(m_poseEstimationSubsystem.getPose().getRotation().getRadians());
+    m_drivetrainSubsystem.drive(new Translation2d(), desiredRotation, m_poseEstimationSubsystem.getPose().getRotation(), false, true);
   }
 
   // Called once the command ends or is interrupted.

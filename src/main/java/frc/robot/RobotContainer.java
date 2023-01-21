@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.SeekingCommand;
+import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
@@ -99,7 +100,7 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
-
+    m_driverController.b().whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI/2.0));
     
   }
 

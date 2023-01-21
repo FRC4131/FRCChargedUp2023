@@ -32,7 +32,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     
     m_swerveDrivePoseEst = new SwerveDrivePoseEstimator(
                                     Constants.Swerve.swerveKinematics, 
-                                    getYaw(), 
+                                    getGyroYaw(), 
                                     m_drivetrainSubsystem.getModulePositions(),
                                     new Pose2d()
                                   );

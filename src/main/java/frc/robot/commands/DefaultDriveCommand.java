@@ -56,7 +56,7 @@ public class DefaultDriveCommand extends CommandBase {
     m_drivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale,
                                 y.getAsDouble() * scale),
                                 theta.getAsDouble() * scale,
-                                m_poseEstimationSubsystem.getYaw(),
+                                m_poseEstimationSubsystem.getPose().getRotation(),
                                 true,
                                 true);
   }
