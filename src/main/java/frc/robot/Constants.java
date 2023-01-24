@@ -31,9 +31,9 @@ public final class Constants {
     }
 
     public static final class VisionConstants{
-        public static final double CAMERA_HEIGHT_METERS = 0.377825;
-        public static final double TARGET_HEIGHT_METERS = 0.377825;
-        public static final double CAMERA_PITCH_RADIANS = 0;
+        public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(5.2);
+        public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(42);
+        public static final double CAMERA_PITCH_RADIANS = Math.toRadians(33);
         public static final double GOAL_RANGE_METERS = 5;
     }
 
