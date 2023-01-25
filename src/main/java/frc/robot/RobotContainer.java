@@ -105,7 +105,7 @@ public class RobotContainer {
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
     m_driverController.b().whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI/2.0));
-    m_driverController.x().onTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(-1,-1), new Rotation2d())));
+    m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(-1,-1), new Rotation2d())));
   }
 
   /**
