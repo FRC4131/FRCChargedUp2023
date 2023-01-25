@@ -57,14 +57,14 @@ public class DefaultDriveCommand extends CommandBase {
                                 y.getAsDouble() * scale),
                                 theta.getAsDouble() * scale,
                                 m_poseEstimationSubsystem.getPose().getRotation(),
-                                true,
+                                fieldRelative,
                                 true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_drivetrainSubsystem.drive(new Translation2d(), 0, new Rotation2d(), true, true);
+    m_drivetrainSubsystem.drive(new Translation2d(), 0, new Rotation2d(), fieldRelative, true);
   }
 
   // Returns true when the command should end.

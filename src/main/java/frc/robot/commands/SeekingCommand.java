@@ -37,11 +37,11 @@ public class SeekingCommand extends CommandBase {
 
   public void seek(){
     double rotationalSpeed;
-    if(m_VisionSubsystem.hasTargets){
-      rotationalSpeed = -turnController.calculate(m_VisionSubsystem.yaw, 0);
-    } else rotationalSpeed = 0;
+    // if(m_VisionSubsystem.hasTargets){
+    //   rotationalSpeed = -turnController.calculate(m_VisionSubsystem.yaw, 0);
+    // } else rotationalSpeed = 0;
 
-    m_DrivetrainSubsystem.drive(new Translation2d(), rotationalSpeed, m_poseEstimationSubsys.getPose().getRotation(),  true, true);
+    // m_DrivetrainSubsystem.drive(new Translation2d(), rotationalSpeed, m_poseEstimationSubsys.getPose().getRotation(),  true, true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

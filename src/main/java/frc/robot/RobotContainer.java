@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.SeekingCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -17,6 +18,9 @@ import frc.robot.subsystems.VisionSubsystem;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -69,9 +73,9 @@ public class RobotContainer {
     double speedCap = Constants.Swerve.maxSpeed;
     m_drivetrainSubsystem
         .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            () -> modifyAxis(m_driverController.getLeftY(), false) * speedCap,
-            () -> modifyAxis(m_driverController.getLeftX(), false) * speedCap,
-            () -> modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            () -> -modifyAxis(m_driverController.getLeftY(), false) * speedCap,
+            () -> -modifyAxis(m_driverController.getLeftX(), false) * speedCap,
+            () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
             () -> m_driverController.getLeftTriggerAxis(),
             true));
   }
@@ -101,7 +105,7 @@ public class RobotContainer {
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
     m_driverController.b().whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI/2.0));
-    
+    m_driverController.x().onTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(-1,-1), new Rotation2d())));
   }
 
   /**
