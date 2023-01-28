@@ -9,6 +9,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.GoToPoseCommand;
+import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.SeekingCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -16,6 +17,7 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
+// import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -105,6 +107,15 @@ public class RobotContainer {
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
     m_driverController.b().whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI/2.0));
+    m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
+                                                          m_poseEstimationSubsystem,
+                                                          () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
+                                                          () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
+                                                          () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                                                          () -> m_driverController.getLeftTriggerAxis(),
+                                                          new Pose2d(new Translation2d(-1.0, -1.0), new Rotation2d())
+                                                          ));
+
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(-1,-1), new Rotation2d())));
   }
 
