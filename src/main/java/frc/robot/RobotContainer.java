@@ -113,10 +113,10 @@ public class RobotContainer {
                                                           () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
                                                           () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                                                           () -> m_driverController.getLeftTriggerAxis(),
-                                                          new Pose2d(new Translation2d(-1.0, -1.0), new Rotation2d())
+                                                          new Pose2d(new Translation2d(0, 0), new Rotation2d())
                                                           ));
 
-    m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(-1,-1), new Rotation2d())));
+    m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
   }
 
   /**
