@@ -4,10 +4,18 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,12 +24,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.SwerveModule;
 import frc.robot.Constants;
+import frc.robot.Constants.AprilTagConstants;
 
 public class PoseEstimationSubsystem extends SubsystemBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   VisionSubsystem m_visionSubsystem;
   SwerveDrivePoseEstimator m_swerveDrivePoseEst;
   AHRS m_navX;
+  PhotonPoseEstimator photonPoseEstimator;
   public frc.lib.util.SwerveModule[] mSwerveMods;
 
   /** Creates a new PoseEstimationSubsystem. */
@@ -29,6 +39,20 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_visionSubsystem = visionSubsystem;
     m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
+
+    List<AprilTag> tagList = new ArrayList<>(8);
+    tagList.add(AprilTagConstants.tag1);
+    tagList.add(AprilTagConstants.tag2);
+    tagList.add(AprilTagConstants.tag3);
+    tagList.add(AprilTagConstants.tag4);
+    tagList.add(AprilTagConstants.tag5);
+    tagList.add(AprilTagConstants.tag6);
+    tagList.add(AprilTagConstants.tag7);
+    tagList.add(AprilTagConstants.tag8);
+
+    AprilTagFieldLayout fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
+    //might need to change the camera to robot pose
+    photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_visionSubsystem.m_camera, m_visionSubsystem.m_cameraToRobot);
 
     zeroGyro();
     
@@ -64,6 +88,11 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     return m_swerveDrivePoseEst.getEstimatedPosition();
   }
 
+  public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose){
+    photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+    return photonPoseEstimator.update();
+  }
+
   @Override
   public void periodic() 
   {
@@ -75,5 +104,6 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("x", m_swerveDrivePoseEst.getEstimatedPosition().getX());
     SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
     SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees()); 
+    
   }
 }
