@@ -10,6 +10,7 @@ import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
+import frc.robot.commands.PPCommand;
 import frc.robot.commands.SeekingCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -26,6 +27,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -49,6 +52,8 @@ public class RobotContainer {
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
   private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem, m_visionSubsystem);
 
+  private SendableChooser<Command> m_autoChooser;
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
@@ -66,6 +71,8 @@ public class RobotContainer {
     tab.addNumber("testLeftX", testLeftX);
     tab.addNumber("testRightX", testRightX);
 
+    addAuton();
+    SmartDashboard.putData(m_autoChooser);
     // Configure the trigger bindings
     configureBindings();
     setDefaultCommands();
@@ -80,6 +87,19 @@ public class RobotContainer {
             () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
             () -> m_driverController.getLeftTriggerAxis(),
             true));
+  }
+
+  public Command getAutonCommand(){
+    return m_autoChooser.getSelected();
+  }
+
+  public void addAuton(){
+    m_autoChooser = new SendableChooser<Command>();
+    m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
+  }
+
+  public Command ppAuto(){
+    return new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, null);
   }
 
   /**

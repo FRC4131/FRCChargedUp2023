@@ -57,6 +57,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
         setModuleStates(swerveModuleStates);
     }
 
+    public void drive(ChassisSpeeds chassisSpeeds)
+    {
+        SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
+            chassisSpeeds 
+        );
+        setModuleStates(swerveModuleStates);
+    }
+
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
