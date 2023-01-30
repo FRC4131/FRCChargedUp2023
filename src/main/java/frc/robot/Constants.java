@@ -130,9 +130,9 @@ public final class Constants {
     }
 
     public static final class Swerve {
-
+//1.15
         public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
-        public static final double kDriveMotorGearRatio = 1 / 8.14; // old value 1 / 5.8462
+        public static final double kDriveMotorGearRatio = 1 / 6.85714286; // old value 1 / 5.8462
         public static final double kTurningMotorGearRatio = 1 / 12.8; // old value 1 / 18.0
         public static final double kDriveEncoderRot2Meter = kDriveMotorGearRatio * Math.PI * kWheelDiameterMeters;
         public static final double kTurningEncoderRot2Rad = kTurningMotorGearRatio * 2 * Math.PI;
