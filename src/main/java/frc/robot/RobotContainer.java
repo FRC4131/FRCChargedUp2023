@@ -89,7 +89,7 @@ public class RobotContainer {
             true));
   }
 
-  public Command getAutonCommand(){
+  public Command getAutonomousCommand(){
     return m_autoChooser.getSelected();
   }
 
@@ -137,16 +137,6 @@ public class RobotContainer {
                                                           ));
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
-  }
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
   }
 
   private static double deadband(double value, double deadband) {
