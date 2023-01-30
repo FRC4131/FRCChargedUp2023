@@ -1,3 +1,35 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.commands;
+
+import java.util.function.Supplier;
+
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
+
+import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.PoseEstimationSubsystem;
+
+public class PPCommand extends CommandBase {
+  private final PathPlannerTrajectory m_trajectory;
+  private final Supplier<Pose2d> m_pose;
+  private final DrivetrainSubsystem m_drivetrainSubsystem;
+  private final PoseEstimationSubsystem m_poseEstimationSubsystem;
+  private final Timer m_timer = new Timer();
+  private HolonomicDriveController m_controller;
+  private PIDController m_xController;
+  private PIDController m_yController;
+  private ProfiledPIDController m_thetaController;
 
 
   /** Creates a new PPCommand. */
