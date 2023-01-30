@@ -51,14 +51,15 @@ public class PPCommand extends CommandBase {
   public void initialize() {
     m_xController = new PIDController(3.5, 0, 0);
     m_yController = new PIDController(3.5, 0, 0);
-    m_thetaController = new ProfiledPIDController(8, 0, 0,
-        new TrapezoidProfile.Constraints(Math.PI * 2, Math.PI * 2));
+    m_thetaController = new ProfiledPIDController(6, 0, 0,
+        new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     //Reset PID controller error and set initial pose.
     m_xController.reset();
     m_yController.reset();
     m_thetaController.reset(m_poseEstimationSubsystem.getPose().getRotation().getRadians(), 0.0);
+ 
 
     //Add PID controllers to the drive controller
     m_controller = new HolonomicDriveController(m_xController, m_yController, m_thetaController);

@@ -78,9 +78,9 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   public void resetOdometry(Pose2d pose) 
   {
     m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
-    for (SwerveModule mod : mSwerveMods) {
-        mod.reset();
-    }
+    // for (SwerveModule mod : mSwerveMods) {
+    //     mod.reset();
+    // }
   }
   
   public Pose2d getPose() 

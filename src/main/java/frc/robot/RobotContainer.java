@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.GoToPoseCommand;
@@ -21,6 +22,9 @@ import frc.robot.subsystems.VisionSubsystem;
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
 
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -31,6 +35,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -99,9 +104,11 @@ public class RobotContainer {
   }
 
   public Command ppAuto(){
-    return new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, null);
+    return new SequentialCommandGroup(
+      new CalibrateOdometryCommand(m_poseEstimationSubsystem, new Pose2d(new Translation2d( 1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath( "2coneA"  , 4, 3))
+    );
   }
-
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
