@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.DefaultDriveCommand;
@@ -144,6 +145,7 @@ public class RobotContainer {
                                                           ));
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
+    m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
   }
 
   private static double deadband(double value, double deadband) {

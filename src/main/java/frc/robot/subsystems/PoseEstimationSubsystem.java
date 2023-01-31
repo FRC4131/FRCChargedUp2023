@@ -69,6 +69,14 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     return photonPoseEstimator.update();
   }
 
+  public double getPitch() {
+    return m_navX.getPitch();
+  }
+
+  public double getRoll() {
+    return m_navX.getRoll();
+  }
+
   @Override
   public void periodic() 
   {
