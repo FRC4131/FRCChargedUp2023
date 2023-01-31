@@ -77,6 +77,14 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     return m_navX.getRoll();
   }
 
+  /**
+   * 
+   * @return The current yaw angle of the robot in degrees (-180,180].
+   */
+  public double getYaw(){
+    return getGyroYaw().getDegrees();
+  }
+
   @Override
   public void periodic() 
   {
@@ -91,7 +99,8 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("RawGyroYaw", getGyroYaw().getDegrees());
     SmartDashboard.putNumber("x", m_swerveDrivePoseEst.getEstimatedPosition().getX());
     SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
-    SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees()); 
+    SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees());
+    SmartDashboard.putNumber("Robot Pitch", getPitch()); 
     
   }
 }
