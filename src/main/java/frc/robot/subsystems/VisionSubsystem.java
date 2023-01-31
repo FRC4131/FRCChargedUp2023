@@ -4,19 +4,23 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.PhotonPoseEstimator;
 
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.Constants.AprilTagConstants;
 
 public class VisionSubsystem extends SubsystemBase {
   PhotonCamera m_camera;
@@ -28,55 +32,44 @@ public class VisionSubsystem extends SubsystemBase {
   boolean hasTargets;
   PhotonPipelineResult result;
   Transform3d m_cameraToRobot;
+  Optional<EstimatedRobotPose> m_estimatedRobotPose;
+
+  List<AprilTag> tagList = new ArrayList<>(8);
+  AprilTagFieldLayout fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
 
   public VisionSubsystem()
   {
     m_camera = new PhotonCamera("Limelight1");
     m_cameraToRobot = new Transform3d(new Translation3d(0.3302, 0.0, 0.1778), new Rotation3d(0.0, 0.0, 0.0));
-    // m_photonPoseEstimator = new RobotPoseEstimator(null, null, null, )
+    tagList.add(AprilTagConstants.tag1);
+    tagList.add(AprilTagConstants.tag2);
+    tagList.add(AprilTagConstants.tag3);
+    tagList.add(AprilTagConstants.tag4);
+    tagList.add(AprilTagConstants.tag5);
+    tagList.add(AprilTagConstants.tag6);
+    tagList.add(AprilTagConstants.tag7);
+    tagList.add(AprilTagConstants.tag8);
+    
+    m_photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_camera, m_cameraToRobot);
+  }
+
+  public Optional<EstimatedRobotPose> getAprilTagRobotPose()
+  {
+    return m_estimatedRobotPose;
   }
 
   @Override
   public void periodic() {
-    var result = m_camera.getLatestResult(); 
-    boolean hasTargets = result.hasTargets();
-    if(!hasTargets){
-      return;
-    }
-    PhotonTrackedTarget target = result.getBestTarget();
-    int targetID = target.getFiducialId();
-
-    yaw = target.getYaw();
-    pitch = target.getPitch();
-    area = target.getArea();
-    skew = target.getSkew();
-    
-    
-    SmartDashboard.putNumber("Distance to Target", seek());
-    SmartDashboard.putBoolean("hasTargets", result.hasTargets());
-    if(hasTargets){
-      SmartDashboard.putNumber("Target ID", targetID);
-      SmartDashboard.putNumber("Yaw", yaw);
-      SmartDashboard.putNumber("Pitch", pitch);
-      SmartDashboard.putNumber("Area", area);
-      SmartDashboard.putNumber("Skew", skew);
-    }
+    m_estimatedRobotPose = m_photonPoseEstimator.update();
+    // SmartDashboard.putNumber("Distance to Target", seek());
+    // SmartDashboard.putBoolean("hasTargets", result.hasTargets());
+    // if(hasTargets){
+    //   SmartDashboard.putNumber("Target ID", targetID);
+    //   SmartDashboard.putNumber("Yaw", yaw);
+    //   SmartDashboard.putNumber("Pitch", pitch);
+    //   SmartDashboard.putNumber("Area", area);
+    //   SmartDashboard.putNumber("Skew", skew);
+    // }
   }
 
-  public double seek(){
-    if(hasTargets){
-    double range =
-    PhotonUtils.calculateDistanceToTargetMeters(
-            VisionConstants.CAMERA_HEIGHT_METERS,
-            VisionConstants.TARGET_HEIGHT_METERS,
-            VisionConstants.CAMERA_PITCH_RADIANS,
-            Units.degreesToRadians(getPitch()));
-
-    return range;
-  } else return 0.0;
-}
-  public double getPitch(){
-    var new_result = result.getBestTarget().getPitch();
-    return new_result;
-  }
 }

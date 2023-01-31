@@ -4,27 +4,19 @@
 
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.util.SwerveModule;
 import frc.robot.Constants;
-import frc.robot.Constants.AprilTagConstants;
 
 public class PoseEstimationSubsystem extends SubsystemBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
@@ -40,20 +32,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     m_visionSubsystem = visionSubsystem;
     m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
 
-    List<AprilTag> tagList = new ArrayList<>(8);
-    tagList.add(AprilTagConstants.tag1);
-    tagList.add(AprilTagConstants.tag2);
-    tagList.add(AprilTagConstants.tag3);
-    tagList.add(AprilTagConstants.tag4);
-    tagList.add(AprilTagConstants.tag5);
-    tagList.add(AprilTagConstants.tag6);
-    tagList.add(AprilTagConstants.tag7);
-    tagList.add(AprilTagConstants.tag8);
-
-    AprilTagFieldLayout fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
-    //might need to change the camera to robot pose
-    photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_visionSubsystem.m_camera, m_visionSubsystem.m_cameraToRobot);
-
+    
     zeroGyro();
     
     m_swerveDrivePoseEst = new SwerveDrivePoseEstimator(
@@ -78,9 +57,6 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   public void resetOdometry(Pose2d pose) 
   {
     m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
-    // for (SwerveModule mod : mSwerveMods) {
-    //     mod.reset();
-    // }
   }
   
   public Pose2d getPose() 
@@ -96,7 +72,11 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   @Override
   public void periodic() 
   {
-    //m_swerveDrivePoseEst.addVisionMeasurement(m_visionSubsystem.getPose(), m_visionSubsystem.getTimestamp());
+    EstimatedRobotPose aprilTagPose = m_visionSubsystem.getAprilTagRobotPose().orElse(null);
+    if(aprilTagPose != null)
+    {
+      m_swerveDrivePoseEst.addVisionMeasurement(aprilTagPose.estimatedPose.toPose2d(), aprilTagPose.timestampSeconds);
+    }
     m_swerveDrivePoseEst.update(getGyroYaw(), m_drivetrainSubsystem.getModulePositions());
 
     // This method will be called once per scheduler run
