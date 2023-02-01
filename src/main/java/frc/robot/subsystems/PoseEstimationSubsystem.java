@@ -66,24 +66,28 @@ public class PoseEstimationSubsystem extends SubsystemBase {
 
   public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose){
     photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+    
     return photonPoseEstimator.update();
   }
-
+  
   @Override
   public void periodic() 
   {
     EstimatedRobotPose aprilTagPose = m_visionSubsystem.getAprilTagRobotPose().orElse(null);
     if(aprilTagPose != null)
     {
-      m_swerveDrivePoseEst.addVisionMeasurement(aprilTagPose.estimatedPose.toPose2d(), aprilTagPose.timestampSeconds);
+     // m_swerveDrivePoseEst.addVisionMeasurement(aprilTagPose.estimatedPose.toPose2d(), aprilTagPose.timestampSeconds);
     }
     m_swerveDrivePoseEst.update(getGyroYaw(), m_drivetrainSubsystem.getModulePositions());
-
+    
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("RawGyroYaw", getGyroYaw().getDegrees());
     SmartDashboard.putNumber("x", m_swerveDrivePoseEst.getEstimatedPosition().getX());
     SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
-    SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees()); 
+    SmartDashboard.putNumber("rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees()); 
     
-  }
+/*     SmartDashboard.putNumber("photon x", aprilTagPose.estimatedPose.toPose2d().getX());
+    SmartDashboard.putNumber("photon y", aprilTagPose.estimatedPose.toPose2d().getY());
+    SmartDashboard.putNumber("photon rotation", aprilTagPose.estimatedPose.toPose2d().getRotation().getDegrees());
+   */}
 }

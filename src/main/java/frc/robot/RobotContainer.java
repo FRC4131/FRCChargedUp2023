@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.lib.util.CommandMacroPad;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CalibrateOdometryCommand;
@@ -28,6 +29,7 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -55,13 +57,16 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-  private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem, m_visionSubsystem);
+  private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
+      m_visionSubsystem);
 
   private SendableChooser<Command> m_autoChooser;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
+
+  private final CommandMacroPad m_macroPad = new CommandMacroPad(1);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -94,21 +99,22 @@ public class RobotContainer {
             true));
   }
 
-  public Command getAutonomousCommand(){
+  public Command getAutonomousCommand() {
     return m_autoChooser.getSelected();
   }
 
-  public void addAuton(){
+  public void addAuton() {
     m_autoChooser = new SendableChooser<Command>();
     m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
-  public Command ppAuto(){
+  public Command ppAuto() {
     return new SequentialCommandGroup(
-      new CalibrateOdometryCommand(m_poseEstimationSubsystem, new Pose2d(new Translation2d( 1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath( "2coneA"  , 4, 3))
-    );
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem,
+            new Pose2d(new Translation2d(1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("2coneA", 4, 3)));
   }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
@@ -132,18 +138,22 @@ public class RobotContainer {
     // pressed,
     // cancelling on release.
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
-    //m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem, m_drivetrainSubsystem));
-    m_driverController.b().whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI/2.0));
+    // m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem,
+    // m_drivetrainSubsystem));
+    m_driverController.b()
+        .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
     m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
-                                                          m_poseEstimationSubsystem,
-                                                          () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-                                                          () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-                                                          () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                                                          () -> m_driverController.getLeftTriggerAxis(),
-                                                          new Pose2d(new Translation2d(0, 0), new Rotation2d())
-                                                          ));
+        m_poseEstimationSubsystem,
+        () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        () -> m_driverController.getLeftTriggerAxis(),
+        new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
+    m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+        new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+
+    m_macroPad.b3().onFalse(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(-1,-1, new Rotation2d())));
   }
 
   private static double deadband(double value, double deadband) {

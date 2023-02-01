@@ -39,7 +39,7 @@ public class VisionSubsystem extends SubsystemBase {
 
   public VisionSubsystem()
   {
-    m_camera = new PhotonCamera("Limelight1");
+    m_camera = new PhotonCamera("4131Camera0");
     m_cameraToRobot = new Transform3d(new Translation3d(0.3302, 0.0, 0.1778), new Rotation3d(0.0, 0.0, 0.0));
     tagList.add(AprilTagConstants.tag1);
     tagList.add(AprilTagConstants.tag2);
