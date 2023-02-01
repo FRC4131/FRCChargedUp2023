@@ -23,40 +23,40 @@ PIDController pitchPIDController;
 
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
-    pitchPIDController = new PIDController(1, 0, 0);
+    pitchPIDController = new PIDController(0.25, 0, 0);
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
-
-
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    pitchPIDController.setSetpoint(0);
+    pitchPIDController.setSetpoint(-2.4);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double threshold = 0.1;
-    double driveSignal = pitchPIDController.calculate(-m_poseEstimationSubsystem.getPitch());
-    SmartDashboard.putNumber("DriveSignal", driveSignal);
-    if(driveSignal > threshold)
-    {
-      driveSignal = threshold;
-    }
-    else if(driveSignal < -threshold)
-    {
-      driveSignal = threshold;
-    }
+    double threshold = 0.125;
+    double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch());
     
-    m_drivetrainSubsystem.drive( new Translation2d(driveSignal * 2, 0) , 0, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
+
+    if (Math.abs(driveSignal) > threshold) {
+      if (driveSignal > 0.0) {
+        driveSignal = threshold;
+      } else {
+        driveSignal = -threshold;
+      }
+    }
+    SmartDashboard.putNumber("DriveSignal", driveSignal);
+
+    
+    m_drivetrainSubsystem.drive(new Translation2d(0, driveSignal * 2) , 0, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
     }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_drivetrainSubsystem.drive( new Translation2d(0, 0) , 1, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
+    m_drivetrainSubsystem.drive(new Translation2d(0, 0) , 1, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
   }
 
   // Returns true when the command should end.

@@ -98,22 +98,21 @@ public class RobotContainer {
             true));
   }
 
-  public Command getAutonomousCommand() {
+  public Command getAutonomousCommand(){
     return m_autoChooser.getSelected();
   }
 
-  public void addAuton() {
+  public void addAuton(){
     m_autoChooser = new SendableChooser<Command>();
     m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
-  public Command ppAuto() {
+  public Command ppAuto(){
     return new SequentialCommandGroup(
-        new CalibrateOdometryCommand(m_poseEstimationSubsystem,
-            new Pose2d(new Translation2d(1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("2coneA", 4, 3)));
+      new CalibrateOdometryCommand(m_poseEstimationSubsystem, new Pose2d(new Translation2d( 1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath( "2coneA"  , 2.5, 2))
+    );
   }
-
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
@@ -152,23 +151,22 @@ public class RobotContainer {
     // pressed,
     // cancelling on release.
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
-    // m_driverController.x().onTrue(new SeekingCommand(m_visionSubsystem,
-    // m_drivetrainSubsystem));
     m_driverController.b()
         .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
     m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
-        m_poseEstimationSubsystem,
-        () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-        () -> m_driverController.getLeftTriggerAxis(),
+                                                          m_poseEstimationSubsystem,
+                                                          () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
+                                                          () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
+                                                          () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                                                          () -> m_driverController.getLeftTriggerAxis(),
         new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
         new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+    
     m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
 
-    m_driverController.a().onTrue(new InstantCommand());
+    m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
   }
 
   private static double deadband(double value, double deadband) {
