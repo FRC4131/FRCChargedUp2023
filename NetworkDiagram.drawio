@@ -1,1 +1,40 @@
-<mxfile host="app.diagrams.net" modified="2023-02-03T01:11:57.358Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36" version="20.8.11" etag="h6hyhov2w558C7VElkUY" type="github"><diagram name="Page-1" id="PCNmFimh4CTBzU1PV2wk">UzV2zq1wL0osyPDNT0nNUTV2VTV2LsrPL4GwciucU3NyVI0MMlNUjV1UjYwMgFjVyA2HrCFY1qAgsSg1rwSLBiADYTaQg2Y1AA==</diagram></mxfile>
+<mxfile host="app.diagrams.net" modified="2023-02-03T02:09:59.499Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36" etag="AMZwaORdYOV9tn8MoQEB" version="20.8.11" type="github">
+  <diagram name="Page-1" id="PCNmFimh4CTBzU1PV2wk">
+    <mxGraphModel dx="970" dy="423" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-1" value="RoboRio" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="160" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-2" value="Limelight 2:&lt;br&gt;(PhotonVision)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-9" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;edgeStyle=orthogonalEdgeStyle;endArrow=none;endFill=0;" edge="1" parent="1" source="_Pjq02-baogEcOPVWsJ6-3" target="_Pjq02-baogEcOPVWsJ6-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-3" value="FRC Radio" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="160" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" edge="1" parent="1" source="_Pjq02-baogEcOPVWsJ6-4" target="_Pjq02-baogEcOPVWsJ6-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" edge="1" parent="1" source="_Pjq02-baogEcOPVWsJ6-4" target="_Pjq02-baogEcOPVWsJ6-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-4" value="Network Switch" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-5" value="Driver&#39;s Laptop" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_Pjq02-baogEcOPVWsJ6-6" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="_Pjq02-baogEcOPVWsJ6-3" target="_Pjq02-baogEcOPVWsJ6-5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="330" as="sourcePoint" />
+            <mxPoint x="450" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
