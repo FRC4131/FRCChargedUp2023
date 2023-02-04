@@ -18,6 +18,7 @@ import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
+import frc.robot.subsystems.TargettingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
@@ -56,6 +57,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+  private final TargettingSubsystem m_targettingSubsystem = new TargettingSubsystem();
   private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
       m_visionSubsystem);
 
@@ -154,11 +156,11 @@ public class RobotContainer {
         .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
     m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
                                                           m_poseEstimationSubsystem,
+                                                          m_targettingSubsystem,
                                                           () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
                                                           () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
                                                           () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                                                          () -> m_driverController.getLeftTriggerAxis(),
-        new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+                                                          () -> m_driverController.getLeftTriggerAxis()));
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
         new Pose2d(new Translation2d(0, 0), new Rotation2d())));

@@ -70,7 +70,7 @@ public class VisionSubsystem extends SubsystemBase {
     if(m_estimatedRobotPose.isPresent()){
     SmartDashboard.putNumber("Apriltag X", m_estimatedRobotPose.get().estimatedPose.toPose2d().getX());
     SmartDashboard.putNumber("Apriltag Y", m_estimatedRobotPose.get().estimatedPose.toPose2d().getY());
-    SmartDashboard.putNumber("Apriltag Heading (radians)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getRadians());
+    SmartDashboard.putNumber("Apriltag Heading (radians)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getDegrees());
     }
   }
 

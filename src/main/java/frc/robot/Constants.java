@@ -41,6 +41,11 @@ public final class Constants {
         public static final double GOAL_RANGE_METERS = 5;
     }
 
+    public enum ScoringHeights{
+        LOW,
+        MEDIUM,
+        HIGH
+    }
     public static final class AprilTagConstants{
         public static final AprilTag tag1 = new AprilTag(1, 
             new Pose3d(15.513558, 1.071626, 0.462788, 
