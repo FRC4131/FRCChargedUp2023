@@ -1,6 +1,5 @@
 package frc.lib.util;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -33,6 +32,10 @@ public class CommandMacroPad extends CommandGenericHID {
   @Override
   public MacroPad getHID() {
     return m_hid;
+  }
+  
+  public boolean buttonPressed(){
+    return m_hid.getButtonCount() > 0;
   }
 
   /**
