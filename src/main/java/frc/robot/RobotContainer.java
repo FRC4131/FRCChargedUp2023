@@ -7,6 +7,7 @@ package frc.robot;
 import frc.lib.util.CommandMacroPad;
 import frc.lib.util.MacroPad;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.ArmJoystickCommand;
 import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CalibrateOdometryCommand;
@@ -17,6 +18,7 @@ import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TurnToAngleCommand;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
@@ -25,6 +27,8 @@ import frc.robot.subsystems.VisionSubsystem;
 
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
+
+import org.ejml.dense.row.MatrixFeatures_CDRM;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
@@ -63,6 +67,7 @@ public class RobotContainer {
   private final TargetingSubsystem m_targettingSubsystem = new TargetingSubsystem(m_commandMacroPad);
   private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
       m_visionSubsystem);
+  private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -102,23 +107,26 @@ public class RobotContainer {
             () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
             () -> m_driverController.getLeftTriggerAxis(),
             true));
+
+            m_armSubsystem.setDefaultCommand(new ArmJoystickCommand(m_armSubsystem, () -> m_operatorController.getRightY(), () -> m_operatorController.getLeftY()));
   }
 
-  public Command getAutonomousCommand(){
+  public Command getAutonomousCommand() {
     return m_autoChooser.getSelected();
   }
 
-  public void addAuton(){
+  public void addAuton() {
     m_autoChooser = new SendableChooser<Command>();
     m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
-  public Command ppAuto(){
+  public Command ppAuto() {
     return new SequentialCommandGroup(
-      new CalibrateOdometryCommand(m_poseEstimationSubsystem, new Pose2d(new Translation2d( 1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath( "2coneA"  , 2.5, 2))
-    );
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem,
+            new Pose2d(new Translation2d(1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("2coneA", 2.5, 2)));
   }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
@@ -147,11 +155,11 @@ public class RobotContainer {
             true))
         .whileFalse(
             new LockedRotDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getRightX(), false),
-            () -> -modifyAxis(m_driverController.getRightY(), false), 
-            () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
+                () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
+                () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
+                () -> -modifyAxis(m_driverController.getRightX(), false),
+                () -> -modifyAxis(m_driverController.getRightY(), false),
+                () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
@@ -169,7 +177,7 @@ public class RobotContainer {
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
         new Pose2d(new Translation2d(0, 0), new Rotation2d())));
-    
+
     m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
