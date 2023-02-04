@@ -14,7 +14,6 @@ import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
-import frc.robot.commands.SeekingCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;

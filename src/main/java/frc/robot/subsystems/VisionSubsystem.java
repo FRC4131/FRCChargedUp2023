@@ -12,30 +12,35 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AprilTagConstants;
+import frc.robot.Constants.VisionConstants;
 
 public class VisionSubsystem extends SubsystemBase {
   PhotonCamera m_camera;
   PhotonPoseEstimator m_photonPoseEstimator;
-  double yaw;
+  public double yaw;
   double pitch;
   double area;
   double skew;
-  boolean hasTargets;
+  public boolean hasTargets;
   PhotonPipelineResult result;
   Transform3d m_cameraToRobot;
   Optional<EstimatedRobotPose> m_estimatedRobotPose;
 
   List<AprilTag> tagList = new ArrayList<>(8);
-  AprilTagFieldLayout fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
+  AprilTagFieldLayout fieldLayout;
 
   public VisionSubsystem()
   {
@@ -49,6 +54,7 @@ public class VisionSubsystem extends SubsystemBase {
     tagList.add(AprilTagConstants.tag6);
     tagList.add(AprilTagConstants.tag7);
     tagList.add(AprilTagConstants.tag8);
+    fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
     
     m_photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_camera, m_cameraToRobot);
   }
@@ -59,17 +65,13 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  public void periodic() {    
     m_estimatedRobotPose = m_photonPoseEstimator.update();
-    // SmartDashboard.putNumber("Distance to Target", seek());
-    // SmartDashboard.putBoolean("hasTargets", result.hasTargets());
-    // if(hasTargets){
-    //   SmartDashboard.putNumber("Target ID", targetID);
-    //   SmartDashboard.putNumber("Yaw", yaw);
-    //   SmartDashboard.putNumber("Pitch", pitch);
-    //   SmartDashboard.putNumber("Area", area);
-    //   SmartDashboard.putNumber("Skew", skew);
-    // }
+    if(m_estimatedRobotPose.isPresent()){
+    SmartDashboard.putNumber("Apriltag X", m_estimatedRobotPose.get().estimatedPose.toPose2d().getX());
+    SmartDashboard.putNumber("Apriltag Y", m_estimatedRobotPose.get().estimatedPose.toPose2d().getY());
+    SmartDashboard.putNumber("Apriltag Heading (radians)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getRadians());
+    }
   }
 
 }
