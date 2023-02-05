@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class TargettingSubsystem extends SubsystemBase {
+public class TargetingSubsystem extends SubsystemBase {
   
   //Grid Pose numbers correspond to April Tag IDs
   //Blue Alliance Wall
@@ -27,7 +27,7 @@ public class TargettingSubsystem extends SubsystemBase {
 
   
   /** Creates a new TargettingSubsystem. */
-  public TargettingSubsystem() {}
+  public TargetingSubsystem() {}
 
   public Pose2d getTargetGridPose(){
     return gridPoses[desiredGrid];

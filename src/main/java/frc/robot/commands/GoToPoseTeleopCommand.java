@@ -14,12 +14,12 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
-import frc.robot.subsystems.TargettingSubsystem;
+import frc.robot.subsystems.TargetingSubsystem;
 
 public class GoToPoseTeleopCommand extends CommandBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   PoseEstimationSubsystem m_poseEstimationSubsystem;
-  TargettingSubsystem m_targettingSubsystem;
+  TargetingSubsystem m_targettingSubsystem;
   DoubleSupplier m_x;
   DoubleSupplier m_y;
   DoubleSupplier m_theta;
@@ -34,7 +34,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
   /** Creates a new GoToPoseTeleopCommand. */
   public GoToPoseTeleopCommand(DrivetrainSubsystem drivetrainSubsystem, 
     PoseEstimationSubsystem poseEstimationSubsystem,
-    TargettingSubsystem targettingSubsystem, 
+    TargetingSubsystem targettingSubsystem, 
     DoubleSupplier x, 
     DoubleSupplier y,
     DoubleSupplier theta, 
