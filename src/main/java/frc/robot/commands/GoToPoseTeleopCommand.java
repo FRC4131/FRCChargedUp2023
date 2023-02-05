@@ -14,10 +14,12 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
+import frc.robot.subsystems.TargetingSubsystem;
 
 public class GoToPoseTeleopCommand extends CommandBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   PoseEstimationSubsystem m_poseEstimationSubsystem;
+  TargetingSubsystem m_targettingSubsystem;
   DoubleSupplier m_x;
   DoubleSupplier m_y;
   DoubleSupplier m_theta;
@@ -31,19 +33,19 @@ public class GoToPoseTeleopCommand extends CommandBase {
 
   /** Creates a new GoToPoseTeleopCommand. */
   public GoToPoseTeleopCommand(DrivetrainSubsystem drivetrainSubsystem, 
-    PoseEstimationSubsystem poseEstimationSubsystem, 
+    PoseEstimationSubsystem poseEstimationSubsystem,
+    TargetingSubsystem targettingSubsystem, 
     DoubleSupplier x, 
     DoubleSupplier y,
     DoubleSupplier theta, 
-    DoubleSupplier throttle, 
-    Pose2d desiredPose) {
+    DoubleSupplier throttle) {
       m_drivetrainSubsystem = drivetrainSubsystem;
       m_poseEstimationSubsystem = poseEstimationSubsystem;
+      m_targettingSubsystem = targettingSubsystem;
       m_x = x;
       m_y = y;
       m_theta = theta;
       m_throttle = throttle;
-      m_desiredPose = desiredPose;
       
       m_xController = new PIDController(3, 0, 0);
       m_yController = new PIDController(3, 0, 0);
@@ -51,13 +53,14 @@ public class GoToPoseTeleopCommand extends CommandBase {
       m_thetaController = new PIDController(4.0, 0, 0);
       m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-      addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
+      addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targettingSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_desiredPose = m_targettingSubsystem.getTargetGridPose();
     m_xController.setSetpoint(m_desiredPose.getX());
     m_yController.setSetpoint(m_desiredPose.getY());
     m_thetaController.setSetpoint(m_desiredPose.getRotation().getRadians());
