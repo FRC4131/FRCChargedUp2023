@@ -7,10 +7,12 @@ package frc.robot.subsystems;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -18,29 +20,41 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ArmSubsystem extends SubsystemBase {
 
-  private CANSparkMax m_actuator = new CANSparkMax(0, MotorType.kBrushless);
-  private CANSparkMax m_leftRot = new CANSparkMax(0, MotorType.kBrushless);
-  private CANSparkMax m_rightRot = new CANSparkMax(0, MotorType.kBrushless);
+  // private CANSparkMax m_actuator = new CANSparkMax(0, MotorType.kBrushless);
+  private CANSparkMax m_leftRot = new CANSparkMax(21, MotorType.kBrushless);
+  private CANSparkMax m_rightRot = new CANSparkMax(25, MotorType.kBrushless);
 
   private SparkMaxPIDController m_leftRotPIDController;
   private SparkMaxPIDController m_rightRotPIDController;
   private SparkMaxPIDController m_actuatorPIDController;
 
+  private RelativeEncoder m_rightEncoder;
+
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
+    m_rightEncoder = m_rightRot.getEncoder();
+    resetPosition();
     m_rightRotPIDController = m_rightRot.getPIDController();
-    m_actuatorPIDController = m_actuator.getPIDController();
+    m_rightRotPIDController.setP(1);
+    
+    
+    // m_actuatorPIDController = m_actuator.getPIDController();
 
-    m_leftRot.follow(m_rightRot, false);
+    // m_leftRot.follow(m_rightRot, true);
   }
 
   public void rotateArm(DoubleSupplier powerSupplier){
     m_rightRot.set(powerSupplier.getAsDouble());
   }
 
-  public void rotateTo(double angle){
-    m_rightRotPIDController.setReference(angleToUnits(angle), ControlType.kPosition);
+  public void rotateTo(){
+    m_rightRotPIDController.setReference(25.0, ControlType.kPosition);
   };
+
+  public void resetPosition(){
+    m_rightEncoder.setPosition(0);
+    m_rightRotPIDController.setReference(0, ControlType.kPosition);
+  }
 
   private double angleToUnits(double angle) {
     return 0;
@@ -56,7 +70,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public void extendArm(DoubleSupplier powerSupplier){
-    m_actuator.set(powerSupplier.getAsDouble());
+    // m_actuator.set(powerSupplier.getAsDouble());
   }
 
   @Override

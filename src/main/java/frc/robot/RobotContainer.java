@@ -108,7 +108,7 @@ public class RobotContainer {
             () -> m_driverController.getLeftTriggerAxis(),
             true));
 
-            m_armSubsystem.setDefaultCommand(new ArmJoystickCommand(m_armSubsystem, () -> m_operatorController.getRightY(), () -> m_operatorController.getLeftY()));
+            //m_armSubsystem.setDefaultCommand(new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false), () -> modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   public Command getAutonomousCommand() {

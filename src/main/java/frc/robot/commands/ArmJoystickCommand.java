@@ -35,8 +35,9 @@ public class ArmJoystickCommand extends CommandBase {
   @Override
   public void execute() {
 
-    m_ArmSubsystem.rotateArm(m_rotationDoubleSupplier);
-    m_ArmSubsystem.extendArm(m_extensionDoubleSupplier);
+    m_ArmSubsystem.rotateTo();
+    // m_ArmSubsystem.rotateArm(m_rotationDoubleSupplier);
+    // m_ArmSubsystem.extendArm(m_extensionDoubleSupplier);
 
   }
 
