@@ -1,9 +1,12 @@
 package frc.lib.util;
 
+import java.util.Set;
+
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.util.MacroPad.Button;
 
 /* A subclass of {@link XboxController} with {@link Trigger} factories for command-based.
 *
@@ -36,6 +39,10 @@ public class CommandMacroPad extends CommandGenericHID {
   
   public boolean buttonPressed(){
     return m_hid.getButtonCount() > 0;
+  }
+
+  public Set<Button> getButtonsPressed(){
+    return m_hid.getButtons();
   }
 
   /**

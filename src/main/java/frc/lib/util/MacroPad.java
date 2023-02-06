@@ -52,10 +52,10 @@ public class MacroPad extends GenericHID {
     int buttons = DriverStation.getStickButtons(2);
     int m = 1;
     for (int i = 0; i < Button.values().length; i++) {
-      m <<= 1;
       if ((buttons & m) == m) {
         pressedButtons.add(Button.values()[i]);
       }
+      m <<= 1;
     }
     return pressedButtons;
   }
