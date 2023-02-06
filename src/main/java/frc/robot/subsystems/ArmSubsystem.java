@@ -33,8 +33,9 @@ public class ArmSubsystem extends SubsystemBase {
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
     m_rightEncoder = m_rightRot.getEncoder();
-    resetPosition();
     m_rightRotPIDController = m_rightRot.getPIDController();
+    m_rightRot.restoreFactoryDefaults();
+
     m_rightRotPIDController.setP(1);
     
     
@@ -48,7 +49,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public void rotateTo(){
-    m_rightRotPIDController.setReference(25.0, ControlType.kPosition);
+    m_rightRotPIDController.setReference(5.0, ControlType.kPosition);
   };
 
   public void resetPosition(){
@@ -76,5 +77,6 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putString("encoderRpos", m_rightEncoder.getPosition() + " ticks(?)");
   }
 }
