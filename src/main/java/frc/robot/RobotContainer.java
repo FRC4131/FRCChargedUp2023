@@ -135,8 +135,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+/*     new Trigger(m_exampleSubsystem::exampleCondition)
+        .onTrue(new ExampleCommand(m_exampleSubsystem)); */
 
     new Trigger(() -> isInDefaultDriveMode)
         .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
@@ -176,7 +176,7 @@ public class RobotContainer {
 
     m_operatorController.x().onTrue(new InstantCommand(() -> m_targettingSubsystem.setGridPose(3)));
   
-    m_commandMacroPad.b1().onTrue(new InstantCommand(()->m_targettingSubsystem.swapAlliance()));
+    m_operatorController.rightBumper().onTrue(new ExampleCommand(m_targettingSubsystem));
   }
 
   private static double deadband(double value, double deadband) {

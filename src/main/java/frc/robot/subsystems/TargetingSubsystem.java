@@ -24,6 +24,8 @@ import frc.lib.util.MacroPad.Button;
 
 public class TargetingSubsystem extends SubsystemBase {
 
+  private final double POLE_OFFSET = .5;
+
   // Grid Pose numbers correspond to April Tag IDs
   // Blue Alliance Wall
   Pose2d gridPose6 = new Pose2d(new Translation2d(1.613, 4.411), new Rotation2d(Math.toRadians(-179.3)));
@@ -39,38 +41,67 @@ public class TargetingSubsystem extends SubsystemBase {
   int desiredGrid;
 
   boolean isBlueAlliance;
-  ShuffleboardTab tab = Shuffleboard.getTab("tab");
-  GenericEntry entry = tab.add("setAlliance", "blue").getEntry();
 
   private final CommandMacroPad m_pad;
 
   /** Creates a new TargettingSubsystem. */
   public TargetingSubsystem(CommandMacroPad m_commandMacroPad) {
     m_pad = m_commandMacroPad;
-
+    SmartDashboard.putBoolean("alliance", false);
   }
 
   public Pose2d getTargetGridPose() {
-    return gridPoses[desiredGrid];
+    return new Pose2d(gridPoses[desiredGrid].getX(), gridPoses[desiredGrid].getY() + getNodeOffset(),
+        new Rotation2d(isBlueAlliance ? 180 : 0));
   }
 
   public void setGridPose(int inputGrid) {
     desiredGrid = inputGrid;
   }
 
+  private Button desiredNode = Button.button1;
+
+  public void setNode(int node) {
+    if (node >= 1 && node <= 9)
+      desiredNode = Button.values()[node - 1];
+    else
+      return;
+
+  }
+
+  private double getNodeOffset() {
+
+    if(desiredNode == null)
+      return 0;
+
+    int mult = isBlueAlliance ? 1 : -1;
+    switch (desiredNode.column) {
+      case 1:
+        return -POLE_OFFSET * mult;
+      case 2:
+        return 0;
+      case 3:
+        return POLE_OFFSET * mult;
+      default:
+        return 0;
+    }
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
 
-    isBlueAlliance = entry.getString("blue").equalsIgnoreCase("blue") ? true : false;
-    SmartDashboard.putBoolean("alliance", isBlueAlliance);
-    desiredGrid = divineSelectedButtonPertainingToGridSelection() * (isBlueAlliance ? 1 : 2) - 1;
-    divineSelectedButtonPertainingToNodeSelection();
+    
+    isBlueAlliance = SmartDashboard.getBoolean("alliance", false);
+    desiredGrid = divineSelectedButtonPertainingToGridSelection() + (isBlueAlliance ? 0 : 3) - 1;
+    setNode(divineSelectedButtonPertainingToNodeSelection().value());
+    SmartDashboard.putNumber("grid selected", desiredGrid);
+    SmartDashboard.putNumber("node selected", desiredNode.value());
   }
 
   private int divineSelectedButtonPertainingToGridSelection() {
-    var butons = m_pad.getButtonsPressed();
-    for (Button button : butons) {
+    var buttons = m_pad.getButtonsPressed();
+    for (Button button : buttons) {
       if (button.row == 4) {
         SmartDashboard.putNumber("grid selected", button.column);
         return button.column;
@@ -78,51 +109,20 @@ public class TargetingSubsystem extends SubsystemBase {
     }
     // only returns from here if no grid selected
     // 0 as default is probably fine
-    return 0;
+    return 1;
   }
 
-  private int divineSelectedButtonPertainingToNodeSelection() {
+  private Button divineSelectedButtonPertainingToNodeSelection() {
     var butons = m_pad.getButtonsPressed();
     for (Button button : butons) {
       if (button.row < 4) {
         SmartDashboard.putNumber("node selected", button.value());
-        return button.value();
+        return button;
       }
     }
     // only returns from here if no grid selected
     // 0 as default is probably fine
-    return 0;
+    return Button.button1;
   }
 
-  public void swapAlliance() {
-    File f = new File("D:\\code.py");
-    Scanner fileIn;
-    try {
-      fileIn = new Scanner(f);
-      String in = "";
-      for (int i = 0; i < 11; i++) {
-        in += fileIn.nextLine();
-      }
-      var specialLine = fileIn.nextLine();
-      if (specialLine.toCharArray()[0] == '#') {
-        specialLine = specialLine.substring(1, specialLine.length());
-      } else {
-        specialLine = "#" + specialLine;
-      }
-      in += specialLine;
-      while (fileIn.hasNextLine()) {
-        in += fileIn.nextLine();
-      }
-      PrintStream ps;
-
-      ps = new PrintStream("D:\\code.py");
-
-      ps.print(in);
-
-      ps.close();
-      fileIn.close();
-    } catch (FileNotFoundException e1) {
-      
-    }
-  }
 }
