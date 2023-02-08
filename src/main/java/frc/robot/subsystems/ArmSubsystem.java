@@ -12,6 +12,9 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -20,36 +23,46 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ArmSubsystem extends SubsystemBase {
 
+  //5:1, 4:1, 3:1 (gearboxes) + 3.86:1 (15-tooth to 58-tooth output gears) gear ratios ratio
+  private final double ARM_MOTOR_GEAR_RATIO = 5.0/1.0 * 4.0/1.0 * 3.0/1.0 * 58.0/15.0; 
+
   // private CANSparkMax m_actuator = new CANSparkMax(0, MotorType.kBrushless);
   private CANSparkMax m_leftRot = new CANSparkMax(21, MotorType.kBrushless);
   private CANSparkMax m_rightRot = new CANSparkMax(25, MotorType.kBrushless);
 
-  private SparkMaxPIDController m_leftRotPIDController;
   private SparkMaxPIDController m_rightRotPIDController;
   private SparkMaxPIDController m_actuatorPIDController;
 
   private RelativeEncoder m_rightEncoder;
 
+  private boolean bool;
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
     m_rightEncoder = m_rightRot.getEncoder();
     m_rightRotPIDController = m_rightRot.getPIDController();
-    m_rightRot.restoreFactoryDefaults();
 
-    m_rightRotPIDController.setP(1);
+    // m_rightRotPIDController.setSmartMotionMaxAccel(0.15, 0);
+    // m_rightRotPIDController.setSmartMotionMaxVelocity(0.20, 0);
+
+    m_rightRotPIDController.setP(0.5);
+
+    SmartDashboard.putBoolean("bool", bool);
+
+    resetPosition();
     
     
     // m_actuatorPIDController = m_actuator.getPIDController();
 
-    // m_leftRot.follow(m_rightRot, true);
+    m_leftRot.follow(m_rightRot, true);
   }
 
   public void rotateArm(DoubleSupplier powerSupplier){
     m_rightRot.set(powerSupplier.getAsDouble());
   }
 
-  public void rotateTo(){
-    m_rightRotPIDController.setReference(5.0, ControlType.kPosition);
+  public void rotateTo(double angleDegrees){
+    double encoderRotations = angleToMotorRotations(angleDegrees);
+    m_rightRotPIDController.setReference(encoderRotations, ControlType.kPosition);
   };
 
   public void resetPosition(){
@@ -57,9 +70,8 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightRotPIDController.setReference(0, ControlType.kPosition);
   }
 
-  private double angleToUnits(double angle) {
-    return 0;
-    //TODO: THIS
+  private double angleToMotorRotations(double angleDegrees) {
+    return angleDegrees * ARM_MOTOR_GEAR_RATIO / 360.0;
   }
 
   public void extendTo(double length){
@@ -77,6 +89,8 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putString("encoderRpos", m_rightEncoder.getPosition() + " ticks(?)");
+    SmartDashboard.putString("RightencoderRpos", m_rightEncoder.getPosition() + " ticks(?)");
+    // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + " ticks(?)");
+    SmartDashboard.getBoolean("BOOL", false);
   }
 }
