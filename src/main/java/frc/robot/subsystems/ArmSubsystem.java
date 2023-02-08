@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -19,16 +21,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
-
-
 public class ArmSubsystem extends SubsystemBase {
 
   //5:1, 4:1, 3:1 (gearboxes) + 3.86:1 (15-tooth to 58-tooth output gears) gear ratios ratio
   private final double ARM_MOTOR_GEAR_RATIO = 5.0/1.0 * 4.0/1.0 * 3.0/1.0 * 58.0/15.0; 
 
   // private CANSparkMax m_actuator = new CANSparkMax(0, MotorType.kBrushless);
-  private CANSparkMax m_leftRot = new CANSparkMax(21, MotorType.kBrushless);
-  private CANSparkMax m_rightRot = new CANSparkMax(25, MotorType.kBrushless);
+  private TalonSRX m_actuator = new TalonSRX(30);
+  private CANSparkMax m_leftRot = new CANSparkMax(59, MotorType.kBrushless);
+  private CANSparkMax m_rightRot = new CANSparkMax(58, MotorType.kBrushless);
 
   private SparkMaxPIDController m_rightRotPIDController;
   private SparkMaxPIDController m_actuatorPIDController;
@@ -53,11 +54,13 @@ public class ArmSubsystem extends SubsystemBase {
     
     // m_actuatorPIDController = m_actuator.getPIDController();
 
-    m_leftRot.follow(m_rightRot, true);
+    m_leftRot.follow(m_rightRot, false);
   }
 
   public void rotateArm(DoubleSupplier powerSupplier){
-    m_rightRot.set(powerSupplier.getAsDouble());
+    //m_rightRot.set(powerSupplier.getAsDouble() * 0.1);
+    m_rightRotPIDController.setReference(powerSupplier.getAsDouble() * 0.5, ControlType.kDutyCycle);
+    SmartDashboard.putNumber("TOSE", powerSupplier.getAsDouble());
   }
 
   public void rotateTo(double angleDegrees){
@@ -67,7 +70,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void resetPosition(){
     m_rightEncoder.setPosition(0);
-    m_rightRotPIDController.setReference(0, ControlType.kPosition);
+    //m_rightRotPIDController.setReference(0, ControlType.kPosition);
   }
 
   private double angleToMotorRotations(double angleDegrees) {
@@ -77,13 +80,15 @@ public class ArmSubsystem extends SubsystemBase {
   public void extendTo(double length){
     m_actuatorPIDController.setReference(lengthToUnits(length),ControlType.kPosition);
   }
+
+
   private double lengthToUnits(double length) {
     //TODO: THIS
     return 0;
   }
 
-  public void extendArm(DoubleSupplier powerSupplier){
-    // m_actuator.set(powerSupplier.getAsDouble());
+  public void extendArm(double power){
+    m_actuator.set(TalonSRXControlMode.PercentOutput , power);
   }
 
   @Override

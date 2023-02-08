@@ -6,25 +6,21 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ClawSubsystem;
 
-public class ArmJoystickCommand extends CommandBase {
+public class ClawPowerCommand extends CommandBase {
 
-  private final ArmSubsystem m_ArmSubsystem;
-  private final DoubleSupplier m_rotationDoubleSupplier;
-  private final DoubleSupplier m_extensionDoubleSupplier;
+  ClawSubsystem m_claw;
+  int direction;
 
+  /** Creates a new ClawPowerCommand. */
+  public ClawPowerCommand(ClawSubsystem clawsub, int dir) {
+    m_claw = clawsub;
+    direction = dir;
 
-  /** Creates a new ArmRotateCommand. */
-  public ArmJoystickCommand(ArmSubsystem armSubsys, DoubleSupplier rightJoy, DoubleSupplier leftJoy) {
     // Use addRequirements() here to declare subsystem dependencies.
-    m_ArmSubsystem = armSubsys;
-    m_rotationDoubleSupplier = rightJoy;
-    m_extensionDoubleSupplier = leftJoy;
-
-
-    addRequirements(armSubsys);
   }
 
   // Called when the command is initially scheduled.
@@ -34,17 +30,14 @@ public class ArmJoystickCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    // m_ArmSubsystem.rotateTo();
-    m_ArmSubsystem.rotateArm(m_rotationDoubleSupplier);
-    m_ArmSubsystem.extendArm(m_extensionDoubleSupplier.getAsDouble());
-
+    m_claw.intakeSpeed(.6 * direction);
   }
-
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_claw.intakeSpeed(0);
+  }
 
   // Returns true when the command should end.
   @Override
