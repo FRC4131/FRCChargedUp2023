@@ -174,7 +174,7 @@ public class RobotContainer {
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
 
-    m_operatorController.x().onTrue(new InstantCommand(() -> m_targettingSubsystem.setGridPose(3)));
+    //m_operatorController.x().onTrue(new InstantCommand(() -> m_targettingSubsystem.setGridPose(3)));
   
     m_operatorController.rightBumper().onTrue(new ExampleCommand(m_targettingSubsystem));
   }

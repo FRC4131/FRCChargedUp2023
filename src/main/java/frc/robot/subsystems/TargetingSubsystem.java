@@ -43,11 +43,12 @@ public class TargetingSubsystem extends SubsystemBase {
   boolean isBlueAlliance;
 
   private final CommandMacroPad m_pad;
+  private Button desiredNode = Button.button1;
 
   /** Creates a new TargettingSubsystem. */
   public TargetingSubsystem(CommandMacroPad m_commandMacroPad) {
     m_pad = m_commandMacroPad;
-    SmartDashboard.putBoolean("alliance", false);
+    SmartDashboard.putBoolean("Alliance", false);
   }
 
   public Pose2d getTargetGridPose() {
@@ -59,47 +60,31 @@ public class TargetingSubsystem extends SubsystemBase {
     desiredGrid = inputGrid;
   }
 
-  private Button desiredNode = Button.button1;
-
   public void setNode(int node) {
     if (node >= 1 && node <= 9)
       desiredNode = Button.values()[node - 1];
     else
       return;
-
   }
 
   private double getNodeOffset() {
-
     if(desiredNode == null)
       return 0;
 
-    int mult = isBlueAlliance ? 1 : -1;
+    int allianceReverse = isBlueAlliance ? 1 : -1;
     switch (desiredNode.column) {
       case 1:
-        return -POLE_OFFSET * mult;
+        return -POLE_OFFSET * allianceReverse;
       case 2:
         return 0;
       case 3:
-        return POLE_OFFSET * mult;
+        return POLE_OFFSET * allianceReverse;
       default:
         return 0;
     }
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-
-    
-    isBlueAlliance = SmartDashboard.getBoolean("alliance", false);
-    desiredGrid = divineSelectedButtonPertainingToGridSelection() + (isBlueAlliance ? 0 : 3) - 1;
-    setNode(divineSelectedButtonPertainingToNodeSelection().value());
-    SmartDashboard.putNumber("grid selected", desiredGrid);
-    SmartDashboard.putNumber("node selected", desiredNode.value());
-  }
-
-  private int divineSelectedButtonPertainingToGridSelection() {
+  private int selectGrid() {
     var buttons = m_pad.getButtonsPressed();
     for (Button button : buttons) {
       if (button.row == 4) {
@@ -112,9 +97,9 @@ public class TargetingSubsystem extends SubsystemBase {
     return 1;
   }
 
-  private Button divineSelectedButtonPertainingToNodeSelection() {
-    var butons = m_pad.getButtonsPressed();
-    for (Button button : butons) {
+  private Button selectNode() {
+    var buttons = m_pad.getButtonsPressed();
+    for (Button button : buttons) {
       if (button.row < 4) {
         SmartDashboard.putNumber("node selected", button.value());
         return button;
@@ -124,5 +109,18 @@ public class TargetingSubsystem extends SubsystemBase {
     // 0 as default is probably fine
     return Button.button1;
   }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run  
+    //isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
+    isBlueAlliance = false;
+    desiredGrid = selectGrid() + (isBlueAlliance ? 0 : 3) - 1;
+    setNode(selectNode().value());
+    SmartDashboard.putNumber("grid selected", desiredGrid);
+    SmartDashboard.putNumber("node selected", desiredNode.value());
+  }
+
+
 
 }
