@@ -7,6 +7,7 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -16,7 +17,7 @@ import frc.robot.subsystems.PoseEstimationSubsystem;
 
 public class LockedRotDriveCommand extends CommandBase {
   private final DrivetrainSubsystem m_DrivetrainSubsystem;
-  private final PoseEstimationSubsystem m_PoseEstimationSubsystem;
+  // private final PoseEstimationSubsystem m_PoseEstimationSubsystem;
   private final DoubleSupplier m_x;
   private final DoubleSupplier m_y;
 
@@ -33,7 +34,6 @@ public class LockedRotDriveCommand extends CommandBase {
    *  <p> Be sure to deadband the right joystick.
    */
   public LockedRotDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
-      PoseEstimationSubsystem poseEstimationSubsystem,
       DoubleSupplier leftX,
       DoubleSupplier leftY,
       DoubleSupplier rightX,
@@ -41,7 +41,7 @@ public class LockedRotDriveCommand extends CommandBase {
       DoubleSupplier throttle) {
 
     m_DrivetrainSubsystem = drivetrainSubsystem;
-    m_PoseEstimationSubsystem = poseEstimationSubsystem;
+    // m_PoseEstimationSubsystem = poseEstimationSubsystem;
 
     m_x = leftX;
     m_y = leftY;
@@ -55,10 +55,11 @@ public class LockedRotDriveCommand extends CommandBase {
     m_anglePID = new ProfiledPIDController(6, 0, 0,
         new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
     m_anglePID.enableContinuousInput(-180, 180);
-    currAngle = m_PoseEstimationSubsystem.getYaw();
+    // currAngle = m_PoseEstimationSubsystem.getYaw();
+    currAngle = m_DrivetrainSubsystem.getYaw();
 
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(drivetrainSubsystem, poseEstimationSubsystem);
+    addRequirements(drivetrainSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -73,7 +74,8 @@ public class LockedRotDriveCommand extends CommandBase {
     // Calculate a desired rotational speed by using a PID controller to compare the current robot angle to a desired angle
     // The desired angle is calculated from the axes of the right joystick, using arctan to find the angle of the position
     // in degrees with a range of (-180, 180)
-    currAngle = m_PoseEstimationSubsystem.getYaw();
+    // currAngle = m_PoseEstimationSubsystem.getYaw();
+    currAngle = m_DrivetrainSubsystem.getYaw();
     double wishAngle = Math.toDegrees(Math.atan2(m_cos.getAsDouble(), m_sin.getAsDouble()));
     double thetaSpeed = m_anglePID.calculate(currAngle, wishAngle);
 
@@ -84,7 +86,7 @@ public class LockedRotDriveCommand extends CommandBase {
     m_DrivetrainSubsystem.drive(new Translation2d(m_x.getAsDouble() * scale,
                                 m_y.getAsDouble() * scale),
                                 Math.abs(thetaSpeed) < 0.05 ? 0 : thetaSpeed,
-                                m_PoseEstimationSubsystem.getPose().getRotation(),
+                                Rotation2d.fromDegrees(m_DrivetrainSubsystem.getYaw()),
                                 true,
                                 true);
   }

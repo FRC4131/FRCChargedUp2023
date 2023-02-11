@@ -33,7 +33,6 @@ public final class Constants {
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
-        public static final int kMacropadPort = 2;
     }
 
     public static final class VisionConstants{
@@ -43,14 +42,6 @@ public final class Constants {
         public static final double GOAL_RANGE_METERS = 5;
     }
 
-    public enum ScoringHeights{
-        LOW,
-        MEDIUM,
-        HIGH,
-        SUBSTATION
-    }
-
-    
     public static final class AprilTagConstants{
         public static final AprilTag tag1 = new AprilTag(1, 
             new Pose3d(15.513558, 1.071626, 0.462788, 
@@ -85,6 +76,60 @@ public final class Constants {
             new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
     }
 
+    public static class SwerveConstants {
+        /**
+         * The left-to-right distance between the drivetrain wheels
+         *
+         * Should be measured from center to center.
+         */
+        // 17.1 inches
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.447675;
+        /**
+         * The front-to-back distance between the drivetrain wheels.
+         *
+         * Should be measured from center to center.
+         */
+        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.447675;
+
+        // public static final int DRIVETRAIN_PIGEON_ID = 0; // Set Pigeon ID
+        public static SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+                // Front left
+                new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
+                // Front right
+                new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0),
+                // Back left
+                new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
+                // Back right
+                new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
+        public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 5;
+        public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 6;
+        public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 11;
+        public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(307.7); // Measure and set front
+                                                                                            // left
+                                                                                            // steer offset
+
+        public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 7;
+        public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 8;
+        public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 12;
+        public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(111.9); // Measure and set front
+                                                                                             // right
+        // steer offset
+
+        public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 3;
+        public static final int BACK_LEFT_MODULE_STEER_MOTOR = 4;
+        public static final int BACK_LEFT_MODULE_STEER_ENCODER = 10; // Set back left steer encoder ID
+        public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(71.05); // Measure and set back left
+                                                                                           // steer
+                                                                                           // offset
+
+        public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 1;
+        public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 2;
+        public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 9; // Set back right steer encoder ID
+        public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(148.9); // Measure and set back
+                                                                                            // right
+                                                                                            // steer offset
+    }
+
     public static final class Swerve {
 //1.15
         public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
@@ -95,7 +140,7 @@ public final class Constants {
         public static final double kDriveEncoderRPM2MeterPerSec = kDriveEncoderRot2Meter / 60;
         public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
 
-        public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
+        public static final boolean invertGyro = true; // Always ensure Gyro is CCW+ CW-
 
         public static final COTSFalconSwerveConstants chosenModule = // TODO: This must be tuned to specific robot
                 COTSFalconSwerveConstants.SDSMK3(COTSFalconSwerveConstants.driveGearRatios.SDSMK3_Fast);
@@ -225,6 +270,14 @@ public final class Constants {
             public static final Rotation2d angleOffset = Rotation2d.fromRadians((0.75*Math.PI)/2);
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
+        }
+    }
+    public static final class ArmConstants{
+        public static final class ArmAngles{
+            public static final double STOWED_ANGLE = 0;
+        }
+        public static final class TelescopingDistances{
+
         }
     }
 }

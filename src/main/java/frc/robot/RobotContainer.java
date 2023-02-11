@@ -7,9 +7,11 @@ package frc.robot;
 import frc.lib.util.CommandMacroPad;
 import frc.lib.util.MacroPad;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.ArmJoystickCommand;
 import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CalibrateOdometryCommand;
+import frc.robot.commands.ClawPowerCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.GoToPoseCommand;
@@ -17,6 +19,8 @@ import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TurnToAngleCommand;
+import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
@@ -26,6 +30,8 @@ import frc.robot.subsystems.VisionSubsystem;
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
 
+import org.ejml.dense.row.MatrixFeatures_CDRM;
+
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
@@ -33,6 +39,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -58,11 +65,12 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
-  private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-  private final CommandMacroPad m_commandMacroPad = new CommandMacroPad(OperatorConstants.kMacropadPort);
-  private final TargetingSubsystem m_targettingSubsystem = new TargetingSubsystem(m_commandMacroPad);
-  private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
-      m_visionSubsystem);
+  private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
+  // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+  // private final PoseEstimationSubsystem m_poseEstimationSubsystem = new
+  // PoseEstimationSubsystem(m_drivetrainSubsystem,
+  // m_visionSubsystem);
+  private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -72,6 +80,8 @@ public class RobotContainer {
       OperatorConstants.kDriverControllerPort);
     private final CommandXboxController m_operatorController = new CommandXboxController(
       OperatorConstants.kOperatorControllerPort);
+
+  private double rumble = 0;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -89,36 +99,46 @@ public class RobotContainer {
     addAuton();
     SmartDashboard.putData(m_autoChooser);
     // Configure the trigger bindings
-    configureBindings();
     setDefaultCommands();
+    configureBindings();
+
   }
 
   public void setDefaultCommands() {
     double speedCap = Constants.Swerve.maxSpeed;
     m_drivetrainSubsystem
-        .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+        .setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
             () -> -modifyAxis(m_driverController.getLeftY(), false) * speedCap,
             () -> -modifyAxis(m_driverController.getLeftX(), false) * speedCap,
-            () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            () -> -modifyAxis(m_driverController.getRightX(), false) *
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
             () -> m_driverController.getLeftTriggerAxis(),
             true));
+
+    // m_armSubsystem.setDefaultCommand(
+    // new ArmJoystickCommand(m_armSubsystem, () ->
+    // modifyAxis(m_operatorController.getRightY(), false),
+    // () -> modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
-  public Command getAutonomousCommand(){
+  public Command getAutonomousCommand() {
     return m_autoChooser.getSelected();
   }
 
-  public void addAuton(){
+  public void addAuton() {
     m_autoChooser = new SendableChooser<Command>();
-    m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
+    // m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
-  public Command ppAuto(){
-    return new SequentialCommandGroup(
-      new CalibrateOdometryCommand(m_poseEstimationSubsystem, new Pose2d(new Translation2d( 1.92, 4.91), m_poseEstimationSubsystem.getPose().getRotation())),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath( "2coneA"  , 2.5, 2))
-    );
-  }
+  // public Command ppAuto() {
+  // return new SequentialCommandGroup(
+  // new CalibrateOdometryCommand(m_poseEstimationSubsystem,
+  // new Pose2d(new Translation2d(1.92, 4.91),
+  // m_poseEstimationSubsystem.getPose().getRotation())),
+  // new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+  // PathPlanner.loadPath("2coneA", 2.5, 2)));
+  // }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
@@ -138,20 +158,68 @@ public class RobotContainer {
 /*     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem)); */
 
+    m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
+    m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
+
+    m_operatorController.povDown().onTrue(new InstantCommand(() -> {
+      m_armSubsystem.snapToAngle(0);
+    }, m_armSubsystem));
+    m_operatorController.povRight().onTrue(new InstantCommand(() -> {
+      m_armSubsystem.snapToAngle(45);
+    }, m_armSubsystem));
+    m_operatorController.povLeft().onTrue(new InstantCommand(() -> {
+      m_armSubsystem.snapToAngle(-45);
+    }, m_armSubsystem));
+    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder());
+    m_operatorController.rightBumper().whileTrue(
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false),
+            () -> modifyAxis(m_operatorController.getLeftY(), false)));
+    m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {
+      rumble = rumble == 0 ? 1 : 0;
+      m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
+    }));
+
     new Trigger(() -> isInDefaultDriveMode)
-        .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-            () -> m_driverController.getLeftTriggerAxis(),
-            true))
-        .whileFalse(
-            new LockedRotDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getRightX(), false),
-            () -> -modifyAxis(m_driverController.getRightY(), false), 
-            () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
+    .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem,
+    
+    () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    Constants.Swerve.maxSpeed,
+    () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    Constants.Swerve.maxSpeed,
+    () -> -modifyAxis(m_driverController.getRightX(), false) *
+    MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    () -> m_driverController.getLeftTriggerAxis(),
+    true))
+    .whileFalse(
+    new LockedRotDriveCommand(m_drivetrainSubsystem, 
+    () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    Constants.Swerve.maxSpeed,
+    () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    Constants.Swerve.maxSpeed,
+    () -> -modifyAxis(m_driverController.getRightX(), false),
+    () -> -modifyAxis(m_driverController.getRightY(), false),
+    () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
+
+    // new Trigger(() -> isInDefaultDriveMode)
+    // .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem,
+    // () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getRightX(), false) *
+    // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    // () -> m_driverController.getLeftTriggerAxis(),
+    // true))
+    // .whileFalse(
+    // new LockedRotDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    // () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getRightX(), false),
+    // () -> -modifyAxis(m_driverController.getRightY(), false),
+    // () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
@@ -167,10 +235,12 @@ public class RobotContainer {
                                                           () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                                                           () -> m_driverController.getLeftTriggerAxis()));
 
-    m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-        new Pose2d(new Translation2d(0, 0), new Rotation2d())));
-    
-    m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
+    // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem,
+    // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+
+    // m_driverController.y().whileTrue(new
+    // AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
 

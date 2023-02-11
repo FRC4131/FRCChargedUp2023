@@ -4,10 +4,12 @@
 
 package frc.robot.commands;
 
+import java.lang.System.Logger.Level;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ArmSubsystem.ArmLevel;;
 
 public class ArmJoystickCommand extends CommandBase {
 
@@ -35,14 +37,19 @@ public class ArmJoystickCommand extends CommandBase {
   @Override
   public void execute() {
 
+    // m_ArmSubsystem.snapToAngle(5);
     m_ArmSubsystem.rotateArm(m_rotationDoubleSupplier);
-    m_ArmSubsystem.extendArm(m_extensionDoubleSupplier);
+    m_ArmSubsystem.extendArm(m_extensionDoubleSupplier.getAsDouble());
 
   }
 
+
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_ArmSubsystem.rotateArm(() -> 0);
+    m_ArmSubsystem.extendArm(0);
+  }
 
   // Returns true when the command should end.
   @Override
