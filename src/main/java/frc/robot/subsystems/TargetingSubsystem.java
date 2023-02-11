@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.CommandMacroPad;
 import frc.lib.util.MacroPad;
 import frc.lib.util.MacroPad.Button;
+import frc.robot.Constants.ScoringHeights;
 
 public class TargetingSubsystem extends SubsystemBase {
 
@@ -54,10 +55,6 @@ public class TargetingSubsystem extends SubsystemBase {
   public Pose2d getTargetGridPose() {
     return new Pose2d(gridPoses[desiredGrid].getX(), gridPoses[desiredGrid].getY() + getNodeOffset(),
         new Rotation2d(isBlueAlliance ? 180 : 0));
-  }
-
-  public void setGridPose(int inputGrid) {
-    desiredGrid = inputGrid;
   }
 
   public void setNode(int node) {
@@ -110,6 +107,22 @@ public class TargetingSubsystem extends SubsystemBase {
     return Button.button1;
   }
 
+  public ScoringHeights getScoringHeight(){
+    if (desiredNode == null){
+      return ScoringHeights.LOW;
+    }
+    switch(desiredNode.row){
+      case 1:
+        return ScoringHeights.HIGH;
+      case 2:
+        return ScoringHeights.MEDIUM;
+      case 3:
+        return ScoringHeights.LOW;
+      default:
+        return ScoringHeights.LOW; 
+    }
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run  
@@ -120,7 +133,4 @@ public class TargetingSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("grid selected", desiredGrid);
     SmartDashboard.putNumber("node selected", desiredNode.value());
   }
-
-
-
 }
