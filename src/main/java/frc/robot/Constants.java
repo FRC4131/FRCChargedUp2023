@@ -140,7 +140,7 @@ public final class Constants {
         public static final double kDriveEncoderRPM2MeterPerSec = kDriveEncoderRot2Meter / 60;
         public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
 
-        public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
+        public static final boolean invertGyro = true; // Always ensure Gyro is CCW+ CW-
 
         public static final COTSFalconSwerveConstants chosenModule = // TODO: This must be tuned to specific robot
                 COTSFalconSwerveConstants.SDSMK3(COTSFalconSwerveConstants.driveGearRatios.SDSMK3_Fast);
@@ -270,6 +270,14 @@ public final class Constants {
             public static final Rotation2d angleOffset = Rotation2d.fromRadians((0.75*Math.PI)/2);
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
+        }
+    }
+    public static final class ArmConstants{
+        public static final class ArmAngles{
+            public static final double STOWED_ANGLE = 0;
+        }
+        public static final class TelescopingDistances{
+
         }
     }
 }

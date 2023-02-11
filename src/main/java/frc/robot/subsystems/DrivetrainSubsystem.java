@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,31 +21,35 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DrivetrainSubsystem extends SubsystemBase {
     public SwerveDriveOdometry swerveOdometry;
-    public AHRS m_navX;
+
+    // NavX in this file is temporary while limelight not installed
+    public AHRS m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);;
     public frc.lib.util.SwerveModule[] m_SwerveMods;
 
     public DrivetrainSubsystem() {
-        
+
         m_SwerveMods = new SwerveModule[] {
                 new SwerveModule(0, Constants.Swerve.Mod0.constants),
                 new SwerveModule(1, Constants.Swerve.Mod1.constants),
                 new SwerveModule(2, Constants.Swerve.Mod2.constants),
                 new SwerveModule(3, Constants.Swerve.Mod3.constants)
         };
-        for (SwerveModule mod : m_SwerveMods){
+        for (SwerveModule mod : m_SwerveMods) {
             mod.reset();
         }
     }
 
     /**
      * 
-     * @param translation X and Y values (multiply by max speed)
-     * @param rotation  Theta value (multiply by max angular velocity)
-     * @param currentRotation The current rotation/theta of the robot (i.e. the yaw from the gyro)
-     * @param fieldRelative Is field relative
-     * @param isOpenLoop 
+     * @param translation     X and Y values (multiply by max speed)
+     * @param rotation        Theta value (multiply by max angular velocity)
+     * @param currentRotation The current rotation/theta of the robot (i.e. the yaw
+     *                        from the gyro)
+     * @param fieldRelative   Is field relative
+     * @param isOpenLoop
      */
-    public void drive(Translation2d translation, double rotation, Rotation2d currentRotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(Translation2d translation, double rotation, Rotation2d currentRotation, boolean fieldRelative,
+            boolean isOpenLoop) {
         SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                         translation.getX(),
@@ -59,11 +64,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
         setModuleStates(swerveModuleStates);
     }
 
-    public void drive(ChassisSpeeds chassisSpeeds)
-    {
+    public double getYaw() {
+        return (Constants.Swerve.invertGyro) ? (360 - m_navX.getYaw())
+                : (m_navX.getYaw());
+    }
+
+    public void zeroGyro(){
+        m_navX.reset();
+    }
+
+    public void drive(ChassisSpeeds chassisSpeeds) {
         SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-            chassisSpeeds 
-        );
+                chassisSpeeds);
         setModuleStates(swerveModuleStates);
     }
 
@@ -99,6 +111,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Turn Position", mod.getTurningPosition());
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
-        
+
     }
 }

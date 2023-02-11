@@ -30,6 +30,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   public PoseEstimationSubsystem(DrivetrainSubsystem drivetrainSubsystem, VisionSubsystem visionSubsystem) {
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_visionSubsystem = visionSubsystem;
+    
     m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
 
     
