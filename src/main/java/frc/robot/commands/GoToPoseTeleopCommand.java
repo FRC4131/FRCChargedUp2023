@@ -19,7 +19,7 @@ import frc.robot.subsystems.TargetingSubsystem;
 public class GoToPoseTeleopCommand extends CommandBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   PoseEstimationSubsystem m_poseEstimationSubsystem;
-  TargetingSubsystem m_targettingSubsystem;
+  TargetingSubsystem m_targetingSubsystem;
   DoubleSupplier m_x;
   DoubleSupplier m_y;
   DoubleSupplier m_theta;
@@ -34,14 +34,14 @@ public class GoToPoseTeleopCommand extends CommandBase {
   /** Creates a new GoToPoseTeleopCommand. */
   public GoToPoseTeleopCommand(DrivetrainSubsystem drivetrainSubsystem, 
     PoseEstimationSubsystem poseEstimationSubsystem,
-    TargetingSubsystem targettingSubsystem, 
+    TargetingSubsystem targetingSubsystem, 
     DoubleSupplier x, 
     DoubleSupplier y,
     DoubleSupplier theta, 
     DoubleSupplier throttle) {
       m_drivetrainSubsystem = drivetrainSubsystem;
       m_poseEstimationSubsystem = poseEstimationSubsystem;
-      m_targettingSubsystem = targettingSubsystem;
+      m_targetingSubsystem = targetingSubsystem;
       m_x = x;
       m_y = y;
       m_theta = theta;
@@ -53,14 +53,14 @@ public class GoToPoseTeleopCommand extends CommandBase {
       m_thetaController = new PIDController(4.0, 0, 0);
       m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-      addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targettingSubsystem);
+      addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_desiredPose = m_targettingSubsystem.getTargetGridPose();
+    m_desiredPose = m_targetingSubsystem.getTargetGridPose();
     m_xController.setSetpoint(m_desiredPose.getX());
     m_yController.setSetpoint(m_desiredPose.getY());
     m_thetaController.setSetpoint(m_desiredPose.getRotation().getRadians());

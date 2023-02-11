@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.lib.util.CommandMacroPad;
+import frc.lib.util.MacroPad;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.Autos;
@@ -57,7 +59,8 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-  private final TargetingSubsystem m_targettingSubsystem = new TargetingSubsystem();
+  private final CommandMacroPad m_commandMacroPad = new CommandMacroPad(OperatorConstants.kMacropadPort);
+  private final TargetingSubsystem m_targettingSubsystem = new TargetingSubsystem(m_commandMacroPad);
   private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
       m_visionSubsystem);
 
@@ -132,8 +135,8 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+/*     new Trigger(m_exampleSubsystem::exampleCondition)
+        .onTrue(new ExampleCommand(m_exampleSubsystem)); */
 
     new Trigger(() -> isInDefaultDriveMode)
         .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
@@ -171,7 +174,9 @@ public class RobotContainer {
 
     m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, new Pose2d(new Translation2d(0,0), new Rotation2d())));
 
-    m_operatorController.x().onTrue(new InstantCommand(() -> m_targettingSubsystem.setGridPose(3)));
+    //m_operatorController.x().onTrue(new InstantCommand(() -> m_targettingSubsystem.setGridPose(3)));
+  
+    m_operatorController.rightBumper().onTrue(new ExampleCommand(m_targettingSubsystem));
   }
 
   private static double deadband(double value, double deadband) {
