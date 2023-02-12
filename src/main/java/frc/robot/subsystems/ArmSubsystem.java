@@ -14,6 +14,7 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -49,12 +50,16 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightEncoder = m_rightRot.getEncoder();
     m_rightRotPIDController = m_rightRot.getPIDController();
     m_rightEncoder.setPositionConversionFactor(1);
-    m_rightRotPIDController.setOutputRange(-0.5, 0.5);
-    // m_rightRotPIDController.setSmartMotionMaxAccel(0.15, 0);
-    // m_rightRotPIDController.setSmartMotionMaxVelocity(0.20, 0);
+    m_rightRotPIDController.setOutputRange(-1, 1);
+    m_rightRotPIDController.setSmartMotionMaxAccel(7500, 0);
+    m_rightRotPIDController.setSmartMotionMaxVelocity( 10000, 0);
+    m_rightRotPIDController.setSmartMotionMinOutputVelocity(0, 0);
+    m_rightRotPIDController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 
-    m_rightRotPIDController.setP(0.5);
-
+    m_rightRotPIDController.setP(4e-9);
+    m_rightRotPIDController.setI(0);
+    m_rightRotPIDController.setD(0);
+    m_rightRotPIDController.setFF(9.9e-5);
     SmartDashboard.putBoolean("bool", bool);
     // m_leftRot.setIdleMode(IdleMode.kCoast);
 
@@ -77,7 +82,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void snapToAngle(double angleDegrees) {
     double encoderRotations = angleToMotorRotations(angleDegrees);
-    m_rightRotPIDController.setReference(encoderRotations, ControlType.kPosition);
+    m_rightRotPIDController.setReference(encoderRotations, ControlType.kSmartMotion);
   };
 
   public void resetPosition() {

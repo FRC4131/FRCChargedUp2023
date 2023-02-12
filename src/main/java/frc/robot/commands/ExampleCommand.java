@@ -4,8 +4,11 @@
 
 package frc.robot.commands;
 
+import frc.robot.Constants.ArmPosition;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
@@ -13,16 +16,22 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 public class ExampleCommand extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final TargetingSubsystem m_targetingSubsystem;
+  private final ArmSubsystem m_armSubsystem;
+
+  ArmPosition m_armSetPoint;
+  Pose2d m_poseSetPoint;
+
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ExampleCommand(TargetingSubsystem ts) {
+  public ExampleCommand(TargetingSubsystem ts, ArmSubsystem as, Pose2d p, ArmPosition ap) {
     m_targetingSubsystem = ts;
+    m_armSubsystem = as; 
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(ts);
+    addRequirements(ts, as);
   }
 
   // Called when the command is initially scheduled.
@@ -33,8 +42,6 @@ public class ExampleCommand extends CommandBase {
   @Override
   public void execute() {
 
-    SmartDashboard.putNumber("desired X", m_targetingSubsystem.getTargetGridPose().getX());
-    SmartDashboard.putNumber("desired Y", m_targetingSubsystem.getTargetGridPose().getY());
 
   }
 

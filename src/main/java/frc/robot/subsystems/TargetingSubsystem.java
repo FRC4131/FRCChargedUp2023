@@ -98,7 +98,7 @@ public class TargetingSubsystem extends SubsystemBase {
 
   public ArmPosition getScoringHeight(){
     if (desiredNode == null){
-      return ArmPosition.RESET;
+      return ArmPosition.LOW;
     }
     switch(desiredNode.row){
       case 1:
