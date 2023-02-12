@@ -5,7 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants.ScoringHeights;
+import frc.robot.Constants.ArmPosition;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
 
@@ -27,13 +27,7 @@ public class ArmPositionCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    ScoringHeights desiredHeight = m_targetingSubsystem.getScoringHeight();
-    if (desiredHeight == ScoringHeights.LOW)
-      m_armSubsystem.rotateTo(0);
-    else if (desiredHeight == ScoringHeights.MEDIUM)
-      m_armSubsystem.rotateTo(1);
-    else if (desiredHeight == ScoringHeights.HIGH)
-      m_armSubsystem.rotateTo(2);
+    m_armSubsystem.snapToAngle(m_targetingSubsystem.getScoringHeight().rotation);
   }
 
   // Called once the command ends or is interrupted.

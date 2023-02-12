@@ -93,31 +93,7 @@ public class ArmSubsystem extends SubsystemBase {
     m_actuatorPIDController.setReference(lengthToUnits(length), ControlType.kPosition);
   }
 
-  public void setSetPoint(ArmLevel level) {
-    switch (level) {
-      case STOWED:
-        snapToAngle(0);
-        break;
-      case GROUNDED:
-
-        break;
-      case DOUBLE_SUBSTATION:
-
-        break;
-      case LOW:
-
-        break;
-      case MID:
-
-        break;
-      case HIGH:
-
-        break;
-      default:
-
-        break;
-    }
-  }
+  
 
   private double lengthToUnits(double length) {
     // TODO: THIS
@@ -145,14 +121,5 @@ public class ArmSubsystem extends SubsystemBase {
           /* one-time action goes here */
           resetPosition();
         });
-  }
-
-  public enum ArmLevel {
-    STOWED,
-    GROUNDED,
-    DOUBLE_SUBSTATION,
-    LOW,
-    MID,
-    HIGH
   }
 }

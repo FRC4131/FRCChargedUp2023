@@ -21,24 +21,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.CommandMacroPad;
 import frc.lib.util.MacroPad;
 import frc.lib.util.MacroPad.Button;
-import frc.robot.Constants.ScoringHeights;
+import frc.robot.Constants.GridPositions;
+import frc.robot.Constants.ArmPosition;
 
 public class TargetingSubsystem extends SubsystemBase {
 
   private final double POLE_OFFSET = .5;
 
-  // Grid Pose numbers correspond to April Tag IDs
-  // Blue Alliance Wall
-  Pose2d gridPose6 = new Pose2d(new Translation2d(1.613, 4.411), new Rotation2d(Math.toRadians(-179.3)));
-  Pose2d gridPose7 = new Pose2d(new Translation2d(1.613, 2.75), new Rotation2d(Math.toRadians(-179.3)));
-  Pose2d gridPose8 = new Pose2d(new Translation2d(1.613, 1.08), new Rotation2d(Math.toRadians(-179.3)));
-
-  // Red Alliance Wall
-  Pose2d gridPose3 = new Pose2d(new Translation2d(14.92, 4.411), new Rotation2d());
-  Pose2d gridPose2 = new Pose2d(new Translation2d(14.92, 2.75), new Rotation2d());
-  Pose2d gridPose1 = new Pose2d(new Translation2d(14.92, 1.08), new Rotation2d());
-
-  Pose2d gridPoses[] = { gridPose1, gridPose2, gridPose3, gridPose6, gridPose7, gridPose8 };
   int desiredGrid;
 
   boolean isBlueAlliance;
@@ -53,7 +42,7 @@ public class TargetingSubsystem extends SubsystemBase {
   }
 
   public Pose2d getTargetGridPose() {
-    return new Pose2d(gridPoses[desiredGrid].getX(), gridPoses[desiredGrid].getY() + getNodeOffset(),
+    return new Pose2d(GridPositions.values()[desiredGrid].x, GridPositions.values()[desiredGrid].y + getNodeOffset(),
         new Rotation2d(isBlueAlliance ? 180 : 0));
   }
 
@@ -107,19 +96,19 @@ public class TargetingSubsystem extends SubsystemBase {
     return Button.button1;
   }
 
-  public ScoringHeights getScoringHeight(){
+  public ArmPosition getScoringHeight(){
     if (desiredNode == null){
-      return ScoringHeights.LOW;
+      return ArmPosition.RESET;
     }
     switch(desiredNode.row){
       case 1:
-        return ScoringHeights.HIGH;
+        return ArmPosition.HIGH;
       case 2:
-        return ScoringHeights.MEDIUM;
+        return ArmPosition.MEDIUM;
       case 3:
-        return ScoringHeights.LOW;
+        return ArmPosition.LOW;
       default:
-        return ScoringHeights.LOW; 
+        return ArmPosition.LOW; 
     }
   }
 

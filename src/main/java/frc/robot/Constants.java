@@ -33,47 +33,82 @@ public final class Constants {
     public static class OperatorConstants {
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
+        public static final int kMacropadPort = 2;
     }
 
-    public static final class VisionConstants{
-        public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(5.2);
-        public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(42);
-        public static final double CAMERA_PITCH_RADIANS = Math.toRadians(33);
+    public static final class VisionConstants {
         public static final double GOAL_RANGE_METERS = 5;
     }
 
-    public static final class AprilTagConstants{
-        public static final AprilTag tag1 = new AprilTag(1, 
-            new Pose3d(15.513558, 1.071626, 0.462788, 
-            new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+    /**DEGREES AND INCHES!!
+     * <p>
+     * TEMPORARY MAYBE
+    */
+    public enum ArmPosition {
+        RESET(118,0),
+        LOW(0,0),
+        MEDIUM(-65,0),
+        HIGH(-62,18),
+        SUBSTATION(32, 14);
 
-        public static final AprilTag tag2 = new AprilTag(2, 
-            new Pose3d(15.513558, 2.748026, 0.462788, 
-            new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+        public final double rotation;
+        public final double length;
 
-        public static final AprilTag tag3 = new AprilTag(3, 
-            new Pose3d(15.513558, 4.424426, 0.462788, 
-            new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+        ArmPosition(double rot, double ext) {
+            rotation = rot;
+            length = ext;
+        }
+    }
 
-        public static final AprilTag tag4 = new AprilTag(4, 
-            new Pose3d(16.178784, 6.749796, 0.695452, 
-            new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+    public enum GridPositions{
+        BLUE1(1.613, 4.411),
+        BLUE2(1.613, 2.75),
+        BLUE3(1.613, 1.08),
+        RED1(14.92, 4.411),
+        RED2(14.92, 2.75),
+        RED3(14.92, 1.08);
 
-        public static final AprilTag tag5 = new AprilTag(5, 
-            new Pose3d(0.36195, 6.749796, 0.695452, 
-            new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+        public final double x;
+        public final double y;
 
-        public static final AprilTag tag6 = new AprilTag(6, 
-            new Pose3d(1.02743, 4.424426, 0.462788, 
-            new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+        GridPositions(double x, double y){
+                this.x = x;
+                this.y = y;
+        }
+    }
 
-        public static final AprilTag tag7 = new AprilTag(7, 
-            new Pose3d(1.02743, 2.748026, 0.462788, 
-            new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+    public static final class AprilTagConstants {
+        public static final AprilTag tag1 = new AprilTag(1,
+                new Pose3d(15.513558, 1.071626, 0.462788,
+                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
 
-        public static final AprilTag tag8 = new AprilTag(8, 
-            new Pose3d(1.02743, 1.071626, 0.462788, 
-            new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+        public static final AprilTag tag2 = new AprilTag(2,
+                new Pose3d(15.513558, 2.748026, 0.462788,
+                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+
+        public static final AprilTag tag3 = new AprilTag(3,
+                new Pose3d(15.513558, 4.424426, 0.462788,
+                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+
+        public static final AprilTag tag4 = new AprilTag(4,
+                new Pose3d(16.178784, 6.749796, 0.695452,
+                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+
+        public static final AprilTag tag5 = new AprilTag(5,
+                new Pose3d(0.36195, 6.749796, 0.695452,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+
+        public static final AprilTag tag6 = new AprilTag(6,
+                new Pose3d(1.02743, 4.424426, 0.462788,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+
+        public static final AprilTag tag7 = new AprilTag(7,
+                new Pose3d(1.02743, 2.748026, 0.462788,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+
+        public static final AprilTag tag8 = new AprilTag(8,
+                new Pose3d(1.02743, 1.071626, 0.462788,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
     }
 
     public static class SwerveConstants {
@@ -131,7 +166,7 @@ public final class Constants {
     }
 
     public static final class Swerve {
-//1.15
+        // 1.15
         public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
         public static final double kDriveMotorGearRatio = 1 / 6.85714286; // old value 1 / 5.8462
         public static final double kTurningMotorGearRatio = 1 / 12.8; // old value 1 / 18.0
@@ -238,8 +273,9 @@ public final class Constants {
             public static final int driveMotorID = 19;
             public static final int angleMotorID = 10;
             public static final int canCoderID = 12;
-            public static final Rotation2d angleOffset = Rotation2d.fromRadians((-4.85 * Math.PI)/4);
-            public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+            public static final Rotation2d angleOffset = Rotation2d.fromRadians((-4.85 * Math.PI) / 4);
+            public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
+                    canCoderID, angleOffset);
         }
 
         /* Front Right Module - Module 1 */
@@ -247,7 +283,7 @@ public final class Constants {
             public static final int driveMotorID = 20;
             public static final int angleMotorID = 2;
             public static final int canCoderID = 11;
-            public static final Rotation2d angleOffset = Rotation2d.fromRadians(1.13*Math.PI);
+            public static final Rotation2d angleOffset = Rotation2d.fromRadians(1.13 * Math.PI);
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
@@ -255,9 +291,9 @@ public final class Constants {
         /* Back Left Module - Module 2 */
         public static final class Mod2 { // TODO: This must be tuned to specific robot
             public static final int driveMotorID = 11;
-            public static final int angleMotorID = 6; 
+            public static final int angleMotorID = 6;
             public static final int canCoderID = 9;
-            public static final Rotation2d angleOffset = Rotation2d.fromRadians((-3.45*Math.PI)/4);
+            public static final Rotation2d angleOffset = Rotation2d.fromRadians((-3.45 * Math.PI) / 4);
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
@@ -267,16 +303,18 @@ public final class Constants {
             public static final int driveMotorID = 14;
             public static final int angleMotorID = 5;
             public static final int canCoderID = 10;
-            public static final Rotation2d angleOffset = Rotation2d.fromRadians((0.75*Math.PI)/2);
+            public static final Rotation2d angleOffset = Rotation2d.fromRadians((0.75 * Math.PI) / 2);
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
         }
     }
-    public static final class ArmConstants{
-        public static final class ArmAngles{
+
+    public static final class ArmConstants {
+        public static final class ArmAngles {
             public static final double STOWED_ANGLE = 0;
         }
-        public static final class TelescopingDistances{
+
+        public static final class TelescopingDistances {
 
         }
     }
