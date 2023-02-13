@@ -33,6 +33,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   private SparkMaxPIDController m_rightRotPIDController;
 
+
   private RelativeEncoder m_rightEncoder;
 
   private boolean bool;
@@ -45,7 +46,7 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightEncoder.setPositionConversionFactor(1);
     m_rightRotPIDController.setOutputRange(-1, 1);
     m_rightRotPIDController.setSmartMotionMaxAccel(7500, 0);
-    m_rightRotPIDController.setSmartMotionMaxVelocity(10000, 0);
+    m_rightRotPIDController.setSmartMotionMaxVelocity( 10000, 0);
     m_rightRotPIDController.setSmartMotionMinOutputVelocity(0, 0);
     m_rightRotPIDController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 
@@ -87,22 +88,15 @@ public class ArmSubsystem extends SubsystemBase {
     return angleDegrees * ARM_MOTOR_GEAR_RATIO / 360.0;
   }
 
-  /**
-   * 
-   * @param angle to rotate to in degrees
-   * @return An instant command
-   */
-  public CommandBase rotateCommand(double angle) {
-    return runOnce(() -> {
-      snapToAngle(angle);
-    });
-  }
+
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putString("Arm Angle",
-        m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " Degrees");
+    SmartDashboard.putString("RightencoderRpos", m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " ticks(?)");
+    // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + "
+    // ticks(?)");
+    SmartDashboard.getBoolean("BOOL", false);
   }
 
   public CommandBase resetEncoder() {
