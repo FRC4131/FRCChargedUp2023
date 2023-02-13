@@ -12,13 +12,9 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,8 +25,6 @@ public class ArmSubsystem extends SubsystemBase {
   // ratios ratio
   private final double ARM_MOTOR_GEAR_RATIO = 5.0 / 1.0 * 4.0 / 1.0 * 3.0 / 1.0 * 58.0 / 15.0;
 
-  // private CANSparkMax m_actuator = new CANSparkMax(0, MotorType.kBrushless);
-  private TalonSRX m_actuator = new TalonSRX(30);
   // private CANSparkMax m_leftRot = new CANSparkMax(59, MotorType.kBrushless);
   private CANSparkMax m_rightRot = new CANSparkMax(58, MotorType.kBrushless);
 
@@ -38,7 +32,7 @@ public class ArmSubsystem extends SubsystemBase {
   private double desiredDistance;
 
   private SparkMaxPIDController m_rightRotPIDController;
-  private SparkMaxPIDController m_actuatorPIDController;
+
 
   private RelativeEncoder m_rightEncoder;
 
@@ -74,10 +68,10 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightRotPIDController.setReference(0, ControlType.kDutyCycle);
   }
 
-  public void rotateArm(DoubleSupplier powerSupplier) {
+  public void rotateArm(double power) {
     // m_rightRot.set(powerSupplier.getAsDouble() * 0.1);
-    m_rightRotPIDController.setReference(powerSupplier.getAsDouble() * 0.5, ControlType.kDutyCycle);
-    SmartDashboard.putNumber("TOSE", powerSupplier.getAsDouble());
+    m_rightRotPIDController.setReference(power * 0.5, ControlType.kDutyCycle);
+    SmartDashboard.putNumber("TOSE", power);
   }
 
   public void snapToAngle(double angleDegrees) {
@@ -94,20 +88,7 @@ public class ArmSubsystem extends SubsystemBase {
     return angleDegrees * ARM_MOTOR_GEAR_RATIO / 360.0;
   }
 
-  public void extendTo(double length) {
-    m_actuatorPIDController.setReference(lengthToUnits(length), ControlType.kPosition);
-  }
 
-  
-
-  private double lengthToUnits(double length) {
-    // TODO: THIS
-    return 0;
-  }
-
-  public void extendArm(double power) {
-    m_actuator.set(TalonSRXControlMode.PercentOutput, power);
-  }
 
   @Override
   public void periodic() {

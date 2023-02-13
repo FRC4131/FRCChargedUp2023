@@ -15,6 +15,7 @@ import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.ClawPowerCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
@@ -24,6 +25,7 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.ExtensionSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -73,6 +75,7 @@ public class RobotContainer {
   //private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
   //    m_visionSubsystem);
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
+  private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -119,8 +122,9 @@ public class RobotContainer {
     true));
     
     m_armSubsystem.setDefaultCommand(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false),
-            () -> modifyAxis(m_operatorController.getLeftY(), false)));
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
+    m_extensionSubsystem.setDefaultCommand(
+        new ExtensionJoystickCommand(m_extensionSubsystem, () -> modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   public Command getAutonomousCommand() {
@@ -175,10 +179,12 @@ public class RobotContainer {
     m_operatorController.povLeft().onTrue(new InstantCommand(() -> {
       m_armSubsystem.snapToAngle(-45);
     }, m_armSubsystem));
+
     m_operatorController.back().onTrue(m_armSubsystem.resetEncoder());
+
     m_operatorController.rightBumper().whileTrue(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false),
-            () -> modifyAxis(m_operatorController.getLeftY(), false)));
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
+    
     m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {
       rumble = rumble == 0 ? 1 : 0;
       m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
