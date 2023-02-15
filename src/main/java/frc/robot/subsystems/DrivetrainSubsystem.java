@@ -22,8 +22,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class DrivetrainSubsystem extends SubsystemBase {
     public SwerveDriveOdometry swerveOdometry;
 
-    // NavX in this file is temporary while limelight not installed
-    public AHRS m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);;
     public frc.lib.util.SwerveModule[] m_SwerveMods;
 
     public DrivetrainSubsystem() {
@@ -64,14 +62,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
         setModuleStates(swerveModuleStates);
     }
 
-    public double getYaw() {
-        return (Constants.Swerve.invertGyro) ? (360 - m_navX.getYaw())
-                : (m_navX.getYaw());
-    }
+    // public double getYaw() {
+    //     return (Constants.Swerve.invertGyro) ? (360 - m_navX.getYaw())
+    //             : (m_navX.getYaw());
+    // }
 
-    public void zeroGyro(){
-        m_navX.reset();
-    }
+    // public void zeroGyro(){
+    //     m_navX.reset();
+    // }
 
     public void drive(ChassisSpeeds chassisSpeeds) {
         SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(

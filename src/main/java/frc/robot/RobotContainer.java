@@ -21,6 +21,7 @@ import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TurnToAngleCommand;
+import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -29,6 +30,7 @@ import frc.robot.subsystems.ExtensionSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
@@ -71,11 +73,12 @@ public class RobotContainer {
   private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
   private final TargetingSubsystem m_targetingSubsystem = new TargetingSubsystem(
       new CommandMacroPad(OperatorConstants.kMacropadPort));
-  //private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-  //private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
-  //    m_visionSubsystem);
+  private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+  private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
+     m_visionSubsystem);
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
+  private final WristSubsystem m_wristSubsystem = new WristSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -111,7 +114,7 @@ public class RobotContainer {
 
   public void setDefaultCommands() {
     
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
+    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
     () -> -modifyAxis(m_driverController.getLeftY(), false) *
         Constants.Swerve.maxSpeed,
     () -> -modifyAxis(m_driverController.getLeftX(), false) *
@@ -169,16 +172,8 @@ public class RobotContainer {
     m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
     m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
     m_operatorController.y().whileTrue(new ArmPositionCommand(m_armSubsystem, m_targetingSubsystem));
-
-    m_operatorController.povDown().onTrue(new InstantCommand(() -> {
-      m_armSubsystem.snapToAngle(0);
-    }, m_armSubsystem));
-    m_operatorController.povRight().onTrue(new InstantCommand(() -> {
-      m_armSubsystem.snapToAngle(45);
-    }, m_armSubsystem));
-    m_operatorController.povLeft().onTrue(new InstantCommand(() -> {
-      m_armSubsystem.snapToAngle(-45);
-    }, m_armSubsystem));
+    m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem, 1));
+    m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem, -1));
 
     m_operatorController.back().onTrue(m_armSubsystem.resetEncoder());
 
@@ -190,38 +185,38 @@ public class RobotContainer {
       m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
     }));
 
-    new Trigger(() -> isInDefaultDriveMode)
-        .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem,
-            () -> -modifyAxis(m_driverController.getLeftY(), false) *
-                Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getLeftX(), false) *
-                Constants.Swerve.maxSpeed,
-            () -> -modifyAxis(m_driverController.getRightX(), false) *
-                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-            () -> m_driverController.getLeftTriggerAxis(),
-            true))
-        .whileFalse(
-            new LockedRotDriveCommand(m_drivetrainSubsystem,
-                () -> -modifyAxis(m_driverController.getLeftY(), false) *
-                    Constants.Swerve.maxSpeed,
-                () -> -modifyAxis(m_driverController.getLeftX(), false) *
-                    Constants.Swerve.maxSpeed,
-                () -> -modifyAxis(m_driverController.getRightX(), false),
-                () -> -modifyAxis(m_driverController.getRightY(), false),
-                () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
+    // new Trigger(() -> isInDefaultDriveMode)
+    //     .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    //         () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    //             Constants.Swerve.maxSpeed,
+    //         () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    //             Constants.Swerve.maxSpeed,
+    //         () -> -modifyAxis(m_driverController.getRightX(), false) *
+    //             MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    //         () -> m_driverController.getLeftTriggerAxis(),
+    //         true))
+    //     .whileFalse(
+    //         new LockedRotDriveCommand(m_drivetrainSubsystem,
+    //             () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    //                 Constants.Swerve.maxSpeed,
+    //             () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    //                 Constants.Swerve.maxSpeed,
+    //             () -> -modifyAxis(m_driverController.getRightX(), false),
+    //             () -> -modifyAxis(m_driverController.getRightY(), false),
+    //             () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
     // cancelling on release.
-    m_driverController.back().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyro()));
+    m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     // m_driverController.b()
     //     .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
-    // m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
-    //     m_poseEstimationSubsystem,
-    //     m_targetingSubsystem,
-    //     () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-    //     () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-    //     () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    //     () -> m_driverController.getLeftTriggerAxis()));
+    m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
+        m_poseEstimationSubsystem,
+        m_targetingSubsystem,
+        () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        () -> m_driverController.getLeftTriggerAxis()));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
     //     m_poseEstimationSubsystem,

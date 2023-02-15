@@ -5,11 +5,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.WristSubsystem;
 
 public class WristCommand extends CommandBase {
   /** Creates a new WristCommand. */
-  public WristCommand() {
+  private final WristSubsystem m_wrist;
+  int direction;
+
+  public WristCommand(WristSubsystem wristSubsystem, int dir) {
+      m_wrist = wristSubsystem;
+      direction = dir;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(wristSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -18,11 +25,15 @@ public class WristCommand extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    m_wrist.wristSpeed(direction * 0.6);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_wrist.wristSpeed(0);
+  }
 
   // Returns true when the command should end.
   @Override

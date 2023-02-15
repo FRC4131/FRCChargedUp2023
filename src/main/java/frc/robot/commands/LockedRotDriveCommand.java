@@ -17,6 +17,7 @@ import frc.robot.subsystems.PoseEstimationSubsystem;
 
 public class LockedRotDriveCommand extends CommandBase {
   private final DrivetrainSubsystem m_DrivetrainSubsystem;
+  private final PoseEstimationSubsystem m_PoseEstimationSubsystem;
   // private final PoseEstimationSubsystem m_PoseEstimationSubsystem;
   private final DoubleSupplier m_x;
   private final DoubleSupplier m_y;
@@ -34,6 +35,7 @@ public class LockedRotDriveCommand extends CommandBase {
    *  <p> Be sure to deadband the right joystick.
    */
   public LockedRotDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
+      PoseEstimationSubsystem poseEstimationSubsystem,
       DoubleSupplier leftX,
       DoubleSupplier leftY,
       DoubleSupplier rightX,
@@ -41,7 +43,7 @@ public class LockedRotDriveCommand extends CommandBase {
       DoubleSupplier throttle) {
 
     m_DrivetrainSubsystem = drivetrainSubsystem;
-    // m_PoseEstimationSubsystem = poseEstimationSubsystem;
+    m_PoseEstimationSubsystem = poseEstimationSubsystem;
 
     m_x = leftX;
     m_y = leftY;
@@ -56,7 +58,7 @@ public class LockedRotDriveCommand extends CommandBase {
         new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
     m_anglePID.enableContinuousInput(-180, 180);
     // currAngle = m_PoseEstimationSubsystem.getYaw();
-    currAngle = m_DrivetrainSubsystem.getYaw();
+    currAngle = m_PoseEstimationSubsystem.getYaw();
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrainSubsystem);
@@ -75,7 +77,7 @@ public class LockedRotDriveCommand extends CommandBase {
     // The desired angle is calculated from the axes of the right joystick, using arctan to find the angle of the position
     // in degrees with a range of (-180, 180)
     // currAngle = m_PoseEstimationSubsystem.getYaw();
-    currAngle = m_DrivetrainSubsystem.getYaw();
+    currAngle = m_PoseEstimationSubsystem.getYaw();
     double wishAngle = Math.toDegrees(Math.atan2(m_cos.getAsDouble(), m_sin.getAsDouble()));
     double thetaSpeed = m_anglePID.calculate(currAngle, wishAngle);
 
@@ -86,7 +88,7 @@ public class LockedRotDriveCommand extends CommandBase {
     m_DrivetrainSubsystem.drive(new Translation2d(m_x.getAsDouble() * scale,
                                 m_y.getAsDouble() * scale),
                                 Math.abs(thetaSpeed) < 0.05 ? 0 : thetaSpeed,
-                                Rotation2d.fromDegrees(m_DrivetrainSubsystem.getYaw()),
+                                Rotation2d.fromDegrees(m_PoseEstimationSubsystem.getYaw()),
                                 true,
                                 true);
   }
