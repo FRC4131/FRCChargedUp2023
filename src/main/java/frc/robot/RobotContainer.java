@@ -6,7 +6,6 @@ package frc.robot;
 
 import frc.lib.util.CommandMacroPad;
 import frc.lib.util.MacroPad;
-import frc.robot.Constants.ArmPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ArmJoystickCommand;
 import frc.robot.commands.ArmPositionCommand;
@@ -14,10 +13,8 @@ import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.ClawPowerCommand;
-import frc.robot.commands.ClawTimedCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.ExtendToCommand;
 import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
@@ -35,13 +32,11 @@ import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
-import java.nio.file.Path;
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
 
 import org.ejml.dense.row.MatrixFeatures_CDRM;
 
-import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
@@ -57,12 +52,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.Swerve.*;
-import static frc.robot.Constants.ArmPosition.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -82,10 +75,10 @@ public class RobotContainer {
       new CommandMacroPad(OperatorConstants.kMacropadPort));
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
   private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
-      m_visionSubsystem);
+     m_visionSubsystem);
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
-  // private final WristSubsystem m_wristSubsystem = new WristSubsystem();
+  private final WristSubsystem m_wristSubsystem = new WristSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -97,8 +90,6 @@ public class RobotContainer {
       OperatorConstants.kOperatorControllerPort);
 
   private double rumble = 0;
-  private DoubleSupplier armAngle;
-  private DoubleSupplier telescopeLength;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -113,10 +104,6 @@ public class RobotContainer {
     tab.addNumber("testLeftX", testLeftX);
     tab.addNumber("testRightX", testRightX);
 
-    armAngle = () -> m_targetingSubsystem.getScoringHeight().rotation;
-
-    telescopeLength = () -> m_targetingSubsystem.getScoringHeight().length;
-
     addAuton();
     SmartDashboard.putData(m_autoChooser);
     // Configure the trigger bindings
@@ -126,22 +113,21 @@ public class RobotContainer {
   }
 
   public void setDefaultCommands() {
-
+    
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-        () -> -modifyAxis(m_driverController.getLeftY(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getLeftX(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getRightX(), false) *
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-        () -> m_driverController.getLeftTriggerAxis(),
-        true));
-
+    () -> -modifyAxis(m_driverController.getLeftY(), false) *
+        Constants.Swerve.maxSpeed,
+    () -> -modifyAxis(m_driverController.getLeftX(), false) *
+        Constants.Swerve.maxSpeed,
+    () -> -modifyAxis(m_driverController.getRightX(), false) *
+        MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    () -> m_driverController.getLeftTriggerAxis(),
+    true));
+    
     m_armSubsystem.setDefaultCommand(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
-    // m_extensionSubsystem.setDefaultCommand(
-    // new ExtensionJoystickCommand(m_extensionSubsystem, () ->
-    // modifyAxis(m_operatorController.getLeftY(), false)));
+    m_extensionSubsystem.setDefaultCommand(
+        new ExtensionJoystickCommand(m_extensionSubsystem, () -> modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   public Command getAutonomousCommand() {
@@ -153,99 +139,13 @@ public class RobotContainer {
     m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
-  public Command moveArm(ArmPosition position) {
-    return new InstantCommand(() -> {
-      m_armSubsystem.snapToAngle(position.rotation);
-    }, m_armSubsystem).alongWith(new InstantCommand(() -> {
-      m_extensionSubsystem.extendTo(position.length);
-    }, m_extensionSubsystem));
-  }
-
   public Command ppAuto() {
     return new SequentialCommandGroup(
         new CalibrateOdometryCommand(m_poseEstimationSubsystem,
             new Pose2d(new Translation2d(1.92, 4.91),
                 m_poseEstimationSubsystem.getPose().getRotation())),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("path 1.1", 2.5, 2)));
-  }
-
-  /**
-   * Auton scoring one cone and one cube high. Balances at the end.
-   * <p>
-   * Initialize this auton against the node closest to the loading zone.
-   */
-  public Command twoPieceLoadingSide() {
-
-    PathPlannerTrajectory firstPath = PathPlanner.loadPath("path 1.1", 4.0, 3.0);
-    return new SequentialCommandGroup(
-        new CalibrateOdometryCommand(m_poseEstimationSubsystem, firstPath.getInitialPose()),
-        moveArm(HIGH).alongWith(waitCommand(1.5)),
-        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
-        moveArm(STOW),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, firstPath).alongWith(
-            waitCommand(1.75).andThen(
-                moveArm(LOW).alongWith(new ClawTimedCommand(m_clawSubsystem, 1, 0.6)))),
-        moveArm(ZEROES),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("path 1.2", 4.0, 3.0)),
-        moveArm(HIGH).alongWith(waitCommand(1.5)),
-        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
-        moveArm(STOW),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("path 1.3", 0.8, 3.0)),
-        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
-  }
-
-  public Command coneAndCubeLoadingSide() {
-    PathPlannerTrajectory secondPath = PathPlanner.loadPath("path 2.1", 4.0, 3.0);
-    return new SequentialCommandGroup(
-        new CalibrateOdometryCommand(m_poseEstimationSubsystem, secondPath.getInitialPose()),
-        moveArm(HIGH).alongWith(waitCommand(1.5)),
-        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
-        moveArm(STOW),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, secondPath).alongWith(
-            waitCommand(1.75).andThen(
-                moveArm(LOW).alongWith(new ClawTimedCommand(m_clawSubsystem, 1, 0.6)))),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("path 2.2", 4.0, 3.0)),
-        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
-        moveArm(STOW),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("path 2.3", 0.8, 3.0)),
-        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
-  }
-
-  public Command balancingLoadingSide() {
-    PathPlannerTrajectory thirdPath = PathPlanner.loadPath("path 3.1", 0.8, 3.0);
-    return new SequentialCommandGroup(
-        new CalibrateOdometryCommand(m_poseEstimationSubsystem, thirdPath.getInitialPose()),
-        moveArm(HIGH).alongWith(waitCommand(1.5)),
-        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, thirdPath),
-        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
-  }
-
-  public Command balancingCenterGrid() {
-    PathPlannerTrajectory fourthPath = PathPlanner.loadPath("path 4.1", 0.8, 3.0);
-    return new SequentialCommandGroup(
-        new CalibrateOdometryCommand(m_poseEstimationSubsystem, fourthPath.getInitialPose()),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fourthPath),
-        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
-  }
-
-  public Command onePieceCenterGrid() {
-    PathPlannerTrajectory fifthPath = PathPlanner.loadPath("path 5.1", 2.0, 1.0);
-    return new SequentialCommandGroup(
-        new CalibrateOdometryCommand(m_poseEstimationSubsystem, fifthPath.getInitialPose()),
-        moveArm(HIGH).alongWith(waitCommand(1.5)),
-        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
-        moveArm(LOW),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fifthPath)
-            .alongWith(waitCommand(2.5))
-            .andThen(new ClawTimedCommand(m_clawSubsystem, 1, -0.6)),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 5.2", 2.0, 1.0))
-    );
+            PathPlanner.loadPath("2coneA", 2.5, 2)));
   }
 
   private void configureBindings() {
@@ -255,28 +155,17 @@ public class RobotContainer {
      * .onTrue(new ExampleCommand(m_exampleSubsystem));
      */
 
-    // m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
-    // m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
-    // -1));
-    // m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
-    // 1));
-    // m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
-    // -1));
+    m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
+    m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
+    m_operatorController.y().whileTrue(new ArmPositionCommand(m_armSubsystem, m_targetingSubsystem));
+    m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem, 1));
+    m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem, -1));
 
-    m_operatorController.a().whileTrue(new ExtendToCommand(m_extensionSubsystem, 1));
-    m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem, 21.8));
-    m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem, 19.5));
-    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder().alongWith(
-        new InstantCommand(() -> {
-          m_extensionSubsystem.resetEncoder();
-        }, m_extensionSubsystem)));
+    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder());
 
     m_operatorController.rightBumper().whileTrue(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false))
-            .alongWith(
-                new ExtensionJoystickCommand(m_extensionSubsystem,
-                    () -> modifyAxis(m_operatorController.getLeftY(), false))));
-
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
+    
     m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {
       rumble = rumble == 0 ? 1 : 0;
       m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
@@ -306,49 +195,25 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     // m_driverController.b()
-    // .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem,
-    // m_poseEstimationSubsystem, Math.PI / 2.0));
-
-    // m_driverController.rightBumper().whileTrue(new
-    // GoToPoseTeleopCommand(m_drivetrainSubsystem,
-    // m_poseEstimationSubsystem,
-    // m_targetingSubsystem,
-    // () -> -modifyAxis(m_driverController.getLeftY(), false) *
-    // Constants.Swerve.maxSpeed,
-    // () -> -modifyAxis(m_driverController.getLeftX(), false) *
-    // Constants.Swerve.maxSpeed,
-    // () -> -modifyAxis(m_driverController.getRightX(), false) *
-    // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    // () -> m_driverController.getLeftTriggerAxis()));
-
-    m_driverController.rightBumper().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
+    //     .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
+    m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
         m_poseEstimationSubsystem,
-        m_targetingSubsystem)
-        .alongWith(new SequentialCommandGroup(waitCommand(1),
-            new InstantCommand(() -> {
-              m_extensionSubsystem.extendTo(telescopeLength.getAsDouble());
-            }, m_extensionSubsystem)
-                .alongWith(new InstantCommand(() -> {
-                  m_armSubsystem.snapToAngle(armAngle.getAsDouble());
-                }, m_armSubsystem)))));
+        m_targetingSubsystem,
+        () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        () -> m_driverController.getLeftTriggerAxis()));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
-    // m_poseEstimationSubsystem,
-    // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+    //     m_poseEstimationSubsystem,
+    //     new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    // m_driverController.y().whileTrue(new
-    // AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
+    // m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
 
-    // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
-    // m_poseEstimationSubsystem,
-    // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+    // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    //     new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    // m_operatorController.rightBumper().onTrue(new
-    // ExampleCommand(m_targetingSubsystem));
-  }
-
-  private static Command waitCommand(double seconds) {
-    return new WaitCommand(seconds);
+    //m_operatorController.rightBumper().onTrue(new ExampleCommand(m_targetingSubsystem));
   }
 
   private static double deadband(double value, double deadband) {

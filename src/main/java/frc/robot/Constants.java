@@ -45,12 +45,9 @@ public final class Constants {
      * TEMPORARY MAYBE
     */
     public enum ArmPosition {
-        LOW(120,1.0),
-        MEDIUM(-62, 8.5),
-        HIGH(-56, 21.8),
-        STOW(120, 0),
-        ZEROES(0, 0);
-
+        LOW(120,0),
+        MEDIUM(-62,0),
+        HIGH(-56,18);
 
         public final double rotation;
         public final double length;
@@ -62,7 +59,7 @@ public final class Constants {
     }
 
     public enum GridPositions{
-        BLUE1(1.92, 4.45),
+        BLUE1(1.92, 4.411),
         BLUE2(1.92, 2.75),
         BLUE3(1.92, 1.08),
         RED1(14.92, 4.411),
@@ -256,8 +253,13 @@ public final class Constants {
         }
     }
 
-    public static final class WristConstants{
-        /** 3 gearings, 5:1 * 5:1 * 5:1 */
-        public static final double WRIST_MOTOR_GEAR_RATIO = 125;
+    public static final class ArmConstants {
+        public static final class ArmAngles {
+            public static final double STOWED_ANGLE = 0;
+        }
+
+        public static final class TelescopingDistances {
+
+        }
     }
 }

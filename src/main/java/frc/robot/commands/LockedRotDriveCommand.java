@@ -18,7 +18,7 @@ import frc.robot.subsystems.PoseEstimationSubsystem;
 public class LockedRotDriveCommand extends CommandBase {
   private final DrivetrainSubsystem m_DrivetrainSubsystem;
   private final PoseEstimationSubsystem m_PoseEstimationSubsystem;
-  // private final PoseEstimationSubsystem m_PoseEstimationSubsystem;
+  
   private final DoubleSupplier m_x;
   private final DoubleSupplier m_y;
 

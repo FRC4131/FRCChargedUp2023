@@ -26,7 +26,7 @@ import frc.robot.Constants.ArmPosition;
 
 public class TargetingSubsystem extends SubsystemBase {
 
-  private final double POLE_OFFSET = .555;
+  private final double POLE_OFFSET = .5;
 
   int desiredGrid;
 
@@ -42,11 +42,8 @@ public class TargetingSubsystem extends SubsystemBase {
   }
 
   public Pose2d getTargetGridPose() {
-    Translation2d offset = getNodeOffset();
-    SmartDashboard.putNumber("ABOOOOOM", offset.getY());
-    return new Pose2d(GridPositions.values()[desiredGrid].x + offset.getX(),
-        GridPositions.values()[desiredGrid].y + offset.getY(),
-        Rotation2d.fromDegrees(isBlueAlliance ? 0 : 180));
+    return new Pose2d(GridPositions.values()[desiredGrid].x, GridPositions.values()[desiredGrid].y + getNodeOffset(),
+        new Rotation2d().fromDegrees(isBlueAlliance ? 180 : 0));
   }
 
   public void setNode(int node) {
@@ -56,31 +53,21 @@ public class TargetingSubsystem extends SubsystemBase {
       return;
   }
 
-  private Translation2d getNodeOffset() {
-    if (desiredNode == null)
-      return new Translation2d();
+  private double getNodeOffset() {
+    if(desiredNode == null)
+      return 0;
 
     int allianceReverse = isBlueAlliance ? 1 : -1;
-
-    double xOffset = desiredNode.row == 1 ? -0.26 * allianceReverse : 0;
-    double yOffset;
-
     switch (desiredNode.column) {
       case 1:
-        yOffset = -POLE_OFFSET * allianceReverse;
-        break;
+        return -POLE_OFFSET * allianceReverse;
       case 2:
-        yOffset = 0;
-        break;
+        return 0;
       case 3:
-        yOffset = POLE_OFFSET * allianceReverse;
-        break;
+        return POLE_OFFSET * allianceReverse;
       default:
-        yOffset = 0;
-      break;
+        return 0;
     }
-    return new Translation2d(xOffset, yOffset);
-
   }
 
   private int selectGrid() {
@@ -109,11 +96,11 @@ public class TargetingSubsystem extends SubsystemBase {
     return Button.button1;
   }
 
-  public ArmPosition getScoringHeight() {
-    if (desiredNode == null) {
+  public ArmPosition getScoringHeight(){
+    if (desiredNode == null){
       return ArmPosition.LOW;
     }
-    switch (desiredNode.row) {
+    switch(desiredNode.row){
       case 1:
         return ArmPosition.HIGH;
       case 2:
@@ -121,14 +108,14 @@ public class TargetingSubsystem extends SubsystemBase {
       case 3:
         return ArmPosition.LOW;
       default:
-        return ArmPosition.LOW;
+        return ArmPosition.LOW; 
     }
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    // isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
+    // This method will be called once per scheduler run  
+    //isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
     desiredGrid = selectGrid() + (isBlueAlliance ? 0 : 3) - 1;
     setNode(selectNode().value());
     SmartDashboard.putNumber("grid selected", desiredGrid);
