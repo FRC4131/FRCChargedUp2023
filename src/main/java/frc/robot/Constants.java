@@ -316,4 +316,8 @@ public final class Constants {
 
         }
     }
+    public static final class LEDConstants {
+        public static final int PORT_1 = 9; // TODO: Change this number to something that we know is valid
+        public static final int NUMBER_LEDS = 17;
+    }
 }
