@@ -136,32 +136,18 @@ public class RobotContainer {
 
   public void addAuton() {
     m_autoChooser = new SendableChooser<Command>();
-    // m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
+    m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
-  // public Command ppAuto() {
-    // return new SequentialCommandGroup(
-    //     new CalibrateOdometryCommand(m_poseEstimationSubsystem,
-    //         new Pose2d(new Translation2d(1.92, 4.91),
-    //             m_poseEstimationSubsystem.getPose().getRotation())),
-    //     new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    //         PathPlanner.loadPath("2coneA", 2.5, 2)));
-  //}
+  public Command ppAuto() {
+    return new SequentialCommandGroup(
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem,
+            new Pose2d(new Translation2d(1.92, 4.91),
+                m_poseEstimationSubsystem.getPose().getRotation())),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("2coneA", 2.5, 2)));
+  }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     /*
@@ -185,25 +171,25 @@ public class RobotContainer {
       m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
     }));
 
-    // new Trigger(() -> isInDefaultDriveMode)
-    //     .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    //         () -> -modifyAxis(m_driverController.getLeftY(), false) *
-    //             Constants.Swerve.maxSpeed,
-    //         () -> -modifyAxis(m_driverController.getLeftX(), false) *
-    //             Constants.Swerve.maxSpeed,
-    //         () -> -modifyAxis(m_driverController.getRightX(), false) *
-    //             MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    //         () -> m_driverController.getLeftTriggerAxis(),
-    //         true))
-    //     .whileFalse(
-    //         new LockedRotDriveCommand(m_drivetrainSubsystem,
-    //             () -> -modifyAxis(m_driverController.getLeftY(), false) *
-    //                 Constants.Swerve.maxSpeed,
-    //             () -> -modifyAxis(m_driverController.getLeftX(), false) *
-    //                 Constants.Swerve.maxSpeed,
-    //             () -> -modifyAxis(m_driverController.getRightX(), false),
-    //             () -> -modifyAxis(m_driverController.getRightY(), false),
-    //             () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
+    new Trigger(() -> isInDefaultDriveMode)
+        .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            () -> -modifyAxis(m_driverController.getLeftY(), false) *
+                Constants.Swerve.maxSpeed,
+            () -> -modifyAxis(m_driverController.getLeftX(), false) *
+                Constants.Swerve.maxSpeed,
+            () -> -modifyAxis(m_driverController.getRightX(), false) *
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            () -> m_driverController.getLeftTriggerAxis(),
+            true))
+        .whileFalse(
+            new LockedRotDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                () -> -modifyAxis(m_driverController.getLeftY(), false) *
+                    Constants.Swerve.maxSpeed,
+                () -> -modifyAxis(m_driverController.getLeftX(), false) *
+                    Constants.Swerve.maxSpeed,
+                () -> -modifyAxis(m_driverController.getRightX(), false),
+                () -> -modifyAxis(m_driverController.getRightY(), false),
+                () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
     // cancelling on release.

@@ -30,7 +30,7 @@ public class TargetingSubsystem extends SubsystemBase {
 
   int desiredGrid;
 
-  boolean isBlueAlliance;
+  boolean isBlueAlliance = true;
 
   private final CommandMacroPad m_pad;
   private Button desiredNode = Button.button1;
@@ -43,7 +43,7 @@ public class TargetingSubsystem extends SubsystemBase {
 
   public Pose2d getTargetGridPose() {
     return new Pose2d(GridPositions.values()[desiredGrid].x, GridPositions.values()[desiredGrid].y + getNodeOffset(),
-        new Rotation2d(isBlueAlliance ? 180 : 0));
+        new Rotation2d().fromDegrees(isBlueAlliance ? 180 : 0));
   }
 
   public void setNode(int node) {
@@ -116,10 +116,12 @@ public class TargetingSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run  
     //isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
-    isBlueAlliance = false;
     desiredGrid = selectGrid() + (isBlueAlliance ? 0 : 3) - 1;
     setNode(selectNode().value());
     SmartDashboard.putNumber("grid selected", desiredGrid);
     SmartDashboard.putNumber("node selected", desiredNode.value());
+    SmartDashboard.putNumber("desiredX", getTargetGridPose().getX());
+    SmartDashboard.putNumber("desiredY", getTargetGridPose().getY());
+    SmartDashboard.putNumber("desiredRotation", getTargetGridPose().getRotation().getDegrees());
   }
 }

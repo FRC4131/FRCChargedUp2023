@@ -66,11 +66,12 @@ public class VisionSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {    
+    SmartDashboard.putString("Name", m_camera.getName());
     m_estimatedRobotPose = m_photonPoseEstimator.update();
     if(m_estimatedRobotPose.isPresent()){
-    SmartDashboard.putNumber("Apriltag X", m_estimatedRobotPose.get().estimatedPose.toPose2d().getX());
-    SmartDashboard.putNumber("Apriltag Y", m_estimatedRobotPose.get().estimatedPose.toPose2d().getY());
-    SmartDashboard.putNumber("Apriltag Heading (radians)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getDegrees());
+      SmartDashboard.putNumber("Apriltag X", m_estimatedRobotPose.get().estimatedPose.toPose2d().getX());
+      SmartDashboard.putNumber("Apriltag Y", m_estimatedRobotPose.get().estimatedPose.toPose2d().getY());
+      SmartDashboard.putNumber("Apriltag Heading (degrees)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getDegrees());
     }
   }
 
