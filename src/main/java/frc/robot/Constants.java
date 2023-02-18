@@ -40,14 +40,20 @@ public final class Constants {
         public static final double GOAL_RANGE_METERS = 5;
     }
 
-    /**DEGREES AND INCHES!!
-     * <p>
-     * TEMPORARY MAYBE
+
+
+    /** Constants for each of the arm's major positions <p>
+     * @param rotation rotation
+     * @param extension length to extend
+     * <p>DEGREES AND INCHES!! (subject to changing units)<p>
     */
     public enum ArmPosition {
         LOW(120,0),
         MEDIUM(-62,0),
-        HIGH(-56,18);
+        HIGH(-56,18),
+        SUBSTATION(-60, 13),
+        MIN(-30, 0),
+        MAX(30, 18);
 
         public final double rotation;
         public final double length;
@@ -57,6 +63,7 @@ public final class Constants {
             length = ext;
         }
     }
+
 
     public enum GridPositions{
         BLUE1(1.613, 4.411),

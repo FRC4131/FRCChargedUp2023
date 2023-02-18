@@ -12,14 +12,18 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClawSubsystem extends SubsystemBase {
 
-  CANSparkMax m_clawController = new CANSparkMax(57, MotorType.kBrushless);
-  RelativeEncoder m_clawEncoder;
-  SparkMaxPIDController m_clawPID;
+  private CANSparkMax m_clawController = new CANSparkMax(57, MotorType.kBrushless);
+  private RelativeEncoder m_clawEncoder;
+  private SparkMaxPIDController m_clawPID;
+
+  private DigitalInput m_maxWiddershins = new DigitalInput(0);
+  private DigitalInput m_maxDextrorotary = new DigitalInput(0);//TODO: channel #s
 
   /** Creates a new ClawSubsystem. */
   public ClawSubsystem() {

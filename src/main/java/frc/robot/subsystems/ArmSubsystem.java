@@ -19,9 +19,12 @@ import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ArmPosition;
+import frc.robot.Constants.ArmConstants.ArmAngles;
 
 public class ArmSubsystem extends SubsystemBase {
 
@@ -41,6 +44,11 @@ public class ArmSubsystem extends SubsystemBase {
   private SparkMaxPIDController m_actuatorPIDController;
 
   private RelativeEncoder m_rightEncoder;
+  private RelativeEncoder m_actuatorEncoder;
+
+  private DigitalInput m_extMaxLimit = new DigitalInput(0);
+  private DigitalInput m_extMinLimit = new DigitalInput(0);// TODO: Channel #s
+  private DigitalInput m_armStowLimit = new DigitalInput(0);
 
   private boolean bool;
 
@@ -52,7 +60,7 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightEncoder.setPositionConversionFactor(1);
     m_rightRotPIDController.setOutputRange(-1, 1);
     m_rightRotPIDController.setSmartMotionMaxAccel(7500, 0);
-    m_rightRotPIDController.setSmartMotionMaxVelocity( 10000, 0);
+    m_rightRotPIDController.setSmartMotionMaxVelocity(10000, 0);
     m_rightRotPIDController.setSmartMotionMinOutputVelocity(0, 0);
     m_rightRotPIDController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 
@@ -81,6 +89,9 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public void snapToAngle(double angleDegrees) {
+    angleDegrees = Math.max(angleDegrees, ArmPosition.MIN.rotation);
+    angleDegrees = Math.max(angleDegrees, ArmPosition.MAX.rotation);
+
     double encoderRotations = angleToMotorRotations(angleDegrees);
     m_rightRotPIDController.setReference(encoderRotations, ControlType.kSmartMotion);
   };
@@ -91,14 +102,21 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   private double angleToMotorRotations(double angleDegrees) {
+
     return angleDegrees * ARM_MOTOR_GEAR_RATIO / 360.0;
   }
 
-  public void extendTo(double length) {
-    m_actuatorPIDController.setReference(lengthToUnits(length), ControlType.kPosition);
+  private double motorRotationsToAngle(double angleRots) {
+    return angleRots * 360.0 / ARM_MOTOR_GEAR_RATIO;
   }
 
-  
+  public void extendTo(double length) {
+
+    length = Math.max(length, ArmPosition.MIN.length);
+    length = Math.min(length, ArmPosition.MAX.length);
+
+    m_actuatorPIDController.setReference(lengthToUnits(length), ControlType.kPosition);
+  }
 
   private double lengthToUnits(double length) {
     // TODO: THIS
@@ -112,10 +130,24 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putString("RightencoderRpos", m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " ticks(?)");
+    SmartDashboard.putString("RightencoderRpos",
+        m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " ticks(?)");
     // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + "
     // ticks(?)");
     SmartDashboard.getBoolean("BOOL", false);
+
+    // prevents arm from extending past its physical limits
+    if ((m_extMaxLimit.get() && m_actuatorEncoder.getVelocity() > 0)
+        || (m_extMinLimit.get() && m_actuatorEncoder.getVelocity() < 0)) {
+      m_actuator.set(TalonSRXControlMode.PercentOutput, 0);
+    }
+
+    // prevents arm from rotating past rotational limts
+    if (m_armStowLimit.get() && m_rightEncoder.getVelocity() > 0
+        || motorRotationsToAngle(m_rightEncoder.getPosition()) < ArmPosition.MAX.rotation
+            && m_rightEncoder.getVelocity() < 0) {
+      m_rightRot.stopMotor();
+    }
   }
 
   public CommandBase resetEncoder() {
