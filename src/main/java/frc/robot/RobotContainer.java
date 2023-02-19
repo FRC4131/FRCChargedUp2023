@@ -157,7 +157,6 @@ public class RobotContainer {
 
     m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
     m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
-    m_operatorController.y().whileTrue(new ArmPositionCommand(m_armSubsystem, m_targetingSubsystem));
     m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem, 1));
     m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem, -1));
 
@@ -193,7 +192,7 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
     // cancelling on release.
-    m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.setPose()));
+    m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     // m_driverController.b()
     //     .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
     m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
