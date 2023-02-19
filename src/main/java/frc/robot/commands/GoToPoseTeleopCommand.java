@@ -48,8 +48,8 @@ public class GoToPoseTeleopCommand extends CommandBase {
       m_theta = theta;
       m_throttle = throttle;
       
-      m_xController = new PIDController(3, 0, 0);
-      m_yController = new PIDController(3, 0, 0);
+      m_xController = new PIDController(3.5, 0, 0);
+      m_yController = new PIDController(3.5, 0, 0);
       
       m_thetaController = new PIDController(4.0, 0, 0);
       m_thetaController.enableContinuousInput(-Math.PI, Math.PI);

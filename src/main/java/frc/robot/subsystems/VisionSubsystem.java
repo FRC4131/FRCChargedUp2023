@@ -55,7 +55,6 @@ public class VisionSubsystem extends SubsystemBase {
     tagList.add(AprilTagConstants.tag7);
     tagList.add(AprilTagConstants.tag8);
     fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
-    
     m_photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_camera, m_cameraToRobot);
   }
 

@@ -59,9 +59,9 @@ public final class Constants {
     }
 
     public enum GridPositions{
-        BLUE1(1.92, 4.411),
-        BLUE2(1.92, 2.75),
-        BLUE3(1.92, 1.08),
+        BLUE1(2.35, 4.411), // x for all blue is 1.92
+        BLUE2(2.35, 2.75),
+        BLUE3(2.35, 1.08),
         RED1(14.92, 4.411),
         RED2(14.92, 2.75),
         RED3(14.92, 1.08);

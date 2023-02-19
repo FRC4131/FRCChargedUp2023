@@ -8,12 +8,16 @@ import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -21,9 +25,10 @@ import frc.robot.Constants;
 public class PoseEstimationSubsystem extends SubsystemBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   VisionSubsystem m_visionSubsystem;
+  private final Field2d field2d = new Field2d();
   static SwerveDrivePoseEstimator m_swerveDrivePoseEst;
   AHRS m_navX;
-  PhotonPoseEstimator photonPoseEstimator;
+
   public frc.lib.util.SwerveModule[] mSwerveMods;
 
   /** Creates a new PoseEstimationSubsystem. */
@@ -59,15 +64,14 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   {
     m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
   }
+
+  public void setPose(){
+    m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), new Pose2d(new Translation2d(5,5), new Rotation2d()));
+  }
   
   public Pose2d getPose() 
   {
     return m_swerveDrivePoseEst.getEstimatedPosition();
-  }
-
-  public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose){
-    photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-    return photonPoseEstimator.update();
   }
 
   public double getPitch() {
@@ -78,12 +82,8 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     return m_navX.getRoll();
   }
 
-  /**
-   * 
-   * @return The current yaw angle of the robot in degrees (-180,180].
-   */
   public double getYaw(){
-    return getGyroYaw().getDegrees();
+    return m_navX.getYaw();
   }
 
   @Override
@@ -95,13 +95,14 @@ public class PoseEstimationSubsystem extends SubsystemBase {
       m_swerveDrivePoseEst.addVisionMeasurement(aprilTagPose.estimatedPose.toPose2d(), aprilTagPose.timestampSeconds);
     }
     m_swerveDrivePoseEst.update(getGyroYaw(), m_drivetrainSubsystem.getModulePositions());
-
+    field2d.setRobotPose(m_swerveDrivePoseEst.update(getGyroYaw(), m_drivetrainSubsystem.getModulePositions()));
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("RawGyroYaw", getGyroYaw().getDegrees());
     SmartDashboard.putNumber("x", m_swerveDrivePoseEst.getEstimatedPosition().getX());
     SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
     SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees());
-    SmartDashboard.putNumber("Robot Pitch", getPitch()); 
+    SmartDashboard.putNumber("Robot Pitch", getPitch());
+    SmartDashboard.putData(field2d);
     
   }
 }
