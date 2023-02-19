@@ -64,10 +64,6 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   {
     m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
   }
-
-  public void setPose(){
-    m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), new Pose2d(new Translation2d(5,5), new Rotation2d()));
-  }
   
   public Pose2d getPose() 
   {
