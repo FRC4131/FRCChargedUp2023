@@ -72,7 +72,7 @@ public class SwerveModule {
     }
 
     public double getDrivePosition() {
-        return -driveEncoder.getPosition();
+        return driveEncoder.getPosition();
     }
 
     public void rawSet(double drive, double turn) {
