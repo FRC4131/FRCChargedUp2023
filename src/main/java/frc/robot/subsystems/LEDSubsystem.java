@@ -10,6 +10,10 @@ import frc.robot.Constants;
 public class LEDSubsystem extends SubsystemBase {
     private AddressableLED m_LED = new AddressableLED(Constants.LEDConstants.PORT_1);
     private AddressableLEDBuffer m_LEDBuffer = new AddressableLEDBuffer(Constants.LEDConstants.NUMBER_LEDS);
+    int h;
+    int s;
+    int v;
+
 
     public LEDSubsystem() {
         m_LED.setLength(m_LEDBuffer.getLength());
@@ -23,7 +27,25 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     // If ledIndex is set to -1, then all LEDs will be set to the provided h, s, and v values
-    public void setHSV(int ledIndex, int h, int s, int v) {
+
+    public int getH()
+    {
+        return h;
+    }
+
+    public int getS()
+    {
+        return s;
+    }
+
+    public int getV()
+    {
+        return v;
+    }
+    public void setHSV(int ledIndex, int initH, int initS, int initV) {
+        h = initH;
+        s = initS;
+        v = initV;
         if (ledIndex == -1) {
             for (int i = 0; i < m_LEDBuffer.getLength(); ++i) {
                 m_LEDBuffer.setHSV(i, h, s, v);
