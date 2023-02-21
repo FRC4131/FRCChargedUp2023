@@ -15,18 +15,24 @@ import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.ClawPowerCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ExtendToCommand;
+import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
+import frc.robot.commands.TimerCommand;
 import frc.robot.commands.TurnToAngleCommand;
+import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.ExtensionSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
@@ -66,13 +72,15 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
-  private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
+  // private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
   private final TargetingSubsystem m_targetingSubsystem = new TargetingSubsystem(
       new CommandMacroPad(OperatorConstants.kMacropadPort));
-  //private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
-  //private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
-  //    m_visionSubsystem);
+  private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+  private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
+      m_visionSubsystem);
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
+  private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
+  // private final WristSubsystem m_wristSubsystem = new WristSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -84,6 +92,8 @@ public class RobotContainer {
       OperatorConstants.kOperatorControllerPort);
 
   private double rumble = 0;
+  private DoubleSupplier armAngle;
+  private DoubleSupplier telescopeLength;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -98,6 +108,10 @@ public class RobotContainer {
     tab.addNumber("testLeftX", testLeftX);
     tab.addNumber("testRightX", testRightX);
 
+    armAngle = () -> m_targetingSubsystem.getScoringHeight().rotation;
+
+    telescopeLength = () -> m_targetingSubsystem.getScoringHeight().length;
+
     addAuton();
     SmartDashboard.putData(m_autoChooser);
     // Configure the trigger bindings
@@ -107,20 +121,22 @@ public class RobotContainer {
   }
 
   public void setDefaultCommands() {
-    
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem,
-    () -> -modifyAxis(m_driverController.getLeftY(), false) *
-        Constants.Swerve.maxSpeed,
-    () -> -modifyAxis(m_driverController.getLeftX(), false) *
-        Constants.Swerve.maxSpeed,
-    () -> -modifyAxis(m_driverController.getRightX(), false) *
-        MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    () -> m_driverController.getLeftTriggerAxis(),
-    true));
-    
+
+    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+        () -> -modifyAxis(m_driverController.getLeftY(), false) *
+            Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getLeftX(), false) *
+            Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getRightX(), false) *
+            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        () -> m_driverController.getLeftTriggerAxis(),
+        true));
+
     m_armSubsystem.setDefaultCommand(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false),
-            () -> modifyAxis(m_operatorController.getLeftY(), false)));
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
+    // m_extensionSubsystem.setDefaultCommand(
+    // new ExtensionJoystickCommand(m_extensionSubsystem, () ->
+    // modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   public Command getAutonomousCommand() {
@@ -129,32 +145,18 @@ public class RobotContainer {
 
   public void addAuton() {
     m_autoChooser = new SendableChooser<Command>();
-    // m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
+    m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
-  // public Command ppAuto() {
-    // return new SequentialCommandGroup(
-    //     new CalibrateOdometryCommand(m_poseEstimationSubsystem,
-    //         new Pose2d(new Translation2d(1.92, 4.91),
-    //             m_poseEstimationSubsystem.getPose().getRotation())),
-    //     new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    //         PathPlanner.loadPath("2coneA", 2.5, 2)));
-  //}
+  public Command ppAuto() {
+    return new SequentialCommandGroup(
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem,
+            new Pose2d(new Translation2d(1.92, 4.91),
+                m_poseEstimationSubsystem.getPose().getRotation())),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("2coneA", 2.5, 2)));
+  }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be
-   * created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
-   * an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
-   * {@link
-   * CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     /*
@@ -162,30 +164,35 @@ public class RobotContainer {
      * .onTrue(new ExampleCommand(m_exampleSubsystem));
      */
 
-    m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
-    m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
-    m_operatorController.y().whileTrue(new ArmPositionCommand(m_armSubsystem, m_targetingSubsystem));
+    // m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
+    // m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
+    // -1));
+    // m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
+    // 1));
+    // m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
+    // -1));
 
-    m_operatorController.povDown().onTrue(new InstantCommand(() -> {
-      m_armSubsystem.snapToAngle(0);
-    }, m_armSubsystem));
-    m_operatorController.povRight().onTrue(new InstantCommand(() -> {
-      m_armSubsystem.snapToAngle(45);
-    }, m_armSubsystem));
-    m_operatorController.povLeft().onTrue(new InstantCommand(() -> {
-      m_armSubsystem.snapToAngle(-45);
-    }, m_armSubsystem));
-    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder());
+    m_operatorController.a().whileTrue(new ExtendToCommand(m_extensionSubsystem, 1));
+    m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem, 21.8));
+    m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem, 19.5));
+    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder().alongWith(
+        new InstantCommand(() -> {
+          m_extensionSubsystem.resetEncoder();
+        }, m_extensionSubsystem)));
+
     m_operatorController.rightBumper().whileTrue(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false),
-            () -> modifyAxis(m_operatorController.getLeftY(), false)));
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false))
+            .alongWith(
+                new ExtensionJoystickCommand(m_extensionSubsystem,
+                    () -> modifyAxis(m_operatorController.getLeftY(), false))));
+
     m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {
       rumble = rumble == 0 ? 1 : 0;
       m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
     }));
 
     new Trigger(() -> isInDefaultDriveMode)
-        .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem,
+        .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             () -> -modifyAxis(m_driverController.getLeftY(), false) *
                 Constants.Swerve.maxSpeed,
             () -> -modifyAxis(m_driverController.getLeftX(), false) *
@@ -195,7 +202,7 @@ public class RobotContainer {
             () -> m_driverController.getLeftTriggerAxis(),
             true))
         .whileFalse(
-            new LockedRotDriveCommand(m_drivetrainSubsystem,
+            new LockedRotDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
                 () -> -modifyAxis(m_driverController.getLeftY(), false) *
                     Constants.Swerve.maxSpeed,
                 () -> -modifyAxis(m_driverController.getLeftX(), false) *
@@ -206,27 +213,51 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is
     // pressed,
     // cancelling on release.
-    m_driverController.back().onTrue(new InstantCommand(() -> m_drivetrainSubsystem.zeroGyro()));
+    m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     // m_driverController.b()
-    //     .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
-    // m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
-    //     m_poseEstimationSubsystem,
-    //     m_targetingSubsystem,
-    //     () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-    //     () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-    //     () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    //     () -> m_driverController.getLeftTriggerAxis()));
+    // .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem, Math.PI / 2.0));
+
+    // m_driverController.rightBumper().whileTrue(new
+    // GoToPoseTeleopCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem,
+    // m_targetingSubsystem,
+    // () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getRightX(), false) *
+    // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    // () -> m_driverController.getLeftTriggerAxis()));
+
+    m_driverController.rightBumper().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
+        m_poseEstimationSubsystem,
+        m_targetingSubsystem)
+        .alongWith(new SequentialCommandGroup(waitCommand(1),
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(telescopeLength.getAsDouble());
+            }, m_extensionSubsystem)
+                .alongWith(new InstantCommand(() -> {
+                  m_armSubsystem.snapToAngle(armAngle.getAsDouble());
+                }, m_armSubsystem)))));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
-    //     m_poseEstimationSubsystem,
-    //     new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+    // m_poseEstimationSubsystem,
+    // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    // m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
+    // m_driverController.y().whileTrue(new
+    // AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
 
-    // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    //     new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+    // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem,
+    // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    //m_operatorController.rightBumper().onTrue(new ExampleCommand(m_targetingSubsystem));
+    // m_operatorController.rightBumper().onTrue(new
+    // ExampleCommand(m_targetingSubsystem));
+  }
+
+  private static Command waitCommand(double seconds) {
+    return new TimerCommand(seconds);
   }
 
   private static double deadband(double value, double deadband) {

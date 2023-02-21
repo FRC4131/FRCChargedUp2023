@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -47,8 +48,8 @@ public class GoToPoseTeleopCommand extends CommandBase {
       m_theta = theta;
       m_throttle = throttle;
       
-      m_xController = new PIDController(3, 0, 0);
-      m_yController = new PIDController(3, 0, 0);
+      m_xController = new PIDController(10, 0, 0);
+      m_yController = new PIDController(15, 0, 0);
       
       m_thetaController = new PIDController(4.0, 0, 0);
       m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
