@@ -14,7 +14,7 @@ import frc.robot.subsystems.PoseEstimationSubsystem;
 
 public class DefaultDriveCommand extends CommandBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
-  PoseEstimationSubsystem m_poseEstimationSubsystem;
+  // PoseEstimationSubsystem m_poseEstimationSubsystem;
   DoubleSupplier x;
   DoubleSupplier y;
   DoubleSupplier theta;
@@ -23,15 +23,14 @@ public class DefaultDriveCommand extends CommandBase {
   double minThrottle = 0.2;
 
   /** Creates a new DefaultDriveCommand. */
-  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem, 
-                             PoseEstimationSubsystem poseEstimationSubsystem, 
+  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
                              DoubleSupplier x, 
                              DoubleSupplier y,
                              DoubleSupplier theta, 
                              DoubleSupplier throttle, 
                              boolean fieldRelative) {
     m_drivetrainSubsystem = drivetrainSubsystem;
-    m_poseEstimationSubsystem = poseEstimationSubsystem;
+    // m_poseEstimationSubsystem = poseEstimationSubsystem;
     this.x = x;
     this.y = y;
     this.theta = theta;
@@ -39,7 +38,7 @@ public class DefaultDriveCommand extends CommandBase {
     this.throttle = throttle;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drivetrainSubsystem);
-    addRequirements(poseEstimationSubsystem);
+    // addRequirements(poseEstimationSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -56,7 +55,7 @@ public class DefaultDriveCommand extends CommandBase {
     m_drivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale,
                                 y.getAsDouble() * scale),
                                 theta.getAsDouble() * scale,
-                                m_poseEstimationSubsystem.getPose().getRotation(),
+                                Rotation2d.fromDegrees(m_drivetrainSubsystem.getYaw()),
                                 fieldRelative,
                                 true);
   }

@@ -4,34 +4,20 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.ArmPosition;
 import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 
-/** An example command that uses an example subsystem. */
-public class ExampleCommand extends CommandBase {
-  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final TargetingSubsystem m_targetingSubsystem;
-  private final ArmSubsystem m_armSubsystem;
-
-  ArmPosition m_armSetPoint;
-  Pose2d m_poseSetPoint;
-
-
-  /**
-   * Creates a new ExampleCommand.
-   *
-   * @param subsystem The subsystem used by this command.
-   */
-  public ExampleCommand(TargetingSubsystem ts, ArmSubsystem as, Pose2d p, ArmPosition ap) {
-    m_targetingSubsystem = ts;
-    m_armSubsystem = as; 
+public class ArmPositionCommand extends CommandBase {
+  /** Creates a new ArmPositionCommand. */
+  ArmSubsystem m_armSubsystem;
+  TargetingSubsystem m_targetingSubsystem;
+  public ArmPositionCommand(ArmSubsystem armSubsystem, TargetingSubsystem targetingSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(ts, as);
+    m_armSubsystem = armSubsystem;
+    m_targetingSubsystem = targetingSubsystem;
+    addRequirements(m_armSubsystem, m_targetingSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -41,8 +27,7 @@ public class ExampleCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-
+    m_armSubsystem.snapToAngle(m_targetingSubsystem.getScoringHeight().rotation);
   }
 
   // Called once the command ends or is interrupted.

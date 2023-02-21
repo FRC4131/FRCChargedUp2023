@@ -19,7 +19,7 @@ public class TurnToAngleCommand extends CommandBase {
   PoseEstimationSubsystem m_poseEstimationSubsystem;
   Double m_setPointAngle;
 
-  ProfiledPIDController m_pidController;
+  PIDController m_pidController;
 
   public TurnToAngleCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem, Double angle) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -27,9 +27,9 @@ public class TurnToAngleCommand extends CommandBase {
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     m_setPointAngle = angle;
 
-    // m_pidController = new PIDController(4.0, 0, 0);
-    m_pidController = new ProfiledPIDController(4.0, 0, 0,
-                            new TrapezoidProfile.Constraints(20 * 2 * Math.PI, 20 * 2 * Math.PI));
+    m_pidController = new PIDController(0.4, 0, 0);
+    // m_pidController = new ProfiledPIDController(0.8, 0, 0,
+    //                         new TrapezoidProfile.Constraints(20 * 2 * Math.PI, 20 * 2 * Math.PI));
     m_pidController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
@@ -38,8 +38,8 @@ public class TurnToAngleCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_pidController.setGoal(m_setPointAngle);
-    // m_pidController.setSetpoint(m_setPointAngle);
+    // m_pidController.setGoal(m_setPointAngle);
+    m_pidController.setSetpoint(m_setPointAngle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

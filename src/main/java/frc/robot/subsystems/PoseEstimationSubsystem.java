@@ -21,7 +21,7 @@ import frc.robot.Constants;
 public class PoseEstimationSubsystem extends SubsystemBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   VisionSubsystem m_visionSubsystem;
-  SwerveDrivePoseEstimator m_swerveDrivePoseEst;
+  static SwerveDrivePoseEstimator m_swerveDrivePoseEst;
   AHRS m_navX;
   PhotonPoseEstimator photonPoseEstimator;
   public frc.lib.util.SwerveModule[] mSwerveMods;
@@ -30,6 +30,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   public PoseEstimationSubsystem(DrivetrainSubsystem drivetrainSubsystem, VisionSubsystem visionSubsystem) {
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_visionSubsystem = visionSubsystem;
+    
     m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
 
     

@@ -44,7 +44,7 @@ public class SwerveModule {
 
         lastAngle = getState().angle;
 
-        angleEncoder.configMagnetOffset(moduleConstants.angleOffset.getDegrees());
+        // angleEncoder.configMagnetOffset(moduleConstants.angleOffset.getDegrees());
         driveEncoder.setPosition(0);
         angleEncoder.setPosition(0);
     }
