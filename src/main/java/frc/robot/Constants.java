@@ -45,7 +45,7 @@ public final class Constants {
      * TEMPORARY MAYBE
     */
     public enum ArmPosition {
-        LOW(120,0.0),
+        LOW(120,1.0),
         MEDIUM(-62, 8.5),
         HIGH(-56, 21.8);
 

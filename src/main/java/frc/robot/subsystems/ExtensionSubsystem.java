@@ -4,18 +4,20 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motion.MotionProfileStatus;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ExtensionSubsystem extends SubsystemBase {
 
   private TalonSRX m_actuator = new TalonSRX(30);
-
+  private double desired;
   private PIDController m_actuatorPIDController = new PIDController(
       1,
       0,
@@ -25,14 +27,14 @@ public class ExtensionSubsystem extends SubsystemBase {
 
   /** Creates a new ExtensionSubsystem. */
   public ExtensionSubsystem() {
+    desired = 0;
     m_actuator.configSelectedFeedbackCoefficient(1);
     // m_actuator.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 1000);
-    // m_actuator.configSelectedFeedbackCoefficient(100 / (1024 * GEAR_RATIO * 0.748), 1, 0);
+    // m_actuator.configSelectedFeedbackCoefficient(100 / (1024 * GEAR_RATIO *
+    // 0.748), 1, 0);
 
     m_actuator.setSensorPhase(true);
     m_actuator.setInverted(false);
-
-    
 
     m_actuator.configNeutralDeadband(0.001);
 
@@ -49,7 +51,7 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     m_actuator.configMotionCruiseVelocity(100000);
     m_actuator.configMotionAcceleration(200000);
-  
+
   }
 
   /**
@@ -58,6 +60,11 @@ public class ExtensionSubsystem extends SubsystemBase {
    */
   public void extendTo(double desired) {
     m_actuator.set(ControlMode.MotionMagic, -desired * (1024 * GEAR_RATIO * 0.748));
+    this.desired = desired;
+  }
+
+  public boolean atGoal() {
+    return Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()) < 700;
   }
 
   public void extendArm(double power) {
@@ -80,9 +87,23 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.setSelectedSensorPosition(0);
   }
 
+  /**
+   * 
+   * @param length to extend to in inches
+   * @return An instant command
+   */
+  public CommandBase extendCommand(double length) {
+    return runOnce(() -> {
+      extendTo(length);
+    });
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Telescope Position", getPosition());
+    SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
+    SmartDashboard.putNumber("OFFSET BRUH",
+        Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()));
   }
 }

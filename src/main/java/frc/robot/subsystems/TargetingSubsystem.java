@@ -62,7 +62,7 @@ public class TargetingSubsystem extends SubsystemBase {
 
     int allianceReverse = isBlueAlliance ? 1 : -1;
 
-    double xOffset = desiredNode.row == 1 ? -0.24 * allianceReverse : 0;
+    double xOffset = desiredNode.row == 1 ? -0.26 * allianceReverse : 0;
     double yOffset;
 
     switch (desiredNode.column) {
