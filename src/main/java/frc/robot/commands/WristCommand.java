@@ -4,26 +4,19 @@
 
 package frc.robot.commands;
 
-import java.lang.System.Logger.Level;
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.WristSubsystem;
 
-public class ArmJoystickCommand extends CommandBase {
+public class WristCommand extends CommandBase {
+  /** Creates a new WristCommand. */
+  private final WristSubsystem m_wrist;
+  int direction;
 
-  private final ArmSubsystem m_ArmSubsystem;
-  private final DoubleSupplier m_rotationDoubleSupplier;
-
-
-
-  /** Creates a new ArmRotateCommand. */
-  public ArmJoystickCommand(ArmSubsystem armSubsys, DoubleSupplier rightJoy) {
+  public WristCommand(WristSubsystem wristSubsystem, int dir) {
+      m_wrist = wristSubsystem;
+      direction = dir;
     // Use addRequirements() here to declare subsystem dependencies.
-    m_ArmSubsystem = armSubsys;
-    m_rotationDoubleSupplier = rightJoy;
-
-    addRequirements(armSubsys);
+    addRequirements(wristSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -33,15 +26,13 @@ public class ArmJoystickCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // m_ArmSubsystem.snapToAngle(5);
-    m_ArmSubsystem.rotateArm(m_rotationDoubleSupplier.getAsDouble());
-
+    m_wrist.wristSpeed(direction * 0.6);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_ArmSubsystem.rotateArm(0);
+    m_wrist.wristSpeed(0);
   }
 
   // Returns true when the command should end.

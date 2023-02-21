@@ -45,7 +45,7 @@ public class VisionSubsystem extends SubsystemBase {
   public VisionSubsystem()
   {
     m_camera = new PhotonCamera("4131Camera0");
-    m_cameraToRobot = new Transform3d(new Translation3d(0.3302, 0.0, 0.1778), new Rotation3d(0.0, 0.0, 0.0));
+    m_cameraToRobot = new Transform3d(new Translation3d(Units.inchesToMeters(-11), 0.0, Units.inchesToMeters(6)), new Rotation3d(0.0, 0.0, Math.PI));
     tagList.add(AprilTagConstants.tag1);
     tagList.add(AprilTagConstants.tag2);
     tagList.add(AprilTagConstants.tag3);
@@ -55,7 +55,6 @@ public class VisionSubsystem extends SubsystemBase {
     tagList.add(AprilTagConstants.tag7);
     tagList.add(AprilTagConstants.tag8);
     fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
-    
     m_photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_camera, m_cameraToRobot);
   }
 
@@ -66,11 +65,12 @@ public class VisionSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {    
+    SmartDashboard.putString("Name", m_camera.getName());
     m_estimatedRobotPose = m_photonPoseEstimator.update();
     if(m_estimatedRobotPose.isPresent()){
-    SmartDashboard.putNumber("Apriltag X", m_estimatedRobotPose.get().estimatedPose.toPose2d().getX());
-    SmartDashboard.putNumber("Apriltag Y", m_estimatedRobotPose.get().estimatedPose.toPose2d().getY());
-    SmartDashboard.putNumber("Apriltag Heading (radians)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getDegrees());
+      SmartDashboard.putNumber("Apriltag X", m_estimatedRobotPose.get().estimatedPose.toPose2d().getX());
+      SmartDashboard.putNumber("Apriltag Y", m_estimatedRobotPose.get().estimatedPose.toPose2d().getY());
+      SmartDashboard.putNumber("Apriltag Heading (degrees)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getDegrees());
     }
   }
 

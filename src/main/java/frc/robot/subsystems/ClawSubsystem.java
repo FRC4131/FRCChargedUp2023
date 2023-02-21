@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClawSubsystem extends SubsystemBase {
 
-  CANSparkMax m_clawController = new CANSparkMax(57, MotorType.kBrushless);
+  CANSparkMax m_clawController = new CANSparkMax(60, MotorType.kBrushless);
   RelativeEncoder m_clawEncoder;
   SparkMaxPIDController m_clawPID;
 

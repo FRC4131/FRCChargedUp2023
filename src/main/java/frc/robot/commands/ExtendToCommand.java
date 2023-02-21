@@ -4,49 +4,45 @@
 
 package frc.robot.commands;
 
-import java.lang.System.Logger.Level;
-import java.util.function.DoubleSupplier;
-
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ExtensionSubsystem;
 
-public class ArmJoystickCommand extends CommandBase {
-
-  private final ArmSubsystem m_ArmSubsystem;
-  private final DoubleSupplier m_rotationDoubleSupplier;
-
-
-
-  /** Creates a new ArmRotateCommand. */
-  public ArmJoystickCommand(ArmSubsystem armSubsys, DoubleSupplier rightJoy) {
+public class ExtendToCommand extends CommandBase {
+  private final ExtensionSubsystem m_ExtensionSubsystem;
+  private Timer m_Timer;
+  private double position;
+  /** Creates a new ExtendToCommand. */
+  public ExtendToCommand(ExtensionSubsystem extensionSubsystem, double position) {
     // Use addRequirements() here to declare subsystem dependencies.
-    m_ArmSubsystem = armSubsys;
-    m_rotationDoubleSupplier = rightJoy;
-
-    addRequirements(armSubsys);
+    m_ExtensionSubsystem = extensionSubsystem;
+    this.position = position;
+    m_Timer = new Timer();
+    addRequirements(extensionSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_Timer.reset();
+    m_Timer.start();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // m_ArmSubsystem.snapToAngle(5);
-    m_ArmSubsystem.rotateArm(m_rotationDoubleSupplier.getAsDouble());
-
+    m_ExtensionSubsystem.extendTo(position);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_ArmSubsystem.rotateArm(0);
+    m_ExtensionSubsystem.extendArm(0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return m_ExtensionSubsystem.atGoal() || m_Timer.hasElapsed(5);
   }
 }

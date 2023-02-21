@@ -4,45 +4,37 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ClawSubsystem;
 
-public class ClawPowerCommand extends CommandBase {
-
-  ClawSubsystem m_claw;
-  int direction;
-
-  /** Creates a new ClawPowerCommand. */
-  public ClawPowerCommand(ClawSubsystem clawsub, int dir) {
-    m_claw = clawsub;
-    direction = dir;
-
+public class TimerCommand extends CommandBase {
+  private final double waitTime;
+  private final Timer m_Timer;
+  /** Creates a new TimerCommand. */
+  public TimerCommand(double waitTime) {
+    this.waitTime = waitTime;
+    m_Timer = new Timer();
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(clawsub);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_Timer.reset();
+    m_Timer.start();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    m_claw.intakeSpeed(.6 * direction);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    m_claw.intakeSpeed(0);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return m_Timer.hasElapsed(waitTime);
   }
 }
