@@ -5,13 +5,17 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class WristSubsystem extends SubsystemBase {
   /** Creates a new WristSubsystem. */
   CANSparkMax m_wristController = new CANSparkMax(57, MotorType.kBrushless);
+  SparkMaxLimitSwitch m_forwardLimit = m_wristController.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
+  SparkMaxLimitSwitch m_reverseLimit = m_wristController.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
 
   public WristSubsystem() {}
 
@@ -21,6 +25,11 @@ public class WristSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+
     // This method will be called once per scheduler run
+    SmartDashboard.putBoolean("Forward Limit Switch", m_forwardLimit.isPressed());
+    SmartDashboard.putBoolean("Reverse Limit Switch", m_reverseLimit.isPressed());
+  
+    
   }
 }
