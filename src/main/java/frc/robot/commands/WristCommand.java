@@ -21,12 +21,33 @@ public class WristCommand extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_wrist.wristSpeed(direction * 0.6);
+   /* if ((!m_wrist.getForwardLimit().get()) && (!m_wrist.getReverseLimit().get())){
+      m_wrist.wristSpeed(direction * 0.6);
+    } else if (m_wrist.getForwardLimit().get()) {
+        if (direction < 0)
+        {
+          m_wrist.wristSpeed(direction*0.6);
+        }
+        else{
+          m_wrist.wristSpeed(0);
+        }    
+    } else if (m_wrist.getReverseLimit().get()){
+        if (direction > 0)
+        {
+          m_wrist.wristSpeed(direction*0.6);
+        }
+        else {
+          m_wrist.wristSpeed(0);
+        }
+    } */ 
+    m_wrist.wristSpeed(direction * 0.6);  
   }
 
   // Called once the command ends or is interrupted.

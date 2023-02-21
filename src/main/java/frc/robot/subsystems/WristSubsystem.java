@@ -23,31 +23,36 @@ public class WristSubsystem extends SubsystemBase {
 
   public void wristSpeed(double d) 
   {
-    if (d > 0)
-    {
-      if (m_forwardLimit.get())
-      {
-        m_wristController.set(0);
-      }
-      else 
-      {
-        m_wristController.set(d);
-      }
-    }
-      else
-      {
-        if (m_reverseLimit.get())
+    if ((!m_forwardLimit.get()) && (!m_reverseLimit.get())){
+       wristSpeed(d);
+    } else if (m_forwardLimit.get()) {
+        if (d < 0)
         {
-          m_wristController.set(0);
+          wristSpeed(d);
         }
-        else 
+        else{
+          wristSpeed(0);
+        }    
+    } else if (m_reverseLimit.get()){
+        if (d > 0)
         {
-          m_wristController.set(d);
+          wristSpeed(d);
         }
-      } 
+        else {
+          wristSpeed(0);
+        }
     }
+  }
   
-  
+  /*public DigitalInput getForwardLimit()
+  {
+    return m_forwardLimit;
+  }
+
+  public DigitalInput getReverseLimit()
+  {
+    return m_reverseLimit;
+  } */
 
   @Override
   public void periodic() {
@@ -55,7 +60,8 @@ public class WristSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     //SmartDashboard.putBoolean("Forward Limit Switch", m_forwardLimit.isPressed());
     //SmartDashboard.putBoolean("Reverse Limit Switch", m_reverseLimit.isPressed());
-  
+      
+      
     
   }
 }
