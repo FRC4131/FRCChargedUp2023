@@ -26,7 +26,7 @@ import frc.robot.Constants.ArmPosition;
 
 public class TargetingSubsystem extends SubsystemBase {
 
-  private final double POLE_OFFSET = .575;
+  private final double POLE_OFFSET = .555;
 
   int desiredGrid;
 
