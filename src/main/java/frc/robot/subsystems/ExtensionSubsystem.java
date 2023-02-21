@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motion.MotionProfileStatus;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -17,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ExtensionSubsystem extends SubsystemBase {
 
   private TalonSRX m_actuator = new TalonSRX(30);
+  
   private double desired;
   private PIDController m_actuatorPIDController = new PIDController(
       1,
@@ -87,6 +90,16 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.setSelectedSensorPosition(0);
   }
 
+  public boolean getForwardOutput()
+  {
+    return m_actuator.getSensorCollection().isFwdLimitSwitchClosed();
+  }
+
+  public boolean getReverseOutput()
+  {
+    return m_actuator.getSensorCollection().isRevLimitSwitchClosed();
+  }
+
   /**
    * 
    * @param length to extend to in inches
@@ -101,6 +114,10 @@ public class ExtensionSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    m_actuator.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+    m_actuator.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+    SmartDashboard.putBoolean("ForwardSwitch", getForwardOutput());
+    SmartDashboard.putBoolean("ReverseSwitch", getReverseOutput());
     SmartDashboard.putNumber("Telescope Position", getPosition());
     SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
     SmartDashboard.putNumber("OFFSET BRUH",
