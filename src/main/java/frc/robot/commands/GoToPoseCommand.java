@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.Swerve;
@@ -23,10 +24,11 @@ public class GoToPoseCommand extends CommandBase {
   private final DrivetrainSubsystem m_DrivetrainSubsystem;
   private final PoseEstimationSubsystem m_PoseEstimationSubsystem;
   private final TargetingSubsystem m_targetingSubsystem;
-  Pose2d m_setpointPose;
-  ProfiledPIDController x_Controller;
-  ProfiledPIDController y_Controller;
-  ProfiledPIDController theta_Controller;
+  private Pose2d m_setpointPose;
+  private ProfiledPIDController x_Controller;
+  private ProfiledPIDController y_Controller;
+  private ProfiledPIDController theta_Controller;
+  private Timer m_Timer;
 
   public GoToPoseCommand(DrivetrainSubsystem drivetrainSubsystem, 
   PoseEstimationSubsystem poseEstimationSubsystem,
@@ -45,12 +47,16 @@ public class GoToPoseCommand extends CommandBase {
     new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
 
     theta_Controller.enableContinuousInput(-Math.PI, Math.PI);
+
+    m_Timer = new Timer();
     addRequirements(m_DrivetrainSubsystem, m_PoseEstimationSubsystem, m_targetingSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_Timer.reset();
+    m_Timer.start();
     x_Controller.reset(m_PoseEstimationSubsystem.getPose().getX());
     y_Controller.reset(m_PoseEstimationSubsystem.getPose().getY());
     m_setpointPose = m_targetingSubsystem.getTargetGridPose();
@@ -79,6 +85,6 @@ public class GoToPoseCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return (x_Controller.atGoal() && y_Controller.atGoal() && theta_Controller.atGoal()) || m_Timer.hasElapsed(6);
   }
 }

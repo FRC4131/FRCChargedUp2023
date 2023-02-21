@@ -21,6 +21,7 @@ import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
+import frc.robot.commands.TimerCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.ArmSubsystem;
@@ -91,6 +92,8 @@ public class RobotContainer {
       OperatorConstants.kOperatorControllerPort);
 
   private double rumble = 0;
+  private DoubleSupplier armAngle;
+  private DoubleSupplier telescopeLength;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -104,6 +107,10 @@ public class RobotContainer {
     tab.addNumber("testLeftY", testLeftY);
     tab.addNumber("testLeftX", testLeftX);
     tab.addNumber("testRightX", testRightX);
+
+    armAngle = () -> m_targetingSubsystem.getScoringHeight().rotation;
+
+    telescopeLength = () -> m_targetingSubsystem.getScoringHeight().length;
 
     addAuton();
     SmartDashboard.putData(m_autoChooser);
@@ -128,7 +135,8 @@ public class RobotContainer {
     m_armSubsystem.setDefaultCommand(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
     // m_extensionSubsystem.setDefaultCommand(
-    //     new ExtensionJoystickCommand(m_extensionSubsystem, () -> modifyAxis(m_operatorController.getLeftY(), false)));
+    // new ExtensionJoystickCommand(m_extensionSubsystem, () ->
+    // modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   public Command getAutonomousCommand() {
@@ -224,7 +232,14 @@ public class RobotContainer {
 
     m_driverController.rightBumper().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
         m_poseEstimationSubsystem,
-        m_targetingSubsystem));
+        m_targetingSubsystem)
+        .alongWith(new SequentialCommandGroup(waitCommand(1),
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(telescopeLength.getAsDouble());
+            }, m_extensionSubsystem)
+                .alongWith(new InstantCommand(() -> {
+                  m_armSubsystem.snapToAngle(armAngle.getAsDouble());
+                }, m_armSubsystem)))));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
     // m_poseEstimationSubsystem,
@@ -239,6 +254,10 @@ public class RobotContainer {
 
     // m_operatorController.rightBumper().onTrue(new
     // ExampleCommand(m_targetingSubsystem));
+  }
+
+  private static Command waitCommand(double seconds) {
+    return new TimerCommand(seconds);
   }
 
   private static double deadband(double value, double deadband) {
