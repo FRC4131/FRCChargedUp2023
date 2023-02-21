@@ -15,6 +15,7 @@ import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.ClawPowerCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ExtendToCommand;
 import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
@@ -75,7 +76,7 @@ public class RobotContainer {
       new CommandMacroPad(OperatorConstants.kMacropadPort));
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
   private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
-     m_visionSubsystem);
+      m_visionSubsystem);
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
   // private final WristSubsystem m_wristSubsystem = new WristSubsystem();
@@ -113,21 +114,21 @@ public class RobotContainer {
   }
 
   public void setDefaultCommands() {
-    
+
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    () -> -modifyAxis(m_driverController.getLeftY(), false) *
-        Constants.Swerve.maxSpeed,
-    () -> -modifyAxis(m_driverController.getLeftX(), false) *
-        Constants.Swerve.maxSpeed,
-    () -> -modifyAxis(m_driverController.getRightX(), false) *
-        MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    () -> m_driverController.getLeftTriggerAxis(),
-    true));
-    
+        () -> -modifyAxis(m_driverController.getLeftY(), false) *
+            Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getLeftX(), false) *
+            Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getRightX(), false) *
+            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        () -> m_driverController.getLeftTriggerAxis(),
+        true));
+
     m_armSubsystem.setDefaultCommand(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
-    m_extensionSubsystem.setDefaultCommand(
-        new ExtensionJoystickCommand(m_extensionSubsystem, () -> modifyAxis(m_operatorController.getLeftY(), false)));
+    // m_extensionSubsystem.setDefaultCommand(
+    //     new ExtensionJoystickCommand(m_extensionSubsystem, () -> modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   public Command getAutonomousCommand() {
@@ -156,15 +157,25 @@ public class RobotContainer {
      */
 
     // m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
-    // m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
-    // m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem, 1));
-    // m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem, -1));
+    // m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
+    // -1));
+    // m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
+    // 1));
+    // m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
+    // -1));
 
-    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder());
+    m_operatorController.a().whileTrue(new ExtendToCommand(m_extensionSubsystem, 1));
+    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder().alongWith(
+        new InstantCommand(() -> {
+          m_extensionSubsystem.resetEncoder();
+        }, m_extensionSubsystem)));
 
     m_operatorController.rightBumper().whileTrue(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
-    
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false))
+            .alongWith(
+                new ExtensionJoystickCommand(m_extensionSubsystem,
+                    () -> modifyAxis(m_operatorController.getLeftY(), false))));
+
     m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {
       rumble = rumble == 0 ? 1 : 0;
       m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
@@ -194,30 +205,38 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     // m_driverController.b()
-    //     .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, Math.PI / 2.0));
-    
-    // m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
-    //     m_poseEstimationSubsystem,
-    //     m_targetingSubsystem,
-    //     () -> -modifyAxis(m_driverController.getLeftY(), false) * Constants.Swerve.maxSpeed,
-    //     () -> -modifyAxis(m_driverController.getLeftX(), false) * Constants.Swerve.maxSpeed,
-    //     () -> -modifyAxis(m_driverController.getRightX(), false) * MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-    //     () -> m_driverController.getLeftTriggerAxis()));
+    // .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem, Math.PI / 2.0));
+
+    // m_driverController.rightBumper().whileTrue(new
+    // GoToPoseTeleopCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem,
+    // m_targetingSubsystem,
+    // () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getRightX(), false) *
+    // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    // () -> m_driverController.getLeftTriggerAxis()));
 
     m_driverController.rightBumper().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
-            m_poseEstimationSubsystem,
-            m_targetingSubsystem));
+        m_poseEstimationSubsystem,
+        m_targetingSubsystem));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
-    //     m_poseEstimationSubsystem,
-    //     new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+    // m_poseEstimationSubsystem,
+    // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    // m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
+    // m_driverController.y().whileTrue(new
+    // AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
 
-    // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    //     new Pose2d(new Translation2d(0, 0), new Rotation2d())));
+    // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem,
+    // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    //m_operatorController.rightBumper().onTrue(new ExampleCommand(m_targetingSubsystem));
+    // m_operatorController.rightBumper().onTrue(new
+    // ExampleCommand(m_targetingSubsystem));
   }
 
   private static double deadband(double value, double deadband) {
