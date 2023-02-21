@@ -41,8 +41,8 @@ public class GoToPoseCommand extends CommandBase {
     y_Controller = new ProfiledPIDController(3, 0, 0, 
     new TrapezoidProfile.Constraints(Swerve.maxSpeed, 8));
     
-    theta_Controller = new ProfiledPIDController(1, 0, 0,
-    new TrapezoidProfile.Constraints(Swerve.maxAngularVelocity, Swerve.maxAngularVelocity));
+    theta_Controller = new ProfiledPIDController(6, 0, 0,
+    new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
 
     theta_Controller.enableContinuousInput(-Math.PI, Math.PI);
     addRequirements(m_DrivetrainSubsystem, m_PoseEstimationSubsystem, m_targetingSubsystem);

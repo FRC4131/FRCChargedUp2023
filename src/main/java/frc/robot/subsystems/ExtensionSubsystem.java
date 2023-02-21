@@ -5,14 +5,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.ControlType;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -56,8 +52,12 @@ public class ExtensionSubsystem extends SubsystemBase {
   
   }
 
+  /**
+   * 
+   * @param desired position of the telescope in inches from retracted
+   */
   public void extendTo(double desired) {
-    m_actuator.set(ControlMode.MotionMagic, desired);
+    m_actuator.set(ControlMode.MotionMagic, -desired * (1024 * GEAR_RATIO * 0.748));
   }
 
   public void extendArm(double power) {
@@ -73,7 +73,7 @@ public class ExtensionSubsystem extends SubsystemBase {
    * @return The position of the motor (in 1024 encoder ticks per rev)
    */
   public double getPosition() {
-    return m_actuator.getSelectedSensorPosition(0);
+    return -m_actuator.getSelectedSensorPosition(0) * (100 / (1024 * GEAR_RATIO * 0.748));
   }
 
   public void resetEncoder() {

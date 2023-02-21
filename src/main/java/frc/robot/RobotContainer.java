@@ -165,6 +165,8 @@ public class RobotContainer {
     // -1));
 
     m_operatorController.a().whileTrue(new ExtendToCommand(m_extensionSubsystem, 1));
+    m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem, 21.8));
+    m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem, 19.5));
     m_operatorController.back().onTrue(m_armSubsystem.resetEncoder().alongWith(
         new InstantCommand(() -> {
           m_extensionSubsystem.resetEncoder();
