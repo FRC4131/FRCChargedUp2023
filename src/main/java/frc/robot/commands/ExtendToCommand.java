@@ -4,29 +4,23 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ExtensionSubsystem;
 
 public class ExtendToCommand extends CommandBase {
   private final ExtensionSubsystem m_ExtensionSubsystem;
-  private Timer m_Timer;
   private double position;
   /** Creates a new ExtendToCommand. */
   public ExtendToCommand(ExtensionSubsystem extensionSubsystem, double position) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_ExtensionSubsystem = extensionSubsystem;
     this.position = position;
-    m_Timer = new Timer();
     addRequirements(extensionSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    m_Timer.reset();
-    m_Timer.start();
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -43,6 +37,6 @@ public class ExtendToCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_ExtensionSubsystem.atGoal() || m_Timer.hasElapsed(5);
+    return false;
   }
 }
