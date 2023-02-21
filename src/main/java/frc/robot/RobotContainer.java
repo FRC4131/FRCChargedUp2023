@@ -12,6 +12,7 @@ import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
+import frc.robot.commands.LEDAmbulanceCommand;
 import frc.robot.commands.LEDSwitchColorsCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.SeekingCommand;
