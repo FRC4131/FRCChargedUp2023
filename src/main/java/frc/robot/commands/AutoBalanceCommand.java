@@ -14,9 +14,10 @@ import frc.robot.subsystems.PoseEstimationSubsystem;
 
 public class AutoBalanceCommand extends CommandBase {
   /** Creates a new AutoBalanceCommand. */
-DrivetrainSubsystem m_drivetrainSubsystem;
-PoseEstimationSubsystem m_poseEstimationSubsystem;
-PIDController pitchPIDController;
+  private DrivetrainSubsystem m_drivetrainSubsystem;
+  private PoseEstimationSubsystem m_poseEstimationSubsystem;
+  private PIDController pitchPIDController;
+  private double balancedAngleDegrees = -2.4;
 
   public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -30,7 +31,7 @@ PIDController pitchPIDController;
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    pitchPIDController.setSetpoint(-2.4);
+    pitchPIDController.setSetpoint(balancedAngleDegrees);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -38,7 +39,6 @@ PIDController pitchPIDController;
   public void execute() {
     double threshold = 0.125;
     double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch());
-    
 
     if (Math.abs(driveSignal) > threshold) {
       if (driveSignal > 0.0) {
@@ -49,14 +49,15 @@ PIDController pitchPIDController;
     }
     SmartDashboard.putNumber("DriveSignal", driveSignal);
 
-    
-    m_drivetrainSubsystem.drive(new Translation2d(0, driveSignal * 2) , 0, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
-    }
+    m_drivetrainSubsystem.drive(new Translation2d(0, driveSignal * 2), 0,
+        m_poseEstimationSubsystem.getPose().getRotation(), true, false);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_drivetrainSubsystem.drive(new Translation2d(0, 0) , 1, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
+    m_drivetrainSubsystem.drive(new Translation2d(0, 0), 1, m_poseEstimationSubsystem.getPose().getRotation(), true,
+        false);
   }
 
   // Returns true when the command should end.

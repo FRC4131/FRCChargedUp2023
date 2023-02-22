@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.lib.util.CommandMacroPad;
 import frc.lib.util.MacroPad;
+import frc.robot.Constants.ArmPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ArmJoystickCommand;
 import frc.robot.commands.ArmPositionCommand;
@@ -21,7 +22,6 @@ import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
-import frc.robot.commands.TimerCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.ArmSubsystem;
@@ -34,11 +34,13 @@ import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.WristSubsystem;
 
+import java.nio.file.Path;
 // import java.lang.invoke.ClassSpecializer.SpeciesData;
 import java.util.function.DoubleSupplier;
 
 import org.ejml.dense.row.MatrixFeatures_CDRM;
 
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
@@ -54,10 +56,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import static frc.robot.Constants.Swerve.*;
+import static frc.robot.Constants.ArmPosition.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -148,13 +152,113 @@ public class RobotContainer {
     m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
   }
 
+  public Command moveArm(ArmPosition position) {
+    return new InstantCommand(() -> {
+      m_armSubsystem.snapToAngle(position.rotation);
+    }, m_armSubsystem).alongWith(new InstantCommand(() -> {
+      m_extensionSubsystem.extendTo(position.length);
+    }, m_extensionSubsystem));
+  }
+
   public Command ppAuto() {
     return new SequentialCommandGroup(
         new CalibrateOdometryCommand(m_poseEstimationSubsystem,
             new Pose2d(new Translation2d(1.92, 4.91),
                 m_poseEstimationSubsystem.getPose().getRotation())),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("2coneA", 2.5, 2)));
+            PathPlanner.loadPath("path 1.1", 2.5, 2)));
+  }
+
+  /**
+   * Auton scoring one cone and one cube high. Balances at the end.
+   * <p>
+   * Initialize this auton against the node closest to the loading zone.
+   */
+  public Command twoPieceLoadingSide() {
+
+    PathPlannerTrajectory firstPath = PathPlanner.loadPath("path 1.1", 4.0, 3.0);
+    return new SequentialCommandGroup(
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem, firstPath.getInitialPose()),
+        moveArm(HIGH).alongWith(waitCommand(1.5)),
+        // Replace this with outtaking command for 1 second
+        new InstantCommand(),
+        moveArm(STOW),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, firstPath).alongWith(
+            waitCommand(1.75).andThen(
+                // Replace with intake command for 1 second
+                moveArm(LOW).alongWith(new InstantCommand()))),
+        moveArm(ZEROES),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("path 1.2", 4.0, 3.0)),
+        moveArm(HIGH).alongWith(waitCommand(1.5)),
+        //Replace with outtaking command for 1 second
+        new InstantCommand(),
+        moveArm(STOW),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("path 1.3", 0.8, 3.0)),
+        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
+    );
+  }
+
+  public Command coneAndCubeLoadingSide(){
+    PathPlannerTrajectory secondPath = PathPlanner.loadPath("path 2.1", 4.0, 3.0);
+    return new SequentialCommandGroup(
+      new CalibrateOdometryCommand(m_poseEstimationSubsystem, secondPath.getInitialPose()),
+      moveArm(HIGH).alongWith(waitCommand(1.5)),
+      // Replace this with outtaking command for 1 second
+      new InstantCommand(),
+      moveArm(STOW),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, secondPath).alongWith(
+          waitCommand(1.75).andThen(
+              // Replace with intake command for 1 second
+              moveArm(LOW).alongWith(new InstantCommand()))),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+          PathPlanner.loadPath("path 2.2", 4.0, 3.0)),
+      //Replace with outtaking command for 1 second
+      new InstantCommand(),
+      moveArm(STOW),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+          PathPlanner.loadPath("path 2.3", 0.8, 3.0)),
+      waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
+    );
+  }
+
+  public Command balancingLoadingSide(){
+    PathPlannerTrajectory thirdPath = PathPlanner.loadPath("path 3.1", 0.8, 3.0);
+    return new SequentialCommandGroup(
+      new CalibrateOdometryCommand(m_poseEstimationSubsystem, thirdPath.getInitialPose()),
+      moveArm(HIGH).alongWith(waitCommand(1.5)),
+      //Replace with outtaking command for 1 second
+      new InstantCommand(),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, thirdPath),
+      waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
+    );
+  }
+
+  public Command balancingCenterGrid(){
+    PathPlannerTrajectory fourthPath = PathPlanner.loadPath("path 4.1", 0.8, 3.0);
+    return new SequentialCommandGroup(
+      new CalibrateOdometryCommand(m_poseEstimationSubsystem, fourthPath.getInitialPose()),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fourthPath),
+      waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
+    );
+  }
+
+  public Command onePieceCenterGrid(){
+    PathPlannerTrajectory fifthPath = PathPlanner.loadPath("5.1", 0.8, 3.0);
+    return new SequentialCommandGroup(
+      new CalibrateOdometryCommand(m_poseEstimationSubsystem, fifthPath.getInitialPose()),
+      moveArm(HIGH).alongWith(waitCommand(1.5)),
+      //Replace with outtaking command
+      new InstantCommand(),
+      moveArm(LOW),
+      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fifthPath)
+      .alongWith(waitCommand(2.5))
+      //Replace with intaking command
+      .andThen(new InstantCommand())
+
+
+    );
   }
 
   private void configureBindings() {
@@ -257,7 +361,7 @@ public class RobotContainer {
   }
 
   private static Command waitCommand(double seconds) {
-    return new TimerCommand(seconds);
+    return new WaitCommand(seconds);
   }
 
   private static double deadband(double value, double deadband) {

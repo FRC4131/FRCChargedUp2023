@@ -24,6 +24,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     public frc.lib.util.SwerveModule[] m_SwerveMods;
 
+    /**
+     * Constructor to create the drivetrain
+     */
     public DrivetrainSubsystem() {
 
         m_SwerveMods = new SwerveModule[] {
@@ -43,8 +46,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
      * @param rotation        Theta value (multiply by max angular velocity)
      * @param currentRotation The current rotation/theta of the robot (i.e. the yaw
      *                        from the gyro)
-     * @param fieldRelative   Is field relative
-     * @param isOpenLoop
+     * @param fieldRelative   whether the robot should drive field relative
+     * @param isOpenLoop Currently unused parameter. Value does not matter.
      */
     public void drive(Translation2d translation, double rotation, Rotation2d currentRotation, boolean fieldRelative,
             boolean isOpenLoop) {
@@ -63,21 +66,42 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     // public double getYaw() {
-    //     return (Constants.Swerve.invertGyro) ? (360 - m_navX.getYaw())
-    //             : (m_navX.getYaw());
+    // return (Constants.Swerve.invertGyro) ? (360 - m_navX.getYaw())
+    // : (m_navX.getYaw());
     // }
 
     // public void zeroGyro(){
-    //     m_navX.reset();
+    // m_navX.reset();
     // }
 
+    /**
+     * Default drive method.
+     * @param chassisSpeeds to drive at.
+     */
     public void drive(ChassisSpeeds chassisSpeeds) {
         SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
                 chassisSpeeds);
         setModuleStates(swerveModuleStates);
     }
 
-    /* Used by SwerveControllerCommand in Auto */
+    /**
+     * Overloaded drive method.
+     * @param chassisSpeeds to drive at.
+     * @param speedCapTranslation in m/s.
+     * @param speedCapRotation in rad/s.
+     */
+    public void drive(ChassisSpeeds chassisSpeeds, double speedCapTranslation, double speedCapRotation) {
+        SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
+                chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, chassisSpeeds, speedCapTranslation,
+                speedCapTranslation, speedCapRotation);
+        setModuleStates(swerveModuleStates);
+    }
+
+    /**
+     * Sets swerve modules' states to the desired states, normalizing wheel speeds.
+     * @param desiredStates
+     */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
 
@@ -86,6 +110,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         }
     }
 
+    /**
+     * @return current swerve modules' states
+     */
     public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (SwerveModule mod : m_SwerveMods) {
@@ -94,6 +121,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         return states;
     }
 
+    /**
+     * @return current swerve modules' positions
+     */
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
         for (SwerveModule mod : m_SwerveMods) {
