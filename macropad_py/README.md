@@ -1,5 +1,5 @@
 
-The code in this folder is for an Adafruit Macropad RP2040.
+The code in this folder is for an Adafruit Macropad RP2040 for FIRST team 4131.
 
 This is a 12-key plus a knob keypad with color LEDs and a screen as output.
 
