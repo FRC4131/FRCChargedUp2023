@@ -23,7 +23,7 @@ public class WristSubsystem extends SubsystemBase {
 
   public void wristSpeed(double d) 
   {
-    if ((!m_forwardLimit.get()) && (!m_reverseLimit.get())){
+    /*if ((!m_forwardLimit.get()) && (!m_reverseLimit.get())){
        wristSpeed(d);
     } else if (m_forwardLimit.get()) {
         if (d < 0)
@@ -41,7 +41,19 @@ public class WristSubsystem extends SubsystemBase {
         else {
           wristSpeed(0);
         }
+    }*/
+
+    if(m_forwardLimit.get() && d > 0)
+    {
+      d = 0;
     }
+    if (m_reverseLimit.get() && d < 0)
+    {
+      d = 0;
+    }
+
+    wristSpeed(d);
+
   }
   
   /*public DigitalInput getForwardLimit()
