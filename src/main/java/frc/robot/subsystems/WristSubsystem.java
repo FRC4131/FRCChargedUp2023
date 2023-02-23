@@ -76,6 +76,13 @@ public class WristSubsystem extends SubsystemBase {
 
     */
   }
+
+  //WARNING: THIS JUST SETS THE POWER IN THE DIRECTION TOWARDS DESIRED ANGLE
+  //THIS WILL ONLY END DUE TO LIMIT SWITCH BEING HIT, AT 0 or 180 degrees
+  public void wristToAngle(double angle){
+    m_wristController.set((angleToMotorRotations(angle)-m_wristEncoder.getPosition())/180);
+  }
+
   /*public DigitalInput getForwardLimit()
   {
     return m_forwardLimit;
