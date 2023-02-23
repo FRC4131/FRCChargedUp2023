@@ -14,6 +14,7 @@ import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.ClawPowerCommand;
+import frc.robot.commands.ClawTimedCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.ExtendToCommand;
@@ -76,7 +77,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
-  // private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
+  private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
   private final TargetingSubsystem m_targetingSubsystem = new TargetingSubsystem(
       new CommandMacroPad(OperatorConstants.kMacropadPort));
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
@@ -180,19 +181,16 @@ public class RobotContainer {
     return new SequentialCommandGroup(
         new CalibrateOdometryCommand(m_poseEstimationSubsystem, firstPath.getInitialPose()),
         moveArm(HIGH).alongWith(waitCommand(1.5)),
-        // Replace this with outtaking command for 1 second
-        new InstantCommand(),
+        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
         moveArm(STOW),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, firstPath).alongWith(
             waitCommand(1.75).andThen(
-                // Replace with intake command for 1 second
-                moveArm(LOW).alongWith(new InstantCommand()))),
+                moveArm(LOW).alongWith(new ClawTimedCommand(m_clawSubsystem, 1, 0.6)))),
         moveArm(ZEROES),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 1.2", 4.0, 3.0)),
         moveArm(HIGH).alongWith(waitCommand(1.5)),
-        // Replace with outtaking command for 1 second
-        new InstantCommand(),
+        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
         moveArm(STOW),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 1.3", 0.8, 3.0)),
@@ -204,17 +202,14 @@ public class RobotContainer {
     return new SequentialCommandGroup(
         new CalibrateOdometryCommand(m_poseEstimationSubsystem, secondPath.getInitialPose()),
         moveArm(HIGH).alongWith(waitCommand(1.5)),
-        // Replace this with outtaking command for 1 second
-        new InstantCommand(),
+        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
         moveArm(STOW),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, secondPath).alongWith(
             waitCommand(1.75).andThen(
-                // Replace with intake command for 1 second
-                moveArm(LOW).alongWith(new InstantCommand()))),
+                moveArm(LOW).alongWith(new ClawTimedCommand(m_clawSubsystem, 1, 0.6)))),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 2.2", 4.0, 3.0)),
-        // Replace with outtaking command for 1 second
-        new InstantCommand(),
+        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
         moveArm(STOW),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 2.3", 0.8, 3.0)),
@@ -226,8 +221,7 @@ public class RobotContainer {
     return new SequentialCommandGroup(
         new CalibrateOdometryCommand(m_poseEstimationSubsystem, thirdPath.getInitialPose()),
         moveArm(HIGH).alongWith(waitCommand(1.5)),
-        // Replace with outtaking command for 1 second
-        new InstantCommand(),
+        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, thirdPath),
         waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
   }
@@ -245,15 +239,12 @@ public class RobotContainer {
     return new SequentialCommandGroup(
         new CalibrateOdometryCommand(m_poseEstimationSubsystem, fifthPath.getInitialPose()),
         moveArm(HIGH).alongWith(waitCommand(1.5)),
-        // Replace with outtaking command
-        new InstantCommand(),
+        new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
         moveArm(LOW),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fifthPath)
             .alongWith(waitCommand(2.5))
-            // Replace with intaking command
-            .andThen(new InstantCommand()),
+            .andThen(new ClawTimedCommand(m_clawSubsystem, 1, -0.6)),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 5.2", 2.0, 1.0))
-
     );
   }
 
