@@ -8,6 +8,7 @@ import com.ctre.phoenix.motion.MotionProfileStatus;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.RemoteLimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ArmPosition;
 
 public class ExtensionSubsystem extends SubsystemBase {
 
@@ -29,7 +31,7 @@ public class ExtensionSubsystem extends SubsystemBase {
       0,
       0);
 
-  private double GEAR_RATIO = 5 / 1 * 7 / 1;
+  private final double GEAR_RATIO = 5 * 7;
 
   /** Creates a new ExtensionSubsystem. */
   public ExtensionSubsystem() {
@@ -58,6 +60,10 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.configMotionCruiseVelocity(100000);
     m_actuator.configMotionAcceleration(200000);
 
+   m_actuator.configForwardSoftLimitEnable(true);
+   m_actuator.configForwardSoftLimitThreshold(lengthToUnits(ArmPosition.MAX.length - 0.1));
+   m_actuator.configReverseSoftLimitEnable(true);
+   m_actuator.configReverseSoftLimitThreshold(lengthToUnits(.1));
   }
 
   /**
@@ -69,8 +75,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     this.desired = desired;
   }
 
+  /** stop trying if encoder is within 700 units of goal */
   public boolean atGoal() {
-    return Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()) < 700;
+    return Math.abs((-lengthToUnits(desired)) - m_actuator.getSelectedSensorPosition()) < 700;
   }
 
   public void extendArm(double power) 
@@ -80,9 +87,9 @@ public class ExtensionSubsystem extends SubsystemBase {
    }
 
 
-  private double lengthToUnits(double length) {
+  private double lengthToUnits(double inches) {
     // TODO: THIS
-    return length / 1024 / GEAR_RATIO;
+    return inches * 1024 * GEAR_RATIO * .748;
   }
 
   /**
@@ -125,15 +132,15 @@ public class ExtensionSubsystem extends SubsystemBase {
    // SmartDashboard.putBoolean("ForwardSwitch", getForwardOutput());
    // SmartDashboard.putBoolean("ReverseSwitch", getReverseOutput());
 
-    if (m_forwardLimit.get() && m_actuator.getMotorOutputPercent() > 0)
+    if (m_forwardLimit.get())
     {
-      m_actuator.set(TalonSRXControlMode.PercentOutput, 0);
+      m_actuator.setSelectedSensorPosition(lengthToUnits(ArmPosition.MAX.length));
     }
-    if (m_reverseLimit.get() && m_actuator.getMotorOutputPercent() < 0)
+    if (m_reverseLimit.get())
     {
-      m_actuator.set(TalonSRXControlMode.PercentOutput, 0);
+      m_actuator.setSelectedSensorPosition(lengthToUnits(ArmPosition.MIN.length));
     }
-    m_actuator.set(TalonSRXControlMode.PercentOutput, GEAR_RATIO);
+    m_actuator.set(TalonSRXControlMode.PercentOutput, 1/GEAR_RATIO);
 
     SmartDashboard.putNumber("Telescope Position", getPosition());
     SmartDashboard.putBoolean("Telescope AtGoal", atGoal());

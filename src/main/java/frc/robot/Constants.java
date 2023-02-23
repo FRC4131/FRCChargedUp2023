@@ -47,7 +47,9 @@ public final class Constants {
     public enum ArmPosition {
         LOW(120,1.0),
         MEDIUM(-62, 8.5),
-        HIGH(-56, 21.8);
+        HIGH(-56, 21.8),
+        MIN(-30, 0),
+        MAX(30, 18);
 
         public final double rotation;
         public final double length;
