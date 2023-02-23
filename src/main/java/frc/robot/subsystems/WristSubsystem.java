@@ -15,8 +15,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import static frc.robot.Constants.WristConstants.*;
-
 public class WristSubsystem extends SubsystemBase {
   /** Creates a new WristSubsystem. */
   CANSparkMax m_wristController = new CANSparkMax(57, MotorType.kBrushless);
@@ -24,6 +22,7 @@ public class WristSubsystem extends SubsystemBase {
   private SparkMaxPIDController m_WristPID;
   private DigitalInput clockwiseLimit = new DigitalInput(0);
   private DigitalInput counterClockwiseLimit = new DigitalInput(0);// TODO: Channel #s
+  private final double WRIST_MOTOR_GEAR_RATIO = 125;
 
   public WristSubsystem() {
     m_Encoder = m_wristController.getEncoder();
