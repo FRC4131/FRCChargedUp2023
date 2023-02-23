@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ExtensionSubsystem extends SubsystemBase {
 
   private TalonSRX m_actuator = new TalonSRX(30);
+  private DigitalInput m_forwardLimit = new DigitalInput(0); //arbitrary channel values for now
+  private DigitalInput m_reverseLimit = new DigitalInput(1);
   
   private double desired;
   private PIDController m_actuatorPIDController = new PIDController(
@@ -70,9 +73,12 @@ public class ExtensionSubsystem extends SubsystemBase {
     return Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()) < 700;
   }
 
-  public void extendArm(double power) {
-    m_actuator.set(TalonSRXControlMode.PercentOutput, power);
-  }
+  public void extendArm(double power) 
+  {
+   
+
+   }
+
 
   private double lengthToUnits(double length) {
     // TODO: THIS
@@ -90,7 +96,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.setSelectedSensorPosition(0);
   }
 
-  public boolean getForwardOutput()
+ /* public boolean getForwardOutput()
   {
     return m_actuator.getSensorCollection().isFwdLimitSwitchClosed();
   }
@@ -98,7 +104,7 @@ public class ExtensionSubsystem extends SubsystemBase {
   public boolean getReverseOutput()
   {
     return m_actuator.getSensorCollection().isRevLimitSwitchClosed();
-  }
+  } */
 
   /**
    * 
@@ -114,10 +120,21 @@ public class ExtensionSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    m_actuator.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
-    m_actuator.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
-    SmartDashboard.putBoolean("ForwardSwitch", getForwardOutput());
-    SmartDashboard.putBoolean("ReverseSwitch", getReverseOutput());
+   // m_actuator.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+   // m_actuator.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+   // SmartDashboard.putBoolean("ForwardSwitch", getForwardOutput());
+   // SmartDashboard.putBoolean("ReverseSwitch", getReverseOutput());
+
+    if (m_forwardLimit.get() && m_actuator.getMotorOutputPercent() > 0)
+    {
+      m_actuator.set(TalonSRXControlMode.PercentOutput, 0);
+    }
+    if (m_reverseLimit.get() && m_actuator.getMotorOutputPercent() < 0)
+    {
+      m_actuator.set(TalonSRXControlMode.PercentOutput, 0);
+    }
+    m_actuator.set(TalonSRXControlMode.PercentOutput, GEAR_RATIO);
+
     SmartDashboard.putNumber("Telescope Position", getPosition());
     SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
     SmartDashboard.putNumber("OFFSET BRUH",
