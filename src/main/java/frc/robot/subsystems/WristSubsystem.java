@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMax.SoftLimitDirection;
 //import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -14,12 +16,30 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class WristSubsystem extends SubsystemBase {
   /** Creates a new WristSubsystem. */
+
+  private static final int GEAR_RATIO = 125;
   private CANSparkMax m_wristController = new CANSparkMax(57, MotorType.kBrushless);
   //private SparkMaxLimitSwitch m_forwardLimit = m_wristController.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
   //private SparkMaxLimitSwitch m_reverseLimit = m_wristController.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen);
-  private DigitalInput m_forwardLimit = new DigitalInput(0); //arbitrary channels for now
-  private DigitalInput m_reverseLimit = new DigitalInput(1);
-  public WristSubsystem() {}
+
+  private RelativeEncoder m_wristEncoder;
+
+  DigitalInput m_maxLimit = new DigitalInput(0);
+  DigitalInput m_minLimit = new DigitalInput(0);
+  public WristSubsystem() {
+
+    m_wristEncoder = m_wristController.getEncoder();
+
+    m_wristController.enableSoftLimit(SoftLimitDirection.kForward, true);
+    m_wristController.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    m_wristController.setSoftLimit(SoftLimitDirection.kForward, (float)angleToMotorRotations(180 - .1));
+    m_wristController.setSoftLimit(SoftLimitDirection.kReverse, (float)angleToMotorRotations(.1));
+  }
+
+
+  public double angleToMotorRotations(double angle){
+    return angle / 360 / GEAR_RATIO;
+  }
 
   public void wristSpeed(double d) 
   {
@@ -41,7 +61,7 @@ public class WristSubsystem extends SubsystemBase {
         else {
           wristSpeed(0);
         }
-    }*/
+    }
 
     if(m_forwardLimit.get() && d > 0)
     {
@@ -54,8 +74,8 @@ public class WristSubsystem extends SubsystemBase {
 
     wristSpeed(d);
 
+    */
   }
-  
   /*public DigitalInput getForwardLimit()
   {
     return m_forwardLimit;
@@ -74,6 +94,12 @@ public class WristSubsystem extends SubsystemBase {
     //SmartDashboard.putBoolean("Reverse Limit Switch", m_reverseLimit.isPressed());
       
       
+    if(m_maxLimit.get()){
+      m_wristEncoder.setPosition(angleToMotorRotations(180));
+    }
+    if(m_minLimit.get()){
+      m_wristEncoder.setPosition(angleToMotorRotations(0));
+    }
     
   }
 }
