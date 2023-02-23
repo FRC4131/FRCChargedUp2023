@@ -10,14 +10,18 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+//import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ArmPosition;
 
 public class ArmSubsystem extends SubsystemBase {
 
@@ -34,6 +38,9 @@ public class ArmSubsystem extends SubsystemBase {
   private SparkMaxPIDController m_rightRotPIDController;
 
   private RelativeEncoder m_rightEncoder;
+
+  private DigitalInput m_minLimitSwitch = new DigitalInput(0);//TODO: Channel #s
+  private DigitalInput m_maxLimitSwitch = new DigitalInput(0);//TODO: Channel #s
 
   private boolean bool;
 
@@ -58,6 +65,11 @@ public class ArmSubsystem extends SubsystemBase {
 
     // m_leftRot.fp
     resetPosition();
+
+    m_rightRot.enableSoftLimit(SoftLimitDirection.kForward, true);
+    m_rightRot.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    m_rightRot.setSoftLimit(SoftLimitDirection.kForward, (float)angleToMotorRotations(ArmPosition.MAX.rotation - .1));
+    m_rightRot.setSoftLimit(SoftLimitDirection.kReverse, (float)angleToMotorRotations(ArmPosition.MIN.rotation + .1));
 
     // m_actuatorPIDController = m_actuator.getPIDController();
 
@@ -101,6 +113,15 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    if(m_maxLimitSwitch.get()){
+      m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MAX.rotation));
+    }
+    if(m_minLimitSwitch.get()){
+      m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MIN.rotation));
+    }
+
+
     SmartDashboard.putString("RightencoderRpos",
         m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " ticks(?)");
     // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + "
