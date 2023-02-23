@@ -101,11 +101,8 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putString("RightencoderRpos",
-        m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " ticks(?)");
-    // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + "
-    // ticks(?)");
-    SmartDashboard.getBoolean("BOOL", false);
+    SmartDashboard.putString("Arm Angle",
+        m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " Degrees");
   }
 
   public CommandBase resetEncoder() {

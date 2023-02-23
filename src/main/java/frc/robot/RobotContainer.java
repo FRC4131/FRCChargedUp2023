@@ -191,72 +191,68 @@ public class RobotContainer {
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 1.2", 4.0, 3.0)),
         moveArm(HIGH).alongWith(waitCommand(1.5)),
-        //Replace with outtaking command for 1 second
+        // Replace with outtaking command for 1 second
         new InstantCommand(),
         moveArm(STOW),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 1.3", 0.8, 3.0)),
-        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
-    );
+        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
   }
 
-  public Command coneAndCubeLoadingSide(){
+  public Command coneAndCubeLoadingSide() {
     PathPlannerTrajectory secondPath = PathPlanner.loadPath("path 2.1", 4.0, 3.0);
     return new SequentialCommandGroup(
-      new CalibrateOdometryCommand(m_poseEstimationSubsystem, secondPath.getInitialPose()),
-      moveArm(HIGH).alongWith(waitCommand(1.5)),
-      // Replace this with outtaking command for 1 second
-      new InstantCommand(),
-      moveArm(STOW),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, secondPath).alongWith(
-          waitCommand(1.75).andThen(
-              // Replace with intake command for 1 second
-              moveArm(LOW).alongWith(new InstantCommand()))),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-          PathPlanner.loadPath("path 2.2", 4.0, 3.0)),
-      //Replace with outtaking command for 1 second
-      new InstantCommand(),
-      moveArm(STOW),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-          PathPlanner.loadPath("path 2.3", 0.8, 3.0)),
-      waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
-    );
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem, secondPath.getInitialPose()),
+        moveArm(HIGH).alongWith(waitCommand(1.5)),
+        // Replace this with outtaking command for 1 second
+        new InstantCommand(),
+        moveArm(STOW),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, secondPath).alongWith(
+            waitCommand(1.75).andThen(
+                // Replace with intake command for 1 second
+                moveArm(LOW).alongWith(new InstantCommand()))),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("path 2.2", 4.0, 3.0)),
+        // Replace with outtaking command for 1 second
+        new InstantCommand(),
+        moveArm(STOW),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("path 2.3", 0.8, 3.0)),
+        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
   }
 
-  public Command balancingLoadingSide(){
+  public Command balancingLoadingSide() {
     PathPlannerTrajectory thirdPath = PathPlanner.loadPath("path 3.1", 0.8, 3.0);
     return new SequentialCommandGroup(
-      new CalibrateOdometryCommand(m_poseEstimationSubsystem, thirdPath.getInitialPose()),
-      moveArm(HIGH).alongWith(waitCommand(1.5)),
-      //Replace with outtaking command for 1 second
-      new InstantCommand(),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, thirdPath),
-      waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
-    );
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem, thirdPath.getInitialPose()),
+        moveArm(HIGH).alongWith(waitCommand(1.5)),
+        // Replace with outtaking command for 1 second
+        new InstantCommand(),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, thirdPath),
+        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
   }
 
-  public Command balancingCenterGrid(){
+  public Command balancingCenterGrid() {
     PathPlannerTrajectory fourthPath = PathPlanner.loadPath("path 4.1", 0.8, 3.0);
     return new SequentialCommandGroup(
-      new CalibrateOdometryCommand(m_poseEstimationSubsystem, fourthPath.getInitialPose()),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fourthPath),
-      waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))
-    );
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem, fourthPath.getInitialPose()),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fourthPath),
+        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
   }
 
-  public Command onePieceCenterGrid(){
-    PathPlannerTrajectory fifthPath = PathPlanner.loadPath("5.1", 0.8, 3.0);
+  public Command onePieceCenterGrid() {
+    PathPlannerTrajectory fifthPath = PathPlanner.loadPath("path 5.1", 2.0, 1.0);
     return new SequentialCommandGroup(
-      new CalibrateOdometryCommand(m_poseEstimationSubsystem, fifthPath.getInitialPose()),
-      moveArm(HIGH).alongWith(waitCommand(1.5)),
-      //Replace with outtaking command
-      new InstantCommand(),
-      moveArm(LOW),
-      new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fifthPath)
-      .alongWith(waitCommand(2.5))
-      //Replace with intaking command
-      .andThen(new InstantCommand())
-
+        new CalibrateOdometryCommand(m_poseEstimationSubsystem, fifthPath.getInitialPose()),
+        moveArm(HIGH).alongWith(waitCommand(1.5)),
+        // Replace with outtaking command
+        new InstantCommand(),
+        moveArm(LOW),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, fifthPath)
+            .alongWith(waitCommand(2.5))
+            // Replace with intaking command
+            .andThen(new InstantCommand()),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 5.2", 2.0, 1.0))
 
     );
   }

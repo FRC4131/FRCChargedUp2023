@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,10 +19,8 @@ public class ExtensionSubsystem extends SubsystemBase {
 
   private TalonSRX m_actuator = new TalonSRX(30);
   private double desired;
-  private PIDController m_actuatorPIDController = new PIDController(
-      1,
-      0,
-      0);
+  private DigitalInput maxLimit = new DigitalInput(0);
+  private DigitalInput minLimit = new DigitalInput(1);// TODO: Channel #s
 
   private double GEAR_RATIO = 5 / 1 * 7 / 1;
 
@@ -33,8 +32,8 @@ public class ExtensionSubsystem extends SubsystemBase {
     // m_actuator.configSelectedFeedbackCoefficient(100 / (1024 * GEAR_RATIO *
     // 0.748), 1, 0);
 
-    m_actuator.setSensorPhase(true);
-    m_actuator.setInverted(false);
+    m_actuator.setSensorPhase(false);
+    m_actuator.setInverted(true);
 
     m_actuator.configNeutralDeadband(0.001);
 
@@ -51,6 +50,11 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     m_actuator.configMotionCruiseVelocity(100000);
     m_actuator.configMotionAcceleration(200000);
+
+    m_actuator.configPeakCurrentLimit(40);
+    m_actuator.configPeakCurrentDuration(250);
+    m_actuator.configContinuousCurrentLimit(0);
+    m_actuator.enableCurrentLimit(true);
 
   }
 
@@ -102,8 +106,13 @@ public class ExtensionSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Telescope Position", getPosition());
-    SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
-    SmartDashboard.putNumber("OFFSET BRUH",
-        Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()));
+    SmartDashboard.putNumber("Telescope Current", m_actuator.getSupplyCurrent());
+    SmartDashboard.putNumber("Telescope Temp", m_actuator.getTemperature());
+
+    if(maxLimit.get())
+      m_actuator.setSelectedSensorPosition(-21.8 * (1024 * GEAR_RATIO * 0.748));
+
+    if(minLimit.get())
+      m_actuator.setSelectedSensorPosition(0);
   }
 }

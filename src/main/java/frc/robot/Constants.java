@@ -255,4 +255,9 @@ public final class Constants {
                     canCoderID, angleOffset);
         }
     }
+
+    public static final class WristConstants{
+        /** 3 gearings, 5:1 * 5:1 * 5:1 */
+        public static final double WRIST_MOTOR_GEAR_RATIO = 125;
+    }
 }
