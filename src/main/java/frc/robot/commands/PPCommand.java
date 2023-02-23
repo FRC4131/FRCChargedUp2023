@@ -78,8 +78,7 @@ public class PPCommand extends CommandBase {
     var updatedTargetChassisSpeeds = new ChassisSpeeds(targetChassisSpeeds.vxMetersPerSecond,
         targetChassisSpeeds.vyMetersPerSecond, targetChassisSpeeds.omegaRadiansPerSecond);
 
-    m_drivetrainSubsystem.drive(updatedTargetChassisSpeeds,
-        Math.abs(desiredState.velocityMetersPerSecond), Math.abs(desiredState.angularVelocityRadPerSec));
+    m_drivetrainSubsystem.drive(updatedTargetChassisSpeeds);
   }
 
   // Called once the command ends or is interrupted.

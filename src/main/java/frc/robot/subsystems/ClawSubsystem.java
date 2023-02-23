@@ -20,14 +20,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClawSubsystem extends SubsystemBase {
 
-  private static final int GEAR_RATIO = 125;
 
   CANSparkMax m_clawController = new CANSparkMax(60, MotorType.kBrushless);
   RelativeEncoder m_clawEncoder;
   SparkMaxPIDController m_clawPID;
-
-  DigitalInput m_maxLimit = new DigitalInput(0);
-  DigitalInput m_minLimit = new DigitalInput(0);
 
   /** Creates a new ClawSubsystem. */
   public ClawSubsystem(){
@@ -35,10 +31,6 @@ public class ClawSubsystem extends SubsystemBase {
     m_clawEncoder = m_clawController.getEncoder();
     m_clawPID = m_clawController.getPIDController();
 
-    m_clawController.enableSoftLimit(SoftLimitDirection.kForward, true);
-    m_clawController.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    m_clawController.setSoftLimit(SoftLimitDirection.kForward, (float)angleToMotorRotations(180 - .1));
-    m_clawController.setSoftLimit(SoftLimitDirection.kReverse, (float)angleToMotorRotations(.1));
 
     m_clawPID.setP(1);
   }
@@ -48,19 +40,10 @@ public class ClawSubsystem extends SubsystemBase {
   }
 
 
-  public double angleToMotorRotations(double angle){
-    return angle / 360 / GEAR_RATIO;
-  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
 
-    if(m_maxLimit.get()){
-      m_clawEncoder.setPosition(angleToMotorRotations(180));
-    }
-    if(m_minLimit.get()){
-      m_clawEncoder.setPosition(angleToMotorRotations(0));
-    }
   }
 }
