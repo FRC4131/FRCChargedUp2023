@@ -330,7 +330,13 @@ public class RobotContainer {
             }, m_extensionSubsystem)
                 .alongWith(new InstantCommand(() -> {
                   m_armSubsystem.snapToAngle(armAngle.getAsDouble());
-                }, m_armSubsystem)))));
+                }, m_armSubsystem)))))
+
+        .onFalse(new SequentialCommandGroup(
+          new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
+          waitCommand(0.5),
+          new InstantCommand(() -> m_extensionSubsystem.extendTo(ArmPosition.ZEROES.length))
+          .alongWith(new InstantCommand(() -> m_armSubsystem.snapToAngle(ArmPosition.ZEROES.rotation)))));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
     // m_poseEstimationSubsystem,

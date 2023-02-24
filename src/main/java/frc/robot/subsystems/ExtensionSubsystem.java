@@ -23,8 +23,8 @@ public class ExtensionSubsystem extends SubsystemBase {
 
   private TalonSRX m_actuator = new TalonSRX(30);
   
-  private DigitalInput m_forwardLimit = new DigitalInput(0); //arbitrary channel values for now
-  private DigitalInput m_reverseLimit = new DigitalInput(1);
+  private DigitalInput m_forwardLimit = new DigitalInput(2); //arbitrary channel values for now
+  private DigitalInput m_reverseLimit = new DigitalInput(3);
   
   private double desired;
   private PIDController m_actuatorPIDController = new PIDController(
@@ -61,10 +61,15 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.configMotionCruiseVelocity(100000);
     m_actuator.configMotionAcceleration(200000);
 
-   m_actuator.configForwardSoftLimitEnable(true);
-   m_actuator.configForwardSoftLimitThreshold(lengthToUnits(ArmPosition.MAX.length - 0.1));
-   m_actuator.configReverseSoftLimitEnable(true);
-   m_actuator.configReverseSoftLimitThreshold(lengthToUnits(.1));
+    m_actuator.configPeakCurrentLimit(40);
+    m_actuator.configPeakCurrentDuration(250);
+    m_actuator.configContinuousCurrentLimit(0);
+    m_actuator.enableCurrentLimit(true);
+
+  //  m_actuator.configForwardSoftLimitEnable(true);
+  //  m_actuator.configForwardSoftLimitThreshold(lengthToUnits(ArmPosition.MAX.length - 0.1));
+  //  m_actuator.configReverseSoftLimitEnable(true);
+  //  m_actuator.configReverseSoftLimitThreshold(lengthToUnits(.1));
   }
 
   /**

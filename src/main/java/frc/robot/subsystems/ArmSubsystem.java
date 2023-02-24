@@ -40,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase {
   private RelativeEncoder m_rightEncoder;
 
   private DigitalInput m_minLimitSwitch = new DigitalInput(0);//TODO: Channel #s
-  private DigitalInput m_maxLimitSwitch = new DigitalInput(0);//TODO: Channel #s
+  private DigitalInput m_maxLimitSwitch = new DigitalInput(1);//TODO: Channel #s
 
   private boolean bool;
 

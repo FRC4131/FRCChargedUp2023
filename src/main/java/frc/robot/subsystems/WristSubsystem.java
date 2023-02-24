@@ -20,8 +20,8 @@ public class WristSubsystem extends SubsystemBase {
   CANSparkMax m_wristController = new CANSparkMax(57, MotorType.kBrushless);
   private RelativeEncoder m_Encoder;
   private SparkMaxPIDController m_WristPID;
-  private DigitalInput clockwiseLimit = new DigitalInput(0);
-  private DigitalInput counterClockwiseLimit = new DigitalInput(0);// TODO: Channel #s
+  private DigitalInput clockwiseLimit = new DigitalInput(4);
+  private DigitalInput counterClockwiseLimit = new DigitalInput(5);// TODO: Channel #s
   private final double WRIST_MOTOR_GEAR_RATIO = 125;
 
   public WristSubsystem() {
