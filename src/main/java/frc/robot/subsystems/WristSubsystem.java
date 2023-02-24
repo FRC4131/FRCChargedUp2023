@@ -20,8 +20,9 @@ public class WristSubsystem extends SubsystemBase {
   CANSparkMax m_wristController = new CANSparkMax(57, MotorType.kBrushless);
   private RelativeEncoder m_Encoder;
   private SparkMaxPIDController m_WristPID;
-  private DigitalInput clockwiseLimit = new DigitalInput(4);
-  private DigitalInput counterClockwiseLimit = new DigitalInput(5);// TODO: Channel #s
+  //clockwise channel needs to be changed
+  private DigitalInput clockwiseLimit = new DigitalInput(5);
+  private DigitalInput counterClockwiseLimit = new DigitalInput(4);
   private final double WRIST_MOTOR_GEAR_RATIO = 125;
 
   public WristSubsystem() {
@@ -59,6 +60,14 @@ public class WristSubsystem extends SubsystemBase {
     m_WristPID.setReference(angleToMotorRotations(desiredAngle), ControlType.kSmartMotion);
   }
 
+  public boolean getClockwiseSwitch(){
+    return clockwiseLimit.get();
+  }
+
+  public boolean getCounterClockwiseSwitch(){
+    return counterClockwiseLimit.get();
+  }
+
   private double angleToMotorRotations(double angleDegrees) {
     return angleDegrees * WRIST_MOTOR_GEAR_RATIO / 360.0;
   }
@@ -67,5 +76,8 @@ public class WristSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Wrist Angle", angleToMotorRotations(m_Encoder.getPosition()));
+    SmartDashboard.putBoolean("Clockwise Switch", getClockwiseSwitch());
+    SmartDashboard.putBoolean("Counterclockwise Switch", getCounterClockwiseSwitch());
+
   }
 }

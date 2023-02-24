@@ -32,15 +32,12 @@ public class ArmSubsystem extends SubsystemBase {
   // private CANSparkMax m_leftRot = new CANSparkMax(59, MotorType.kBrushless);
   private CANSparkMax m_rightRot = new CANSparkMax(58, MotorType.kBrushless);
 
-  private double desiredAngle;
-  private double desiredDistance;
-
   private SparkMaxPIDController m_rightRotPIDController;
 
   private RelativeEncoder m_rightEncoder;
 
-  private DigitalInput m_minLimitSwitch = new DigitalInput(0);//TODO: Channel #s
-  private DigitalInput m_maxLimitSwitch = new DigitalInput(1);//TODO: Channel #s
+  // private DigitalInput m_minLimitSwitch = new DigitalInput(0);//TODO: Channel #s
+  // private DigitalInput m_maxLimitSwitch = new DigitalInput(1);//TODO: Channel #s
 
   private boolean bool;
 
@@ -114,12 +111,12 @@ public class ArmSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    if(m_maxLimitSwitch.get()){
-      m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MAX.rotation));
-    }
-    if(m_minLimitSwitch.get()){
-      m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MIN.rotation));
-    }
+    // if(m_maxLimitSwitch.get()){
+    //   m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MAX.rotation));
+    // }
+    // if(m_minLimitSwitch.get()){
+    //   m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MIN.rotation));
+    // }
 
 
     SmartDashboard.putString("RightencoderRpos",

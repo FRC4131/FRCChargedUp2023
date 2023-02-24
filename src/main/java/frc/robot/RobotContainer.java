@@ -85,7 +85,7 @@ public class RobotContainer {
       m_visionSubsystem);
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
-  // private final WristSubsystem m_wristSubsystem = new WristSubsystem();
+  private final WristSubsystem m_wristSubsystem = new WristSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -258,10 +258,10 @@ public class RobotContainer {
     // m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
     // m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
     // -1));
-    // m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
-    // 1));
-    // m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
-    // -1));
+    m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
+    1));
+    m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
+    -1));
 
     m_operatorController.a().whileTrue(new ExtendToCommand(m_extensionSubsystem, 1));
     m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem, 21.8));

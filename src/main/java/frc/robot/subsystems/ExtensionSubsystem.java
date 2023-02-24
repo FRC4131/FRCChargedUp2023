@@ -23,8 +23,8 @@ public class ExtensionSubsystem extends SubsystemBase {
 
   private TalonSRX m_actuator = new TalonSRX(30);
   
-  private DigitalInput m_forwardLimit = new DigitalInput(2); //arbitrary channel values for now
-  private DigitalInput m_reverseLimit = new DigitalInput(3);
+  // private DigitalInput m_forwardLimit = new DigitalInput(2); //arbitrary channel values for now
+  // private DigitalInput m_reverseLimit = new DigitalInput(3);
   
   private double desired;
   private PIDController m_actuatorPIDController = new PIDController(
@@ -137,15 +137,15 @@ public class ExtensionSubsystem extends SubsystemBase {
    // SmartDashboard.putBoolean("ForwardSwitch", getForwardOutput());
    // SmartDashboard.putBoolean("ReverseSwitch", getReverseOutput());
 
-    if (m_forwardLimit.get())
-    {
-      m_actuator.setSelectedSensorPosition(lengthToUnits(ArmPosition.MAX.length));
-    }
-    if (m_reverseLimit.get())
-    {
-      m_actuator.setSelectedSensorPosition(lengthToUnits(ArmPosition.MIN.length));
-    }
-    m_actuator.set(TalonSRXControlMode.PercentOutput, 1/GEAR_RATIO);
+    // if (m_forwardLimit.get())
+    // {
+    //   m_actuator.setSelectedSensorPosition(lengthToUnits(ArmPosition.MAX.length));
+    // }
+    // if (m_reverseLimit.get())
+    // {
+    //   m_actuator.setSelectedSensorPosition(lengthToUnits(ArmPosition.MIN.length));
+    // }
+    // m_actuator.set(TalonSRXControlMode.PercentOutput, 1/GEAR_RATIO);
 
     SmartDashboard.putNumber("Telescope Position", getPosition());
     SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
