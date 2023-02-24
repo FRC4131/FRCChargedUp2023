@@ -81,11 +81,10 @@ public class ExtensionSubsystem extends SubsystemBase {
     return Math.abs((-lengthToUnits(desired)) - m_actuator.getSelectedSensorPosition()) < 700;
   }
 
-  public void extendArm(double power) 
+  public void extendArm(double power)
   {
-   
-
-   }
+   m_actuator.set(TalonSRXControlMode.PercentOutput, power);
+  }
 
 
   private double lengthToUnits(double inches) {
