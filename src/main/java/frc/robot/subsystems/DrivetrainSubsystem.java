@@ -77,6 +77,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
         setModuleStates(swerveModuleStates);
     }
 
+    /**
+     * Overloaded drive method.
+     * @param chassisSpeeds to drive at.
+     * @param speedCapTranslation in m/s.
+     * @param speedCapRotation in rad/s.
+     */
+    public void drive(ChassisSpeeds chassisSpeeds, double speedCapTranslation, double speedCapRotation) {
+        SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
+                chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, chassisSpeeds, speedCapTranslation,
+                speedCapTranslation, speedCapRotation);
+        setModuleStates(swerveModuleStates);
+    }
+
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);

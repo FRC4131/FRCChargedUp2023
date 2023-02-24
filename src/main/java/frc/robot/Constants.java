@@ -48,6 +48,8 @@ public final class Constants {
         LOW(120,1.0),
         MEDIUM(-62, 8.5),
         HIGH(-56, 21.8),
+        STOW(120,0),
+        ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18);
 
@@ -252,16 +254,6 @@ public final class Constants {
             public static final Rotation2d angleOffset = Rotation2d.fromRadians((0.75 * Math.PI) / 2);
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
-        }
-    }
-
-    public static final class ArmConstants {
-        public static final class ArmAngles {
-            public static final double STOWED_ANGLE = 0;
-        }
-
-        public static final class TelescopingDistances {
-
         }
     }
 }

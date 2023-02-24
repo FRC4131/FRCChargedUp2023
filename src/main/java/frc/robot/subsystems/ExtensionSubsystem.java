@@ -22,6 +22,7 @@ import frc.robot.Constants.ArmPosition;
 public class ExtensionSubsystem extends SubsystemBase {
 
   private TalonSRX m_actuator = new TalonSRX(30);
+  
   private DigitalInput m_forwardLimit = new DigitalInput(0); //arbitrary channel values for now
   private DigitalInput m_reverseLimit = new DigitalInput(1);
   

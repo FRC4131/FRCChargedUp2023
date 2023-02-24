@@ -42,8 +42,6 @@ public class ClawTimedCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(m_timer.get() >= m_seconds){
-      return true;
-    } else return false;
+    return m_timer.hasElapsed(m_seconds);
   }
 }
