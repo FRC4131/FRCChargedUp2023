@@ -23,22 +23,23 @@ public class WristSubsystem extends SubsystemBase {
   //clockwise channel needs to be changed
   private DigitalInput clockwiseLimit = new DigitalInput(5);
   private DigitalInput counterClockwiseLimit = new DigitalInput(4);
-  private final double WRIST_MOTOR_GEAR_RATIO = 125;
+  private final double WRIST_MOTOR_GEAR_RATIO = 25;
 
   public WristSubsystem() {
     m_Encoder = m_wristController.getEncoder();
     m_WristPID = m_wristController.getPIDController();
 
+    m_Encoder.setVelocityConversionFactor(0.00818123109638691);
     m_WristPID.setOutputRange(-1, 1);
-    m_WristPID.setSmartMotionMaxAccel(7500, 0);
-    m_WristPID.setSmartMotionMaxVelocity(10000, 0);
+    m_WristPID.setSmartMotionMaxAccel(25, 0);
+    m_WristPID.setSmartMotionMaxVelocity(30, 0);
     m_WristPID.setSmartMotionMinOutputVelocity(0, 0);
     m_WristPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 
-    m_WristPID.setP(4e-9);
+    m_WristPID.setP(0.0009);
     m_WristPID.setI(0);
     m_WristPID.setD(0);
-    m_WristPID.setFF(9.9e-5);
+    m_WristPID.setFF(0.011);
 
     m_wristController.setInverted(false);
     m_wristController.burnFlash();
@@ -60,12 +61,25 @@ public class WristSubsystem extends SubsystemBase {
     m_WristPID.setReference(angleToMotorRotations(desiredAngle), ControlType.kSmartMotion);
   }
 
+
+  public void rotateClockwise(){
+    m_WristPID.setReference(8, ControlType.kSmartVelocity);
+  }
+
+  public void rotateCounterClockwise(){
+    m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+  }
+
+  public void stopRotate(){
+    m_WristPID.setReference(0, ControlType.kSmartVelocity);
+  }
+
   public boolean getClockwiseSwitch(){
-    return clockwiseLimit.get();
+    return !clockwiseLimit.get();
   }
 
   public boolean getCounterClockwiseSwitch(){
-    return counterClockwiseLimit.get();
+    return !counterClockwiseLimit.get();
   }
 
   private double angleToMotorRotations(double angleDegrees) {
@@ -76,6 +90,7 @@ public class WristSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Wrist Angle", angleToMotorRotations(m_Encoder.getPosition()));
+    SmartDashboard.putNumber("Wrist Velocity", m_Encoder.getVelocity());
     SmartDashboard.putBoolean("Clockwise Switch", getClockwiseSwitch());
     SmartDashboard.putBoolean("Counterclockwise Switch", getCounterClockwiseSwitch());
 

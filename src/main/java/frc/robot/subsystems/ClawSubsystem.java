@@ -36,7 +36,7 @@ public class ClawSubsystem extends SubsystemBase {
   }
 
   public void intakeSpeed(double d) {
-    m_clawController.set(d);
+    m_clawController.set(d * 0.6);
   }
 
 

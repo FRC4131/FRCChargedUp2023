@@ -25,6 +25,7 @@ import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.commands.WristCommand;
+import frc.robot.commands.WristSwitchCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -255,17 +256,19 @@ public class RobotContainer {
      * .onTrue(new ExampleCommand(m_exampleSubsystem));
      */
 
-    // m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
-    // m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
-    // -1));
+    m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
+    m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
+    -1));
     m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
     1));
     m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
     -1));
 
-    m_operatorController.a().whileTrue(new ExtendToCommand(m_extensionSubsystem, 1));
-    m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem, 21.8));
-    m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem, 19.5));
+    m_operatorController.y().onTrue(new WristSwitchCommand(m_wristSubsystem));
+    // m_operatorController.a().whileTrue(new InstantCommand(() -> m_wristSubsystem.rotateAt(-8)));
+    //m_operatorController.a().whileTrue(new ExtendToCommand(m_extensionSubsystem, 1));
+    // m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem, 21.8));
+    // m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem, 19.5));
     m_operatorController.back().onTrue(m_armSubsystem.resetEncoder().alongWith(
         new InstantCommand(() -> {
           m_extensionSubsystem.resetEncoder();
