@@ -51,7 +51,10 @@ public final class Constants {
         STOW(120,0),
         ZEROES(0,0),
         MIN(-30, 0),
-        MAX(30, 18);
+        MAX(30, 18),
+        DOUBLESUB(-56, 1.0), //arbitrary guestimate
+        FLOOR(110, 15);  //arbitrary guestimate 
+
 
         public final double rotation;
         public final double length;

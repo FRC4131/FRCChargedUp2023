@@ -321,7 +321,7 @@ public class RobotContainer {
     // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
     // () -> m_driverController.getLeftTriggerAxis()));
 
-    m_driverController.rightBumper().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
+    m_driverController.leftBumper().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
         m_poseEstimationSubsystem,
         m_targetingSubsystem)
         .alongWith(new SequentialCommandGroup(waitCommand(1),
@@ -337,6 +337,38 @@ public class RobotContainer {
           waitCommand(0.5),
           new InstantCommand(() -> m_extensionSubsystem.extendTo(ArmPosition.ZEROES.length))
           .alongWith(new InstantCommand(() -> m_armSubsystem.snapToAngle(ArmPosition.ZEROES.rotation)))));
+
+      m_operatorController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,   //from double substation
+          m_poseEstimationSubsystem,
+          m_targetingSubsystem)
+          .alongWith(new SequentialCommandGroup(waitCommand(1),
+              new InstantCommand(() -> {
+                m_extensionSubsystem.extendTo(ArmPosition.DOUBLESUB.length);
+              }, m_extensionSubsystem)
+                  .alongWith(new InstantCommand(() -> {
+                    m_armSubsystem.snapToAngle(ArmPosition.DOUBLESUB.rotation);
+                  }, m_armSubsystem)))))
+  
+          .onFalse(new SequentialCommandGroup(
+            new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
+            waitCommand(0.5),
+            new InstantCommand(() -> m_extensionSubsystem.extendTo(ArmPosition.ZEROES.length))
+            .alongWith(new InstantCommand(() -> m_armSubsystem.snapToAngle(ArmPosition.ZEROES.rotation)))));
+
+      m_driverController.y().whileTrue(new SequentialCommandGroup(waitCommand(1),
+              new InstantCommand(() -> {
+                m_extensionSubsystem.extendTo(ArmPosition.FLOOR.length);
+              }, m_extensionSubsystem)
+                  .alongWith(new InstantCommand(() -> {
+                    m_armSubsystem.snapToAngle(ArmPosition.FLOOR.rotation);
+                  }, m_armSubsystem))))
+  
+          .onFalse(new SequentialCommandGroup(
+            new ClawTimedCommand(m_clawSubsystem, 1, -0.6),
+            waitCommand(0.5),
+            new InstantCommand(() -> m_extensionSubsystem.extendTo(ArmPosition.ZEROES.length))
+            .alongWith(new InstantCommand(() -> m_armSubsystem.snapToAngle(ArmPosition.ZEROES.rotation)))));
+
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
     // m_poseEstimationSubsystem,
