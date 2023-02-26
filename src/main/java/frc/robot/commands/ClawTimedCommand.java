@@ -13,8 +13,8 @@ public class ClawTimedCommand extends CommandBase {
   ClawSubsystem m_clawSubsystem;
   Timer m_timer;
   double m_seconds;
-  double m_speed;
-  public ClawTimedCommand(ClawSubsystem clawSubsystem, double seconds, double speed) {
+  double m_direction;
+  public ClawTimedCommand(ClawSubsystem clawSubsystem, double seconds, double direction) {
     m_clawSubsystem = clawSubsystem;
     m_timer = new Timer();
     addRequirements(clawSubsystem);
@@ -30,7 +30,7 @@ public class ClawTimedCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_clawSubsystem.intakeSpeed(m_speed);
+    m_clawSubsystem.intakeSpeed(m_direction * 0.6);
   }
 
   // Called once the command ends or is interrupted.
