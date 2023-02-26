@@ -21,6 +21,7 @@ import frc.robot.commands.ExtendToCommand;
 import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
+import frc.robot.commands.GoToSubstationCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TurnToAngleCommand;
@@ -285,11 +286,34 @@ public class RobotContainer {
     //       m_wristSubsystem.rotate();
     //     }));
 
-     m_operatorController.y().onTrue(
-        new InstantCommand(() -> {
-          m_wristSubsystem.rotate(); })
-          .alongWith(new ClawTimedCommand(m_clawSubsystem,1, 0.3))
-        );
+    m_operatorController.x().whileTrue(new GoToSubstationCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem) //goes to substation based on april tag
+    .alongWith((moveArm(ArmPosition.DOUBLESUB))) //moves to double sub arm position
+    .alongWith(new ClawPowerCommand(m_clawSubsystem, 1))) //intakes 
+    .onFalse(moveArm(ArmPosition.ZEROES)); //moves arm back to zero position
+
+    m_operatorController.b().whileTrue(moveArm(ArmPosition.FLOOR) //moves arm to floor
+    .alongWith(new ClawPowerCommand(m_clawSubsystem, 1))) //intakes 
+    .onFalse(moveArm(ArmPosition.ZEROES)); //moves arm back to zero position 
+
+    m_operatorController.a().whileTrue((new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem)) //go to pose
+    .alongWith(
+      new InstantCommand(() -> {
+        m_extensionSubsystem.extendTo(telescopeLength.getAsDouble());}, m_extensionSubsystem)) //extend telescope
+    .alongWith(new InstantCommand(() -> {
+      m_armSubsystem.snapToAngle(armAngle.getAsDouble());}, m_armSubsystem)) //arm go to angle
+    .alongWith(new InstantCommand (() -> {
+      m_wristSubsystem.rotate();})) //rotate wrist 
+    .alongWith(new ClawTimedCommand(m_clawSubsystem,1, 0.3)) //rotates intake so we don't drop piece
+    .alongWith(new SequentialCommandGroup(waitCommand(1), //spit out game piece 
+      new ClawPowerCommand(m_clawSubsystem, -1))))
+      .onFalse(moveArm(ArmPosition.ZEROES)); //move arm back 
+    
+
+    //  m_operatorController.y().onTrue(
+    //     new InstantCommand(() -> {
+    //       m_wristSubsystem.rotate(); })
+    //       .alongWith(new ClawTimedCommand(m_clawSubsystem,1, 0.3))
+    //     );
 
     m_operatorController.rightBumper().whileTrue(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false))
@@ -328,7 +352,7 @@ public class RobotContainer {
     m_driverController.b()
         .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem,
             m_poseEstimationSubsystem, Math.PI / 2.0));
-
+    
     m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
         m_poseEstimationSubsystem,
         m_targetingSubsystem,
@@ -356,6 +380,8 @@ public class RobotContainer {
             waitCommand(0.5),
             new InstantCommand(() -> m_extensionSubsystem.extendTo(ArmPosition.ZEROES.length))
                 .alongWith(new InstantCommand(() -> m_armSubsystem.snapToAngle(ArmPosition.ZEROES.rotation))))));
+
+    
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
     // m_poseEstimationSubsystem,
