@@ -32,7 +32,7 @@ public class ExtensionSubsystem extends SubsystemBase {
       0,
       0);
 
-  private final double GEAR_RATIO = 5 * 7;
+  private final double GEAR_RATIO = 7;
 
   /** Creates a new ExtensionSubsystem. */
   public ExtensionSubsystem() {
@@ -58,8 +58,8 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.config_kD(1, 0);
     m_actuator.config_kF(1, 0);
 
-    m_actuator.configMotionCruiseVelocity(100000);
-    m_actuator.configMotionAcceleration(200000);
+    m_actuator.configMotionCruiseVelocity(100000 / 5);
+    m_actuator.configMotionAcceleration(200000 / 5);
 
     m_actuator.configPeakCurrentLimit(40);
     m_actuator.configPeakCurrentDuration(250);

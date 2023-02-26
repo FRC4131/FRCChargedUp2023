@@ -44,10 +44,12 @@ public class TargetingSubsystem extends SubsystemBase {
   }
 
   public Pose2d getTargetGridPose() {
+    boolean isRed = DriverStation.getAlliance().equals(Alliance.Red);
+    int grid = isRed ? desiredGrid - 1: desiredGrid - 3;
     Translation2d offset = getNodeOffset();
     SmartDashboard.putNumber("ABOOOOOM", offset.getY());
-    return new Pose2d(GridPositions.values()[desiredGrid].x + offset.getX(),
-        GridPositions.values()[desiredGrid].y + offset.getY(),
+    return new Pose2d(GridPositions.values()[grid].x + offset.getX(),
+        GridPositions.values()[grid].y + offset.getY(),
         Rotation2d.fromDegrees(isBlueAlliance ? 0 : 180));
   }
 
@@ -133,7 +135,7 @@ public class TargetingSubsystem extends SubsystemBase {
     // isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
     isBlueAlliance = DriverStation.getAlliance().equals(Alliance.Blue);
 
-    desiredGrid = selectGrid() + (isBlueAlliance ? 0 : 3) - 1;
+    desiredGrid = selectGrid() + (isBlueAlliance ? 5 : 0);
     setNode(selectNode().value());
     SmartDashboard.putNumber("grid selected", desiredGrid);
     SmartDashboard.putNumber("node selected", desiredNode.value());
