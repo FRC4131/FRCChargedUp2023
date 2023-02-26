@@ -76,6 +76,17 @@ public class WristSubsystem extends SubsystemBase {
 
   }
 
+  public void stopRotate(){
+    m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+  }
+
+  public void rotateClockwise(){
+    m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+  }
+  
+  public void rotateCounterClockwise(){
+    m_WristPID.setReference(8, ControlType.kSmartVelocity);
+  }
 
 
   public void checkLimitSwitch(){

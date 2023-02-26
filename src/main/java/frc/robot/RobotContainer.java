@@ -280,10 +280,16 @@ public class RobotContainer {
               m_extensionSubsystem.resetEncoder();
             }, m_extensionSubsystem)));
 
-    m_operatorController.y().onTrue(
+    // m_operatorController.y().onTrue(
+    //     new InstantCommand(() -> {
+    //       m_wristSubsystem.rotate();
+    //     }));
+
+     m_operatorController.y().onTrue(
         new InstantCommand(() -> {
-          m_wristSubsystem.rotate();
-        }));
+          m_wristSubsystem.rotate(); })
+          .alongWith(new ClawTimedCommand(m_clawSubsystem,1, 0.3))
+        );
 
     m_operatorController.rightBumper().whileTrue(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false))
