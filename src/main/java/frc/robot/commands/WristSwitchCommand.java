@@ -18,10 +18,12 @@ public class WristSwitchCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    movingClockwise = false;
-    if(m_WristSubsystem.getCounterClockwiseSwitch()){
-      movingClockwise = true;
-    }
+    // movingClockwise = false;
+    // if(m_WristSubsystem.getCounterClockwiseSwitch()){
+    //   movingClockwise = true;
+    // }
+
+    movingClockwise = m_WristSubsystem.getCounterClockwiseSwitch();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

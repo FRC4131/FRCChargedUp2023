@@ -54,6 +54,19 @@ public class WristSubsystem extends SubsystemBase {
     m_Encoder.setPosition(0);
   }
 
+  public void stopRotate()
+  {
+    m_WristPID.setReference(0, ControlType.kSmartVelocity); 
+  }
+
+  public void rotateClockwise(){
+    m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+  }
+
+  public void rotateCounterClockwise(){
+    m_WristPID.setReference(8, ControlType.kSmartVelocity);
+  }
+
   /**
    * Sets the setPoint for the PID controller to run to the specified position
    * @param desiredAngle Angle to rotate to in degrees
