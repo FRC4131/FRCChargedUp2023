@@ -24,6 +24,7 @@ public class WristSubsystem extends SubsystemBase {
   private DigitalInput clockwiseLimit = new DigitalInput(5);
   private DigitalInput counterClockwiseLimit = new DigitalInput(4);
   private final double WRIST_MOTOR_GEAR_RATIO = 25;
+  private boolean isMovingClockwise;
 
   public WristSubsystem() {
     m_Encoder = m_wristController.getEncoder();
@@ -62,17 +63,33 @@ public class WristSubsystem extends SubsystemBase {
   }
 
 
-  public void rotateClockwise(){
-    m_WristPID.setReference(8, ControlType.kSmartVelocity);
+  public void rotate(){ //negative clockwise, positive counterclockwise
+    isMovingClockwise = getCounterClockwiseSwitch();
+    if (getClockwiseSwitch() && !isMovingClockwise)
+    {
+      m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+    }
+    else if (getCounterClockwiseSwitch() && isMovingClockwise)
+    {
+      m_WristPID.setReference(8, ControlType.kSmartVelocity);
+    }
+
   }
 
-  public void rotateCounterClockwise(){
-    m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+
+
+  public void checkLimitSwitch(){
+    if (getClockwiseSwitch() && isMovingClockwise)
+    {
+      m_WristPID.setReference(0, ControlType.kSmartVelocity);
+    }
+    else if (getCounterClockwiseSwitch() && !isMovingClockwise)
+    {
+      m_WristPID.setReference(0, ControlType.kSmartVelocity);
+    }
   }
 
-  public void stopRotate(){
-    m_WristPID.setReference(0, ControlType.kSmartVelocity);
-  }
+
 
   public boolean getClockwiseSwitch(){
     return !clockwiseLimit.get();
@@ -81,6 +98,7 @@ public class WristSubsystem extends SubsystemBase {
   public boolean getCounterClockwiseSwitch(){
     return !counterClockwiseLimit.get();
   }
+
 
   private double angleToMotorRotations(double angleDegrees) {
     return angleDegrees * WRIST_MOTOR_GEAR_RATIO / 360.0;
@@ -93,6 +111,7 @@ public class WristSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Wrist Velocity", m_Encoder.getVelocity());
     SmartDashboard.putBoolean("Clockwise Switch", getClockwiseSwitch());
     SmartDashboard.putBoolean("Counterclockwise Switch", getCounterClockwiseSwitch());
+    checkLimitSwitch();
 
   }
 }
