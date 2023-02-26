@@ -35,38 +35,34 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   public PoseEstimationSubsystem(DrivetrainSubsystem drivetrainSubsystem, VisionSubsystem visionSubsystem) {
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_visionSubsystem = visionSubsystem;
-    
+
     m_navX = new AHRS(SPI.Port.kMXP, (byte) 200);
 
-    
     zeroGyro();
-    
+
     m_swerveDrivePoseEst = new SwerveDrivePoseEstimator(
-                                    Constants.Swerve.swerveKinematics, 
-                                    getGyroYaw(), 
-                                    m_drivetrainSubsystem.getModulePositions(),
-                                    new Pose2d()
-                                  );
+        Constants.Swerve.swerveKinematics,
+        getGyroYaw(),
+        m_drivetrainSubsystem.getModulePositions(),
+        new Pose2d());
+
+        
   }
-  
-  public void zeroGyro() 
-  {
+
+  public void zeroGyro() {
     m_navX.reset();
   }
 
-  private Rotation2d getGyroYaw() 
-  {
+  private Rotation2d getGyroYaw() {
     return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - m_navX.getYaw())
-            : Rotation2d.fromDegrees(m_navX.getYaw());
+        : Rotation2d.fromDegrees(m_navX.getYaw());
   }
-  
-  public void resetOdometry(Pose2d pose) 
-  {
+
+  public void resetOdometry(Pose2d pose) {
     m_swerveDrivePoseEst.resetPosition(getGyroYaw(), m_drivetrainSubsystem.getModulePositions(), pose);
   }
-  
-  public Pose2d getPose() 
-  {
+
+  public Pose2d getPose() {
     return m_swerveDrivePoseEst.getEstimatedPosition();
   }
 
@@ -78,16 +74,14 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     return m_navX.getRoll();
   }
 
-  public double getYaw(){
+  public double getYaw() {
     return m_navX.getYaw();
   }
 
   @Override
-  public void periodic() 
-  {
+  public void periodic() {
     EstimatedRobotPose aprilTagPose = m_visionSubsystem.getAprilTagRobotPose().orElse(null);
-    if(aprilTagPose != null)
-    {
+    if (aprilTagPose != null) {
       m_swerveDrivePoseEst.addVisionMeasurement(aprilTagPose.estimatedPose.toPose2d(), aprilTagPose.timestampSeconds);
     }
     m_swerveDrivePoseEst.update(getGyroYaw(), m_drivetrainSubsystem.getModulePositions());
@@ -99,6 +93,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees());
     SmartDashboard.putNumber("Robot Pitch", getPitch());
     SmartDashboard.putData(field2d);
-    
+
   }
+
 }

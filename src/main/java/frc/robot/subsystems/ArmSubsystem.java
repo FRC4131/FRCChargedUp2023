@@ -63,8 +63,8 @@ public class ArmSubsystem extends SubsystemBase {
     // m_leftRot.fp
     resetPosition();
 
-    m_rightRot.enableSoftLimit(SoftLimitDirection.kForward, true);
-    m_rightRot.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    m_rightRot.enableSoftLimit(SoftLimitDirection.kForward, false);
+    m_rightRot.enableSoftLimit(SoftLimitDirection.kReverse, false);
     m_rightRot.setSoftLimit(SoftLimitDirection.kForward, (float)angleToMotorRotations(ArmPosition.MAX.rotation - .1));
     m_rightRot.setSoftLimit(SoftLimitDirection.kReverse, (float)angleToMotorRotations(ArmPosition.MIN.rotation + .1));
 

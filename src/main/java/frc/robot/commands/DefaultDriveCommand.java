@@ -8,6 +8,8 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
@@ -24,12 +26,12 @@ public class DefaultDriveCommand extends CommandBase {
 
   /** Creates a new DefaultDriveCommand. */
   public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
-                             PoseEstimationSubsystem poseEstimationSubsystem,
-                             DoubleSupplier x, 
-                             DoubleSupplier y,
-                             DoubleSupplier theta, 
-                             DoubleSupplier throttle, 
-                             boolean fieldRelative) {
+      PoseEstimationSubsystem poseEstimationSubsystem,
+      DoubleSupplier x,
+      DoubleSupplier y,
+      DoubleSupplier theta,
+      DoubleSupplier throttle,
+      boolean fieldRelative) {
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     this.x = x;
@@ -54,11 +56,12 @@ public class DefaultDriveCommand extends CommandBase {
     double scale = slope * this.throttle.getAsDouble() + minThrottle;
 
     m_drivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale,
-                                y.getAsDouble() * scale),
-                                theta.getAsDouble() * scale,
-                                m_poseEstimationSubsystem.getPose().getRotation(),
-                                fieldRelative,
-                                true);
+        y.getAsDouble() * scale),
+        theta.getAsDouble() * scale,
+        DriverStation.getAlliance().equals(Alliance.Blue) ? m_poseEstimationSubsystem.getPose().getRotation()
+            : m_poseEstimationSubsystem.getPose().getRotation().minus(Rotation2d.fromDegrees(180)),
+        fieldRelative,
+        true);
   }
 
   // Called once the command ends or is interrupted.

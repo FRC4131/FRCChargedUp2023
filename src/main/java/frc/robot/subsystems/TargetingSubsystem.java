@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -129,6 +131,8 @@ public class TargetingSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     // isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
+    isBlueAlliance = DriverStation.getAlliance().equals(Alliance.Blue);
+
     desiredGrid = selectGrid() + (isBlueAlliance ? 0 : 3) - 1;
     setNode(selectNode().value());
     SmartDashboard.putNumber("grid selected", desiredGrid);
