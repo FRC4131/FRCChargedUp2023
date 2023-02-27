@@ -125,6 +125,7 @@ public class WristSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Wrist Velocity", m_Encoder.getVelocity());
     SmartDashboard.putBoolean("Clockwise Switch", getClockwiseSwitch());
     SmartDashboard.putBoolean("Counterclockwise Switch", getCounterClockwiseSwitch());
+    SmartDashboard.putNumber("Wrist Current", m_wristController.getOutputCurrent());
     checkLimitSwitch();
 
   }

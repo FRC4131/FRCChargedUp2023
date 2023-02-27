@@ -309,9 +309,9 @@ public class RobotContainer {
     m_operatorController.povDown().whileTrue(new ExtendToCommand(m_extensionSubsystem,
         0));
     // m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem,
-    //     21.8));
+    // 21.8));
     // m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem,
-    //     19.5));
+    // 19.5));
     m_operatorController.back().onTrue(m_armSubsystem.resetEncoder()
         .alongWith(
             new InstantCommand(() -> {
@@ -323,13 +323,7 @@ public class RobotContainer {
     // m_wristSubsystem.rotate();
     // }));
 
-    m_operatorController.x().whileTrue(new GoToSubstationCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem) // goes
-                                                                                                                   // to
-                                                                                                                   // substation
-                                                                                                                   // based
-                                                                                                                   // on
-                                                                                                                   // april
-                                                                                                                   // tag
+    m_operatorController.x().whileTrue(new GoToSubstationCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)
         .alongWith((moveArm(DOUBLESUB))) // moves to double sub arm position
         .alongWith(new ClawPowerCommand(m_clawSubsystem, 1))) // intakes
         .onFalse(moveArm(DEFAULT)); // moves arm back to zero position
@@ -339,19 +333,21 @@ public class RobotContainer {
         .onFalse(moveArm(DEFAULT)); // moves arm back to zero position
 
     m_operatorController.povUp()
-        .whileTrue((new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem)) // Go to pose
+        .whileTrue((new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem)) // Go
+                                                                                                                 // to
+                                                                                                                 // pose
             .alongWith(
                 moveArm(m_targetingSubsystem.getScoringHeight()))
             .alongWith(new InstantCommand(() -> {
               m_wristSubsystem.rotate();
-            })) // rotate wrist
+            })) // rotate wristF
             .alongWith(waitCommand(2).andThen(new ClawTimedCommand(m_clawSubsystem, 1, -0.6)))) // Spit out
         .onFalse(moveArm(DEFAULT)); // move arm back
 
     m_operatorController.y().onTrue(
-    new InstantCommand(() -> {
-    m_wristSubsystem.rotate(); })
-    );
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }));
 
     m_operatorController.rightBumper().whileTrue(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false))

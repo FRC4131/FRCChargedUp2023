@@ -13,6 +13,7 @@ import com.revrobotics.RelativeEncoder;
 //import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController.AccelStrategy;
@@ -66,6 +67,8 @@ public class ArmSubsystem extends SubsystemBase {
     // m_leftRot.fp
     resetPosition();
 
+    m_rightRot.setIdleMode(IdleMode.kBrake);
+    m_leftRot.setIdleMode(IdleMode.kBrake);
     m_rightRot.enableSoftLimit(SoftLimitDirection.kForward, false);
     m_rightRot.enableSoftLimit(SoftLimitDirection.kReverse, false);
     m_rightRot.setSoftLimit(SoftLimitDirection.kForward, (float)angleToMotorRotations(ArmPosition.MAX.rotation - .1));

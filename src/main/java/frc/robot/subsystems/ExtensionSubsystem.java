@@ -6,8 +6,10 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motion.MotionProfileStatus;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteLimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -32,13 +34,13 @@ public class ExtensionSubsystem extends SubsystemBase {
       0,
       0);
 
-  private final double GEAR_RATIO = 7;
+  private final double GEAR_RATIO = 5 * 7;
 
   /** Creates a new ExtensionSubsystem. */
   public ExtensionSubsystem() {
     desired = 0;
     m_actuator.configSelectedFeedbackCoefficient(1);
-    // m_actuator.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 1000);
+    m_actuator.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 1000);
     // m_actuator.configSelectedFeedbackCoefficient(100 / (1024 * GEAR_RATIO *
     // 0.748), 1, 0);
 
@@ -58,13 +60,14 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.config_kD(1, 0);
     m_actuator.config_kF(1, 0);
 
-    m_actuator.configMotionCruiseVelocity(100000 / 5);
-    m_actuator.configMotionAcceleration(200000 / 5);
+    m_actuator.configMotionCruiseVelocity(100000);
+    m_actuator.configMotionAcceleration(200000);
 
     m_actuator.configPeakCurrentLimit(40);
-    m_actuator.configPeakCurrentDuration(250);
+    m_actuator.configPeakCurrentDuration(100);
     m_actuator.configContinuousCurrentLimit(0);
     m_actuator.enableCurrentLimit(true);
+    m_actuator.setNeutralMode(NeutralMode.Coast);
 
   //  m_actuator.configForwardSoftLimitEnable(true);
   //  m_actuator.configForwardSoftLimitThreshold(lengthToUnits(ArmPosition.MAX.length - 0.1));
@@ -151,5 +154,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
     SmartDashboard.putNumber("OFFSET BRUH",
         Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()));
+    SmartDashboard.putNumber("Telescope Current", m_actuator.getSupplyCurrent());
+    SmartDashboard.putNumber("Telescope Temp", m_actuator.getTemperature());
   }
 }
