@@ -52,8 +52,9 @@ public final class Constants {
         ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18),
-        DOUBLESUB(-56, 1.0),
-        FLOOR(110,15);
+        DOUBLESUB(-56, 1.0), //guestimate
+        FLOOR(110,15), //guestimate 
+        DEFAULT(0,0); //guestimate 
 
         public final double rotation;
         public final double length;

@@ -17,6 +17,7 @@ public class ClawTimedCommand extends CommandBase {
   public ClawTimedCommand(ClawSubsystem clawSubsystem, double seconds, double speed) {
     m_clawSubsystem = clawSubsystem;
     m_timer = new Timer();
+    m_speed = speed; 
     addRequirements(clawSubsystem);
   }
 

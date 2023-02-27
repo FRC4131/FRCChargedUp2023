@@ -50,7 +50,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   }
 
   public void zeroGyro() {
-    m_navX.reset();
+    m_navX.setAngleAdjustment(getPitch());
   }
 
   private Rotation2d getGyroYaw() {

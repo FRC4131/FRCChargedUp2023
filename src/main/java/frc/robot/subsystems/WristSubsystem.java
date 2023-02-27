@@ -21,8 +21,8 @@ public class WristSubsystem extends SubsystemBase {
   private RelativeEncoder m_Encoder;
   private SparkMaxPIDController m_WristPID;
   //clockwise channel needs to be changed
-  private DigitalInput clockwiseLimit = new DigitalInput(5);
-  private DigitalInput counterClockwiseLimit = new DigitalInput(4);
+  private DigitalInput clockwiseLimit = new DigitalInput(2);
+  private DigitalInput counterClockwiseLimit = new DigitalInput(1);
   private final double WRIST_MOTOR_GEAR_RATIO = 25;
   private boolean isMovingClockwise;
 
@@ -73,6 +73,9 @@ public class WristSubsystem extends SubsystemBase {
     {
       m_WristPID.setReference(8, ControlType.kSmartVelocity);
     }
+    else if (!(getClockwiseSwitch() || getClockwiseSwitch())){
+      m_WristPID.setReference(8, ControlType.kSmartVelocity);
+    }
 
   }
 
@@ -83,7 +86,7 @@ public class WristSubsystem extends SubsystemBase {
   public void rotateClockwise(){
     m_WristPID.setReference(-8, ControlType.kSmartVelocity);
   }
-  
+
   public void rotateCounterClockwise(){
     m_WristPID.setReference(8, ControlType.kSmartVelocity);
   }

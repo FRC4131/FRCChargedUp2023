@@ -29,7 +29,10 @@ public class ArmSubsystem extends SubsystemBase {
   // ratios ratio
   private final double ARM_MOTOR_GEAR_RATIO = 5.0 / 1.0 * 4.0 / 1.0 * 3.0 / 1.0 * 58.0 / 15.0;
 
-  // private CANSparkMax m_leftRot = new CANSparkMax(59, MotorType.kBrushless);
+  // Follower motor
+  private CANSparkMax m_leftRot = new CANSparkMax(59, MotorType.kBrushless);
+
+  // Leader motor
   private CANSparkMax m_rightRot = new CANSparkMax(58, MotorType.kBrushless);
 
   private SparkMaxPIDController m_rightRotPIDController;
