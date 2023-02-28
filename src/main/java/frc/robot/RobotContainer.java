@@ -139,10 +139,10 @@ public class RobotContainer {
         () -> m_driverController.getLeftTriggerAxis(),
         true));
 
-    m_armSubsystem.setDefaultCommand(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
-    m_extensionSubsystem.setDefaultCommand(
-        new ExtensionJoystickCommand(m_extensionSubsystem, () -> modifyAxis(m_operatorController.getLeftY(), false)));
+    // m_armSubsystem.setDefaultCommand(
+    //     new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
+    // m_extensionSubsystem.setDefaultCommand(
+    //     new ExtensionJoystickCommand(m_extensionSubsystem, () -> modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   public Command getAutonomousCommand() {
@@ -261,26 +261,17 @@ public class RobotContainer {
             .alongWith(moveArm(FLOOR))
             .alongWith(waitCommand(2)
                 .andThen(new ClawTimedCommand(m_clawSubsystem, 1.2, 0.6))),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 9.2", 4.0, 3.0)) // moves
-                                                                                                                    // to
-                                                                                                                    // grid
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 9.2", 4.0, 3.0))
             .alongWith(moveArm(HIGH))
             .alongWith(new InstantCommand(() -> {
               m_wristSubsystem.rotate();
             })),
         new ClawTimedCommand(m_clawSubsystem, 1, -0.6), // drops off second piece
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 9.3", 4.0, 3.0)) // moves
-                                                                                                                    // and
-                                                                                                                    // pick
-                                                                                                                    // up
-                                                                                                                    // third
-                                                                                                                    // piece
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 9.3", 4.0, 3.0))
             .alongWith(moveArm(FLOOR))
             .alongWith(waitCommand(2)
                 .andThen(new ClawTimedCommand(m_clawSubsystem, 1, 0.6))),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 9.4", 4.0, 3.0)) // moves
-                                                                                                                    // to
-                                                                                                                    // grid
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 9.4", 4.0, 3.0))
             .alongWith(moveArm(HIGH))
             .alongWith(new InstantCommand(() -> {
               m_wristSubsystem.rotate();
@@ -306,8 +297,9 @@ public class RobotContainer {
     // m_operatorController.y().onTrue(new WristSwitchCommand(m_wristSubsystem));
     // m_operatorController.a().whileTrue(new InstantCommand(() ->
     // m_wristSubsystem.rotateAt(-8)));
-    m_operatorController.povDown().whileTrue(new ExtendToCommand(m_extensionSubsystem,
-        0));
+    m_operatorController.povRight().onTrue(new InstantCommand(() -> {m_extensionSubsystem.extendTo(19.5);}, m_extensionSubsystem));
+    m_operatorController.povLeft().onTrue(new InstantCommand(() -> {m_extensionSubsystem.extendTo(0);}, m_extensionSubsystem));
+    m_operatorController.povDown().onTrue(moveArm(m_targetingSubsystem.getScoringHeight()));
     // m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem,
     // 21.8));
     // m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem,
@@ -328,9 +320,9 @@ public class RobotContainer {
         .alongWith(new ClawPowerCommand(m_clawSubsystem, 1))) // intakes
         .onFalse(moveArm(DEFAULT)); // moves arm back to zero position
 
-    m_operatorController.b().whileTrue(moveArm(ArmPosition.FLOOR) // moves arm to floor
-        .alongWith(new ClawPowerCommand(m_clawSubsystem, 1))) // intakes
-        .onFalse(moveArm(DEFAULT)); // moves arm back to zero position
+    // m_operatorController.b().whileTrue(moveArm(ArmPosition.FLOOR) // moves arm to floor
+    //     .alongWith(new ClawPowerCommand(m_clawSubsystem, 1))) // intakes
+    //     .onFalse(moveArm(DEFAULT)); // moves arm back to zero position
 
     m_operatorController.povUp()
         .whileTrue((new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem)) // Go
@@ -360,6 +352,8 @@ public class RobotContainer {
       m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
     }));
 
+    m_operatorController.start().onTrue(moveArm(ZEROES));
+
     new Trigger(() -> isInDefaultDriveMode)
         .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             () -> -modifyAxis(m_driverController.getLeftY(), false) *
@@ -387,16 +381,16 @@ public class RobotContainer {
         .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem,
             m_poseEstimationSubsystem, Math.PI / 2.0));
 
-    m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
-        m_poseEstimationSubsystem,
-        m_targetingSubsystem,
-        () -> -modifyAxis(m_driverController.getLeftY(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getLeftX(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getRightX(), false) *
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-        () -> m_driverController.getLeftTriggerAxis()));
+    // m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
+    //     m_poseEstimationSubsystem,
+    //     m_targetingSubsystem,
+    //     () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    //         Constants.Swerve.maxSpeed,
+    //     () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    //         Constants.Swerve.maxSpeed,
+    //     () -> -modifyAxis(m_driverController.getRightX(), false) *
+    //         MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    //     () -> m_driverController.getLeftTriggerAxis()));
 
     // m_driverController.rightBumper().whileTrue(new
     // GoToPoseCommand(m_drivetrainSubsystem,

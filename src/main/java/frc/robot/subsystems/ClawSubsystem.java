@@ -30,13 +30,16 @@ public class ClawSubsystem extends SubsystemBase {
 
     m_clawEncoder = m_clawController.getEncoder();
     m_clawPID = m_clawController.getPIDController();
+    m_clawController.setSmartCurrentLimit(30, 40);
+
+    m_clawController.burnFlash();
 
 
     m_clawPID.setP(1);
   }
 
   public void intakeSpeed(double d) {
-    m_clawController.set(d * 0.6);
+    m_clawController.set(d * 1);
   }
 
 

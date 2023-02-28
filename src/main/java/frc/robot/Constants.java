@@ -47,7 +47,7 @@ public final class Constants {
     public enum ArmPosition {
         LOW(120,1.0),
         MEDIUM(-62, 8.5),
-        HIGH(-56, 21.8),
+        HIGH(-56, 19.5),
         STOW(120,0),
         ZEROES(0,0),
         MIN(-30, 0),
