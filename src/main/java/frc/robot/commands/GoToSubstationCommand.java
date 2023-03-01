@@ -4,87 +4,136 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.apriltag.AprilTag;
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.Constants.Swerve;
+import frc.robot.Constants.GridPositions;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
+import frc.robot.subsystems.TargetingSubsystem;
 
 public class GoToSubstationCommand extends CommandBase {
-  /** Creates a new GoToSubstationCommand. */
-  private DrivetrainSubsystem m_DrivetrainSubsystem;
-  private PoseEstimationSubsystem m_PoseEstimationSubsystem;
-  private AprilTag m_aprilTag; 
-  private ProfiledPIDController x_Controller;
-  private ProfiledPIDController y_Controller;
-  private ProfiledPIDController theta_Controller;
-  private Timer m_Timer;
-  private Pose2d m_setpointPose;
-  
-  public GoToSubstationCommand (DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem) 
-  {
-    m_DrivetrainSubsystem = drivetrainSubsystem;
-    m_PoseEstimationSubsystem = poseEstimationSubsystem;
-    m_aprilTag = (DriverStation.getAlliance().equals(Alliance.Blue) ? Constants.AprilTagConstants.tag4 : Constants.AprilTagConstants.tag5);
+  DrivetrainSubsystem m_drivetrainSubsystem;
+  PoseEstimationSubsystem m_poseEstimationSubsystem;
+  DoubleSupplier m_x;
+  DoubleSupplier m_y;
+  DoubleSupplier m_theta;
+  DoubleSupplier m_throttle;
+  Pose2d m_desiredPose;
+  double m_minThrottle = 0.2;
 
-    x_Controller = new ProfiledPIDController(3, 0, 0,
-    new TrapezoidProfile.Constraints(Swerve.maxSpeed, 8));
-    
-    y_Controller = new ProfiledPIDController(3, 0, 0, 
-    new TrapezoidProfile.Constraints(Swerve.maxSpeed, 8));
-    
-    theta_Controller = new ProfiledPIDController(6, 0, 0,
-    new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
+  ProfiledPIDController m_xController;
+  ProfiledPIDController m_yController;
+  ProfiledPIDController m_thetaController;
 
-    theta_Controller.enableContinuousInput(-Math.PI, Math.PI);
+  /**
+   * Command to run to the alliance's double substation
+   * @param drivetrainSubsystem drives the robot
+   * @param poseEstimationSubsystem provides robot pose
+   * @param x left joystick x value (multiply it by max speed)
+   * @param y left joystick y value (multiply it by max speed)
+   * @param theta right joystick x value (multiply it by max angular speed)
+   * @param throttle right trigger value (gives driver more control)
+   */
+  public GoToSubstationCommand(DrivetrainSubsystem drivetrainSubsystem,
+      PoseEstimationSubsystem poseEstimationSubsystem,
+      DoubleSupplier x,
+      DoubleSupplier y,
+      DoubleSupplier theta,
+      DoubleSupplier throttle) {
+    m_drivetrainSubsystem = drivetrainSubsystem;
+    m_poseEstimationSubsystem = poseEstimationSubsystem;
+    m_x = x;
+    m_y = y;
+    m_theta = theta;
+    m_throttle = throttle;
 
-    m_Timer = new Timer();
-    addRequirements(m_DrivetrainSubsystem, m_PoseEstimationSubsystem);
+    m_xController = new ProfiledPIDController(3, 0, 0,
+        new Constraints(Constants.Swerve.maxSpeed, Constants.Swerve.maxSpeed));
+
+    m_yController = new ProfiledPIDController(3, 0, 0,
+        new Constraints(Constants.Swerve.maxSpeed, Constants.Swerve.maxSpeed));
+
+    m_thetaController = new ProfiledPIDController(6, 0, 0,
+        new Constraints(Constants.Swerve.maxAngularVelocity, Constants.Swerve.maxAngularVelocity));
+    m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
+    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_Timer.reset();
-    m_Timer.start();
-    x_Controller.reset(m_PoseEstimationSubsystem.getPose().getX());
-    y_Controller.reset(m_PoseEstimationSubsystem.getPose().getY());
-    m_setpointPose = m_aprilTag.pose.toPose2d();
-    x_Controller.setGoal(m_setpointPose.getX());
-    y_Controller.setGoal(m_setpointPose.getY());
-    theta_Controller.setGoal(m_setpointPose.getRotation().getRadians());
+    boolean isRed = DriverStation.getAlliance().equals(Alliance.Red);
+    GridPositions grid = DriverStation.getAlliance().equals(Alliance.Red) ? GridPositions.REDDUBSUB : GridPositions.BLUEDUBSUB;
+    m_desiredPose =  new Pose2d(grid.x, grid.y, Rotation2d.fromDegrees(isRed ? 180 : 0));
+    m_xController.reset(m_poseEstimationSubsystem.getPose().getX());
+    m_yController.reset(m_poseEstimationSubsystem.getPose().getY());
+    m_xController.setGoal(m_desiredPose.getX());
+    m_yController.setGoal(m_desiredPose.getY());
+    m_thetaController.setGoal(m_desiredPose.getRotation().getRadians());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double desiredRotation = theta_Controller.calculate(m_PoseEstimationSubsystem.getPose().getRotation().getRadians());
-    double desiredX = x_Controller.calculate(m_PoseEstimationSubsystem.getPose().getX());
-    double desiredY = y_Controller.calculate(m_PoseEstimationSubsystem.getPose().getY());
-    SmartDashboard.putNumber("ABOOMX", m_setpointPose.getX());
-    SmartDashboard.putNumber("ABOOMY", m_setpointPose.getY());
-    m_DrivetrainSubsystem.drive(new Translation2d(desiredX, desiredY), desiredRotation, m_PoseEstimationSubsystem.getPose().getRotation(), false, true);
+    double pidDesiredRotation = m_thetaController.calculate(
+        m_poseEstimationSubsystem.getPose().getRotation().getRadians(), m_desiredPose.getRotation().getRadians());
+    double pidDesiredX = m_xController.calculate(m_poseEstimationSubsystem.getPose().getX(), m_desiredPose.getX());
+    double pidDesiredY = m_yController.calculate(m_poseEstimationSubsystem.getPose().getY(), m_desiredPose.getY());
+
+    // Cap the PID's velocity vector by the max speed
+    Translation2d pidVector = new Translation2d(pidDesiredX, pidDesiredY);
+    double pidScaling = getSpeedScaling(pidVector);
+    Translation2d scaledPidVector = pidVector.times(pidScaling);
+
+    // Get the driver input vector rotated into the global coordinate system
+    Translation2d rotatedDriveVector = new Translation2d(m_x.getAsDouble(), m_y.getAsDouble())
+        .rotateBy(m_poseEstimationSubsystem.getPose().getRotation());
+    rotatedDriveVector = rotatedDriveVector.times(Constants.Swerve.maxSpeed);
+
+    // Calculate the throttle scaling factor
+    double throttleSlope = 1 - m_minThrottle;
+    double throttleScale = throttleSlope * m_throttle.getAsDouble() + m_minThrottle;
+
+    Translation2d finalVector = new Translation2d(
+        rotatedDriveVector.getX() * throttleScale + scaledPidVector.getX(),
+        rotatedDriveVector.getY() * throttleScale + scaledPidVector.getY());
+    double finalRotation = (m_theta.getAsDouble() + pidDesiredRotation) * throttleScale;
+
+    m_drivetrainSubsystem.drive(finalVector, finalRotation, new Rotation2d(), false, false);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_DrivetrainSubsystem.drive(new Translation2d(), 0, new Rotation2d(), true, true);
+    m_drivetrainSubsystem.drive(new ChassisSpeeds());
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (x_Controller.atGoal() && y_Controller.atGoal() && theta_Controller.atGoal()) || m_Timer.hasElapsed(6);
+    return false;
   }
+
+  private double getSpeedScaling(Translation2d input) {
+    if (Math.abs(input.getNorm()) > Constants.Swerve.maxSpeed) {
+      return Constants.Swerve.maxSpeed / input.getNorm();
+    } else {
+      return 1.0;
+    }
+  }
+
 }

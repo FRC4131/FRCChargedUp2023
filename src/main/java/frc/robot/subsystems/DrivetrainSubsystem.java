@@ -118,11 +118,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        for (SwerveModule mod : m_SwerveMods) {
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Drive Position", mod.getDrivePosition());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Turn Position", mod.getTurningPosition());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
-        }
+        // for (SwerveModule mod : m_SwerveMods) {
+        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Drive Position", mod.getDrivePosition());
+        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Turn Position", mod.getTurningPosition());
+        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
+        // }
 
     }
 }

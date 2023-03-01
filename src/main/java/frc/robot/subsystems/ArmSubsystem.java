@@ -52,21 +52,30 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightEncoder = m_rightRot.getEncoder();
     m_rightRotPIDController = m_rightRot.getPIDController();
     m_rightEncoder.setPositionConversionFactor(1);
+    m_rightEncoder.setVelocityConversionFactor(1);
     m_rightRotPIDController.setOutputRange(-1, 1);
     m_rightRotPIDController.setSmartMotionMaxAccel(7500, 0);
     m_rightRotPIDController.setSmartMotionMaxVelocity(10000, 0);
     m_rightRotPIDController.setSmartMotionMinOutputVelocity(0, 0);
     m_rightRotPIDController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
 
+    // Smart Motion
     m_rightRotPIDController.setP(4e-9);
     m_rightRotPIDController.setI(0);
     m_rightRotPIDController.setD(0);
     m_rightRotPIDController.setFF(9.9e-5);
+
+    // Position
+    // m_rightRotPIDController.setP(5e-2);
+    // m_rightRotPIDController.setI(0);
+    // m_rightRotPIDController.setD(0);
+    // m_rightRotPIDController.setFF(0);
+
     SmartDashboard.putBoolean("bool", bool);
     // m_leftRot.setIdleMode(IdleMode.kCoast);
 
     // m_leftRot.fp
-    resetPosition();
+    resetPosition(0);
 
     m_rightRot.setIdleMode(IdleMode.kBrake);
     m_leftRot.setIdleMode(IdleMode.kBrake);
@@ -85,7 +94,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void rotateArm(double power) {
     // m_rightRot.set(powerSupplier.getAsDouble() * 0.1);
-    m_rightRotPIDController.setReference(power * 0.5, ControlType.kDutyCycle);
+    m_rightRotPIDController.setReference(power, ControlType.kDutyCycle);
     SmartDashboard.putNumber("TOSE", power);
   }
 
@@ -94,8 +103,8 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightRotPIDController.setReference(encoderRotations, ControlType.kSmartMotion);
   };
 
-  public void resetPosition() {
-    m_rightEncoder.setPosition(0);
+  public void resetPosition(double position) {
+    m_rightEncoder.setPosition(angleToMotorRotations(position));
     // m_rightRotPIDController.setReference(0, ControlType.kPosition);
   }
 
@@ -126,6 +135,7 @@ public class ArmSubsystem extends SubsystemBase {
     // }
 
 
+    SmartDashboard.putNumber("cool speed", m_rightEncoder.getVelocity());
     SmartDashboard.putString("RightencoderRpos",
         m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " ticks(?)");
     // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + "
@@ -133,13 +143,13 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.getBoolean("BOOL", false);
   }
 
-  public CommandBase resetEncoder() {
+  public CommandBase resetEncoder(double position) {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
           /* one-time action goes here */
-          resetPosition();
+          resetPosition(position);
         });
   }
 }

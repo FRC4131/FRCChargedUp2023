@@ -58,7 +58,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.config_kP(1, 0.0165);
     m_actuator.config_kI(1, 0);
     m_actuator.config_kD(1, 0);
-    m_actuator.config_kF(1, 0);
+    m_actuator.config_kF(1, 1e-2);
 
     m_actuator.configMotionCruiseVelocity(100000);
     m_actuator.configMotionAcceleration(200000);
@@ -120,8 +120,8 @@ public class ExtensionSubsystem extends SubsystemBase {
     return -m_actuator.getSelectedSensorPosition(0) * (100 / (1024 * GEAR_RATIO * 0.748));
   }
 
-  public void resetEncoder() {
-    m_actuator.setSelectedSensorPosition(0);
+  public void resetEncoder(double position) {
+    m_actuator.setSelectedSensorPosition(position);
   }
 
   public boolean getForwardOutput() {

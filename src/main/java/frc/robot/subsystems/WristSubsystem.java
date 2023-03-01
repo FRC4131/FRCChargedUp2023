@@ -95,11 +95,15 @@ public class WristSubsystem extends SubsystemBase {
   public void checkLimitSwitch(){
     if (getClockwiseSwitch() && isMovingClockwise)
     {
-      m_WristPID.setReference(0, ControlType.kSmartVelocity);
+      m_WristPID.setReference(0, ControlType.kDutyCycle);
     }
     else if (getCounterClockwiseSwitch() && !isMovingClockwise)
     {
-      m_WristPID.setReference(0, ControlType.kSmartVelocity);
+      m_WristPID.setReference(0, ControlType.kDutyCycle);
+    }
+
+    if((getClockwiseSwitch() || getCounterClockwiseSwitch()) && m_wristController.getOutputCurrent() > 15){
+      m_WristPID.setReference(0, ControlType.kDutyCycle);
     }
   }
 

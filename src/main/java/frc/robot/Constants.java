@@ -46,8 +46,8 @@ public final class Constants {
     */
     public enum ArmPosition {
         LOW(120,1.0),
-        MEDIUM(-62, 8.5),
-        HIGH(-56, 19.5),
+        MEDIUM(-67, 0),
+        HIGH(-59, 18.6),
         STOW(120,0),
         ZEROES(0,0),
         MIN(-30, 0),
@@ -71,7 +71,10 @@ public final class Constants {
         RED3(14.92, 1.08),
         BLUE6(1.92, 4.45),
         BLUE7(1.92, 2.75),
-        BLUE8(1.92, 1.08);
+        BLUE8(1.92, 1.08),
+        REDDUBSUB(1.36195, 7.4),
+        BLUEDUBSUB(15.178784, 7.4);
+        
 
         public final double x;
         public final double y;

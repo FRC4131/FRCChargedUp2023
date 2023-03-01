@@ -37,6 +37,10 @@ public class TargetingSubsystem extends SubsystemBase {
   private final CommandMacroPad m_pad;
   private Button desiredNode = Button.button1;
 
+  public double armAngle = 0;
+  public double elevatorLength = 0;
+  public ArmPosition pos = ArmPosition.HIGH;
+
   /** Creates a new TargettingSubsystem. */
   public TargetingSubsystem(CommandMacroPad m_commandMacroPad) {
     m_pad = m_commandMacroPad;
@@ -66,7 +70,8 @@ public class TargetingSubsystem extends SubsystemBase {
 
     int allianceReverse = isBlueAlliance ? 1 : -1;
 
-    double xOffset = desiredNode.row == 1 ? -0.26 * allianceReverse : 0;
+    // double xOffset = desiredNode.row == 1 ? -0.26 * allianceReverse : 0;
+    double xOffset = -0.25;
     double yOffset;
 
     switch (desiredNode.column) {
@@ -136,11 +141,19 @@ public class TargetingSubsystem extends SubsystemBase {
     isBlueAlliance = DriverStation.getAlliance().equals(Alliance.Blue);
 
     desiredGrid = selectGrid() + (isBlueAlliance ? 5 : 0);
+
+    armAngle = getScoringHeight().rotation;
+    elevatorLength = getScoringHeight().length;
     setNode(selectNode().value());
     SmartDashboard.putNumber("grid selected", desiredGrid);
     SmartDashboard.putNumber("node selected", desiredNode.value());
     SmartDashboard.putNumber("desiredX", getTargetGridPose().getX());
     SmartDashboard.putNumber("desiredY", getTargetGridPose().getY());
     SmartDashboard.putNumber("desiredRotation", getTargetGridPose().getRotation().getDegrees());
+
+    SmartDashboard.putNumber("EXTEND PLS", armAngle);
+    SmartDashboard.putNumber("ROT PLS", elevatorLength);
+
+    pos = getScoringHeight();
   }
 }
