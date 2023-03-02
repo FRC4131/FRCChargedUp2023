@@ -75,7 +75,7 @@ public class ArmSubsystem extends SubsystemBase {
     // m_leftRot.setIdleMode(IdleMode.kCoast);
 
     // m_leftRot.fp
-    resetPosition(0);
+    resetPosition(45.0);
 
     m_rightRot.setIdleMode(IdleMode.kBrake);
     m_leftRot.setIdleMode(IdleMode.kBrake);

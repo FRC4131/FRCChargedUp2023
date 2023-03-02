@@ -120,7 +120,19 @@ public class TargetingSubsystem extends SubsystemBase {
 
   public ArmPosition getScoringHeight() {
     if (desiredNode == null) {
-      return ArmPosition.LOW;
+      return ArmPosition.ZEROES;
+    }
+    if(desiredNode.column == 2){
+      switch (desiredNode.row) {
+        case 1:
+          return ArmPosition.HIGH;
+        case 2:
+          return ArmPosition.MEDIUM;
+        case 3:
+          return ArmPosition.LOW;
+        default:
+          return ArmPosition.ZEROES;
+      }
     }
     switch (desiredNode.row) {
       case 1:
@@ -130,7 +142,23 @@ public class TargetingSubsystem extends SubsystemBase {
       case 3:
         return ArmPosition.LOW;
       default:
+        return ArmPosition.ZEROES;
+    }
+  }
+
+  public ArmPosition getCommitedScoringHeight(){
+    if (desiredNode == null) {
+      return ArmPosition.ZEROES;
+    }
+    switch (desiredNode.row) {
+      case 1:
+        return ArmPosition.HIGHCOMMIT;
+      case 2:
+        return ArmPosition.MEDIUMCOMMIT;
+      case 3:
         return ArmPosition.LOW;
+      default:
+        return ArmPosition.ZEROES;
     }
   }
 

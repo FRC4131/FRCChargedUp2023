@@ -22,8 +22,10 @@ import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.GoToSubstationCommand;
+import frc.robot.commands.LEDSwitchColorsCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
+import frc.robot.commands.TimerCommand;
 import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.commands.WristCommand;
 import frc.robot.commands.WristSwitchCommand;
@@ -32,6 +34,7 @@ import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.ExtensionSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -88,6 +91,7 @@ public class RobotContainer {
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
   private final WristSubsystem m_wristSubsystem = new WristSubsystem();
+  private final LEDSubsystem m_LEDSubsystem = new LEDSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -289,6 +293,7 @@ public class RobotContainer {
      * new Trigger(m_exampleSubsystem::exampleCondition)
      * .onTrue(new ExampleCommand(m_exampleSubsystem));
      */
+    m_operatorController.leftStick().onTrue(new LEDSwitchColorsCommand(m_LEDSubsystem));
 
     m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
     m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
@@ -300,23 +305,53 @@ public class RobotContainer {
     // m_operatorController.y().onTrue(new WristSwitchCommand(m_wristSubsystem));
     // m_operatorController.a().whileTrue(new InstantCommand(() ->
     // m_wristSubsystem.rotateAt(-8)));
-    m_operatorController.leftStick().onTrue(new InstantCommand(() -> {m_extensionSubsystem.resetEncoder(0); m_armSubsystem.resetEncoder(0);}, m_extensionSubsystem, m_armSubsystem));
+
     m_operatorController.povRight().onTrue(new InstantCommand(() -> {
       m_extensionSubsystem.extendTo(19.5);
     }, m_extensionSubsystem));
     m_operatorController.povLeft().onTrue(new InstantCommand(() -> {
       m_extensionSubsystem.extendTo(0);
     }, m_extensionSubsystem));
-    m_operatorController.povDown().onTrue(moveArm(m_targetingSubsystem.pos));
+    m_operatorController.povDown().onTrue(
+        new InstantCommand(
+            () -> {
+              ArmPosition position = m_targetingSubsystem.getScoringHeight();
+              m_armSubsystem.snapToAngle(position.rotation);
+            }, m_armSubsystem)
+            .alongWith(
+                new InstantCommand(() -> {
+                  ArmPosition position = m_targetingSubsystem.getScoringHeight();
+                  m_extensionSubsystem.extendTo(position.length);
+                }, m_extensionSubsystem)));
     // m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem,
     // 21.8));
     // m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem,
     // 19.5));
-    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(52.83)
+    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(0)
         .alongWith(
             new InstantCommand(() -> {
               m_extensionSubsystem.resetEncoder(0);
             }, m_extensionSubsystem)));
+
+    m_driverController.rightStick().whileTrue(
+        new InstantCommand(
+            () -> {
+              ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+              m_armSubsystem.snapToAngle(position.rotation);
+            }, m_armSubsystem)
+            .alongWith(
+                new InstantCommand(() -> {
+                  ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+                  m_extensionSubsystem.extendTo(position.length);
+                }, m_extensionSubsystem))
+            .alongWith(new TimerCommand(0.75)).andThen(
+                new ClawPowerCommand(m_clawSubsystem, -1).alongWith(
+                new InstantCommand(() -> {
+                  m_extensionSubsystem.extendTo(0);
+                }, m_extensionSubsystem))
+            ));
+        
+    m_operatorController.povUp().onTrue(moveArm(DOUBLESUB));
 
     // m_operatorController.y().onTrue(
     // new InstantCommand(() -> {
@@ -328,17 +363,17 @@ public class RobotContainer {
     // .alongWith(new ClawPowerCommand(m_clawSubsystem, 1))) // intakes
     // .onFalse(moveArm(DEFAULT)); // moves arm back to zero position
 
-    m_operatorController.povUp()
-        .whileTrue((new GoToPoseCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem)) // Go
-                                                                                                                 // to
-                                                                                                                 // pose
-            .alongWith(
-                moveArm(m_targetingSubsystem.getScoringHeight()))
-            .alongWith(new InstantCommand(() -> {
-              m_wristSubsystem.rotate();
-            })) // rotate wristF
-            .alongWith(waitCommand(2).andThen(new ClawTimedCommand(m_clawSubsystem, 1, -0.6)))) // Spit out
-        .onFalse(moveArm(DEFAULT)); // move arm back
+    // m_operatorController.povUp()
+    // .whileTrue((new GoToPoseCommand(m_drivetrainSubsystem,
+    // m_poseEstimationSubsystem, m_targetingSubsystem))
+    // .alongWith(
+    // moveArm(m_targetingSubsystem.getScoringHeight()))
+    // .alongWith(new InstantCommand(() -> {
+    // m_wristSubsystem.rotate();
+    // }))
+    // .alongWith(waitCommand(2).andThen(new ClawTimedCommand(m_clawSubsystem, 1,
+    // -0.6))))
+    // .onFalse(moveArm(DEFAULT));
 
     m_operatorController.y().onTrue(
         new InstantCommand(() -> {
@@ -385,7 +420,7 @@ public class RobotContainer {
     // ExampleCommand(m_targetingSubsystem));
   }
 
-  private void configureDriver1Bindings(){
+  private void configureDriver1Bindings() {
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
     m_driverController.b()
         .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem,

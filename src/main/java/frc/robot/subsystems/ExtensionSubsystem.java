@@ -16,6 +16,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -35,6 +36,8 @@ public class ExtensionSubsystem extends SubsystemBase {
       0);
 
   private final double GEAR_RATIO = 5 * 7;
+
+  private Timer m_Timer;
 
   /** Creates a new ExtensionSubsystem. */
   public ExtensionSubsystem() {
@@ -74,6 +77,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     // - 0.1));
     // m_actuator.configReverseSoftLimitEnable(true);
     // m_actuator.configReverseSoftLimitThreshold(lengthToUnits(.1));
+    m_Timer = new Timer();
+    m_Timer.reset();
+    m_Timer.stop();
   }
 
   /**
@@ -112,6 +118,12 @@ public class ExtensionSubsystem extends SubsystemBase {
       SmartDashboard.putBoolean("FORCE STOP TELE", false);
     }
   }
+
+  // private void limitCurrent(){
+  //   if(m_actuator.getSupplyCurrent() < 10){
+
+  //   }
+  // }
 
   /**
    * @return The position of the motor (in 1024 encoder ticks per rev)
@@ -173,5 +185,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("TELE BACK", getReverseOutput());
     SmartDashboard.putNumber("TELE OUTPUT", -m_actuator.getMotorOutputPercent());
     checkLimitSwitches();
+
+    if (Math.abs(m_actuator.getSupplyCurrent()) <= 0.2 && getReverseOutput()){
+      resetEncoder(0);
+    }
   }
 }
