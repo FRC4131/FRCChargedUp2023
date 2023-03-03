@@ -58,7 +58,7 @@ public final class Constants {
         CUBENODEMEDIUM(-67, 1.5),
         CUBENODEHIGH(-59, 18.6),
         MEDIUMCOMMIT(-70, 1.5),
-        HIGHCOMMIT(-64, 19.35);
+        HIGHCOMMIT(-67, 19.35);
 
         public final double rotation;
         public final double length;
@@ -70,9 +70,9 @@ public final class Constants {
     }
 
     public enum GridPositions{
-        RED1(14.92, 4.45),
-        RED2(14.92, 2.75),
-        RED3(14.92, 1.08),
+        RED1(15.1, 1.08),
+        RED2(15.1, 2.75),
+        RED3(15.1, 4.45),
         BLUE6(1.92, 4.45),
         BLUE7(1.92, 2.75),
         BLUE8(1.92, 1.08),

@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
@@ -38,13 +40,18 @@ public class GoToPoseTeleopCommand extends CommandBase {
 
   /**
    * Command to run to selected grid position while also giving driver fine tuning
-   * @param drivetrainSubsystem drives the robot
+   * 
+   * @param drivetrainSubsystem     drives the robot
    * @param poseEstimationSubsystem provides robot pose
-   * @param targetingSubsystem determines selected grid
-   * @param x left joystick x value (multiply it by max speed)
-   * @param y left joystick y value (multiply it by max speed)
-   * @param theta right joystick x value (multiply it by max angular speed)
-   * @param throttle right trigger value (gives driver more control)
+   * @param targetingSubsystem      determines selected grid
+   * @param x                       left joystick x value (multiply it by max
+   *                                speed)
+   * @param y                       left joystick y value (multiply it by max
+   *                                speed)
+   * @param theta                   right joystick x value (multiply it by max
+   *                                angular speed)
+   * @param throttle                right trigger value (gives driver more
+   *                                control)
    */
   public GoToPoseTeleopCommand(DrivetrainSubsystem drivetrainSubsystem,
       PoseEstimationSubsystem poseEstimationSubsystem,
@@ -78,9 +85,9 @@ public class GoToPoseTeleopCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_desiredPose = m_targetingSubsystem.getTargetGridPose();
     m_xController.reset(m_poseEstimationSubsystem.getPose().getX());
     m_yController.reset(m_poseEstimationSubsystem.getPose().getY());
+    m_desiredPose = m_targetingSubsystem.getTargetGridPose();
     m_xController.setGoal(m_desiredPose.getX());
     m_yController.setGoal(m_desiredPose.getY());
     m_thetaController.setGoal(m_desiredPose.getRotation().getRadians());
@@ -89,6 +96,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    boolean isBlue = DriverStation.getAlliance().equals(Alliance.Blue);
     double pidDesiredRotation = m_thetaController.calculate(
         m_poseEstimationSubsystem.getPose().getRotation().getRadians(), m_desiredPose.getRotation().getRadians());
     double pidDesiredX = m_xController.calculate(m_poseEstimationSubsystem.getPose().getX(), m_desiredPose.getX());
@@ -99,10 +107,12 @@ public class GoToPoseTeleopCommand extends CommandBase {
     // Cap the PID's velocity vector by the max speed
     Translation2d pidVector = new Translation2d(pidDesiredX, pidDesiredY);
     double pidScaling = getSpeedScaling(pidVector);
-    Translation2d scaledPidVector = pidVector.times(pidScaling);
+    Translation2d scaledPidVector = pidVector
+        .times(DriverStation.getAlliance().equals(Alliance.Blue) ? pidScaling : -pidScaling);
 
     // Get the driver input vector rotated into the global coordinate system
-    Translation2d rotatedDriveVector = new Translation2d(m_x.getAsDouble(), m_y.getAsDouble())
+    Translation2d rotatedDriveVector = new Translation2d(isBlue ? m_x.getAsDouble() : -m_x.getAsDouble(),
+        isBlue ? m_y.getAsDouble() : -m_y.getAsDouble())
         .rotateBy(m_poseEstimationSubsystem.getPose().getRotation());
 
     // Calculate the throttle scaling factor

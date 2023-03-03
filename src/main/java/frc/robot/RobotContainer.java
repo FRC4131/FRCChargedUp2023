@@ -158,7 +158,7 @@ public class RobotContainer {
 
   public void addAuton() {
     m_autoChooser = new SendableChooser<Command>();
-    m_autoChooser.setDefaultOption("PathplannerAuton", ppAuto());
+    m_autoChooser.setDefaultOption("Testing Auton", defaultAuto());
   }
 
   public Command moveArm(ArmPosition position) {
@@ -179,6 +179,29 @@ public class RobotContainer {
                 m_poseEstimationSubsystem.getPose().getRotation())),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 1.1", 2.5, 2)));
+  }
+
+  /**
+   * 1 cone then taxi
+   */
+  public Command defaultAuto() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }),
+        moveArm(HIGH),
+        new WaitCommand(1.5),
+        moveArm(HIGHCOMMIT),
+        new WaitCommand(3),
+        new WaitCommand(3).deadlineWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem).alongWith(
+                new WaitCommand(0.25).andThen(
+                    new ClawPowerCommand(m_clawSubsystem, -1)))),
+        moveArm(ZEROES),
+        new WaitCommand(2),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 10.1", 4.0, 3.0)));
   }
 
   /**
@@ -307,8 +330,10 @@ public class RobotContainer {
     // m_wristSubsystem.rotateAt(-8)));
 
     m_operatorController.povRight().onTrue(new InstantCommand(() -> {
-      m_extensionSubsystem.extendTo(19.5);
-    }, m_extensionSubsystem));
+      m_armSubsystem.snapToAngle(90);
+    }, m_armSubsystem).alongWith(new InstantCommand(() -> {
+      m_extensionSubsystem.extendTo(0);
+    }, m_extensionSubsystem)));
     m_operatorController.povLeft().onTrue(new InstantCommand(() -> {
       m_extensionSubsystem.extendTo(0);
     }, m_extensionSubsystem));
@@ -327,7 +352,7 @@ public class RobotContainer {
     // 21.8));
     // m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem,
     // 19.5));
-    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(0)
+    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(45)
         .alongWith(
             new InstantCommand(() -> {
               m_extensionSubsystem.resetEncoder(0);
@@ -346,11 +371,10 @@ public class RobotContainer {
                 }, m_extensionSubsystem))
             .alongWith(new TimerCommand(0.75)).andThen(
                 new ClawPowerCommand(m_clawSubsystem, -1).alongWith(
-                new InstantCommand(() -> {
-                  m_extensionSubsystem.extendTo(0);
-                }, m_extensionSubsystem))
-            ));
-        
+                    new InstantCommand(() -> {
+                      m_extensionSubsystem.extendTo(0);
+                    }, m_extensionSubsystem))));
+
     m_operatorController.povUp().onTrue(moveArm(DOUBLESUB));
 
     // m_operatorController.y().onTrue(

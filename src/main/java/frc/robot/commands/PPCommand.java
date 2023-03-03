@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -37,7 +38,7 @@ public class PPCommand extends CommandBase {
       PathPlannerTrajectory trajectory) {
     // Use addRequirements() here to declare subsystem dependencies
 
-    m_trajectory = trajectory;
+    m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, DriverStation.getAlliance());
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     m_pose = m_poseEstimationSubsystem::getPose;
@@ -48,6 +49,8 @@ public class PPCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_poseEstimationSubsystem.resetOdometry(m_trajectory.getInitialHolonomicPose());
+    // m_poseEstimationSubsystem.zeroGyro();
     m_xController = new PIDController(3.5, 0, 0);
     m_yController = new PIDController(3.5, 0, 0);
     m_thetaController = new ProfiledPIDController(6, 0, 0,
@@ -78,8 +81,8 @@ public class PPCommand extends CommandBase {
     var updatedTargetChassisSpeeds = new ChassisSpeeds(targetChassisSpeeds.vxMetersPerSecond,
         targetChassisSpeeds.vyMetersPerSecond, targetChassisSpeeds.omegaRadiansPerSecond);
 
-    m_drivetrainSubsystem.drive(updatedTargetChassisSpeeds, 
-    Math.abs(desiredState.velocityMetersPerSecond), Math.abs(desiredState.angularVelocityRadPerSec));
+    m_drivetrainSubsystem.drive(updatedTargetChassisSpeeds,
+        Math.abs(desiredState.velocityMetersPerSecond), Math.abs(desiredState.angularVelocityRadPerSec));
   }
 
   // Called once the command ends or is interrupted.
