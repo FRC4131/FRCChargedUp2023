@@ -9,12 +9,12 @@ import frc.robot.subsystems.WristSubsystem;
 
 public class WristCommand extends CommandBase {
   /** Creates a new WristCommand. */
-  private final WristSubsystem m_wrist;
-  int direction;
+  private final WristSubsystem m_WristSubsystem;
+  boolean isClockwise;
 
-  public WristCommand(WristSubsystem wristSubsystem, int dir) {
-      m_wrist = wristSubsystem;
-      direction = dir;
+  public WristCommand(WristSubsystem wristSubsystem, boolean isClockwise) {
+    m_WristSubsystem = wristSubsystem;
+    this.isClockwise = isClockwise;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(wristSubsystem);
   }
@@ -22,43 +22,37 @@ public class WristCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    if (!isClockwise) {
+      m_WristSubsystem.rotateCounterClockwise();
+    } else {
+      m_WristSubsystem.rotateClockwise();
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-   /* if ((!m_wrist.getForwardLimit().get()) && (!m_wrist.getReverseLimit().get())){
-      m_wrist.wristSpeed(direction * 0.6);
-    } else if (m_wrist.getForwardLimit().get()) {
-        if (direction < 0)
-        {
-          m_wrist.wristSpeed(direction*0.6);
-        }
-        else{
-          m_wrist.wristSpeed(0);
-        }    
-    } else if (m_wrist.getReverseLimit().get()){
-        if (direction > 0)
-        {
-          m_wrist.wristSpeed(direction*0.6);
-        }
-        else {
-          m_wrist.wristSpeed(0);
-        }
-    } */ 
-    m_wrist.wristSpeed(direction * 0.6);  
+    if (!isClockwise) {
+      m_WristSubsystem.rotateCounterClockwise();
+    } else {
+      m_WristSubsystem.rotateClockwise();
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_wrist.wristSpeed(0);
+    m_WristSubsystem.stopRotate();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    if (!isClockwise && m_WristSubsystem.getClockwiseSwitch()) {
+      return true;
+    } else if (isClockwise && m_WristSubsystem.getCounterClockwiseSwitch()) {
+      return true;
+    } else
+      return false;
   }
 }

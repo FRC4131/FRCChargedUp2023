@@ -20,12 +20,12 @@ public class LEDSwitchColorsCommand extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        if (m_LEDSubsystem.getH() == 60 && m_LEDSubsystem.getS() == 100 && m_LEDSubsystem.getV() == 100) {
-            m_LEDSubsystem.setHSV(-1, 291, 90, 70);
-        } else if (m_LEDSubsystem.getH() == 291 && m_LEDSubsystem.getS() == 90 && m_LEDSubsystem.getV() == 70) {
-            m_LEDSubsystem.setHSV(-1, 60, 100, 100);
+        if (m_LEDSubsystem.getH() == 60 && m_LEDSubsystem.getS() == 255 && m_LEDSubsystem.getV() == 255) {
+            m_LEDSubsystem.setHSV(-1, 130, 255, 255);
+        } else if (m_LEDSubsystem.getH() == 130 && m_LEDSubsystem.getS() == 255 && m_LEDSubsystem.getV() == 255) {
+            m_LEDSubsystem.setHSV(-1, 60, 255, 255);
         } else {
-            m_LEDSubsystem.setHSV(-1, 60, 100, 100);
+            m_LEDSubsystem.setHSV(-1, 60, 255, 255);
         }
     }
 

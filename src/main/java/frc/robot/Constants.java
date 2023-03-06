@@ -47,18 +47,23 @@ public final class Constants {
     public enum ArmPosition {
         LOW(120,1.0),
         MEDIUM(-61, 1.5),
-        HIGH(-53, 19.35),
+        HIGH(-53, 19.65),
         STOW(120,0),
         ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18),
-        DOUBLESUB(-58, 0), //guestimate
+        DOUBLESUB(-58, 0),
         FLOOR(110,15), //guestimate 
         DEFAULT(0,0), //guestimate 
         CUBENODEMEDIUM(-67, 1.5),
-        CUBENODEHIGH(-59, 18.6),
+        CUBENODEHIGH(-59, 18.8),
         MEDIUMCOMMIT(-70, 1.5),
-        HIGHCOMMIT(-67, 19.35);
+        HIGHCOMMIT(-67, 19.65),
+        SHOOTPOSITION(-70, 0),
+        INTAKEBACK(-117,0), 
+        INTAKEFRONT(120, 0),
+        SALUTE(90,0);
+
 
         public final double rotation;
         public final double length;

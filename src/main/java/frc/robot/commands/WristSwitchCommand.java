@@ -10,6 +10,12 @@ import frc.robot.subsystems.WristSubsystem;
 public class WristSwitchCommand extends CommandBase {
   private final WristSubsystem m_WristSubsystem;
   private boolean movingClockwise;
+
+  /**
+   * Command to turn the wrist to the opposite orientation.
+   * <p>Will turn clockwise if wrist has not hit either extrema upon activation.
+   * @param wristSubsystem
+   */
   public WristSwitchCommand(WristSubsystem wristSubsystem) {
     m_WristSubsystem = wristSubsystem;
     addRequirements(wristSubsystem);
@@ -43,9 +49,9 @@ public class WristSwitchCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-  if(movingClockwise && m_WristSubsystem.getClockwiseSwitch()){
+  if(!movingClockwise && m_WristSubsystem.getClockwiseSwitch()){
     return true;
-  }else if(!movingClockwise && m_WristSubsystem.getCounterClockwiseSwitch()){
+  }else if(movingClockwise && m_WristSubsystem.getCounterClockwiseSwitch()){
       return true;
     } else return false;
   } 

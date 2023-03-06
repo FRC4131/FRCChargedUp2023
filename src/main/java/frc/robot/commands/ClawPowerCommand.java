@@ -13,10 +13,12 @@ import frc.robot.subsystems.ClawSubsystem;
 public class ClawPowerCommand extends CommandBase {
 
   ClawSubsystem m_claw;
-  int direction;
+  double direction;
 
-  /** Creates a new ClawPowerCommand. */
-  public ClawPowerCommand(ClawSubsystem clawsub, int dir) {
+  /** Creates a new ClawPowerCommand. Intaking is positive <p>
+   *  Auto reduced to 60%. Use a magnitude of 5/3 to run at full speed.
+  */
+  public ClawPowerCommand(ClawSubsystem clawsub, double dir) {
     m_claw = clawsub;
     direction = dir;
 

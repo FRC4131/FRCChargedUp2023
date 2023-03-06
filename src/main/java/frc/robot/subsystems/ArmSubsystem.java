@@ -123,6 +123,10 @@ public class ArmSubsystem extends SubsystemBase {
     });
   }
 
+  public double getArmAngle(){
+    return m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

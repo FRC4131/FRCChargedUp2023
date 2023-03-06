@@ -77,6 +77,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     // - 0.1));
     // m_actuator.configReverseSoftLimitEnable(true);
     // m_actuator.configReverseSoftLimitThreshold(lengthToUnits(.1));
+
+    resetEncoder(0);
+
     m_Timer = new Timer();
     m_Timer.reset();
     m_Timer.stop();
@@ -91,9 +94,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     this.desired = desired;
   }
 
-  /** stop trying if encoder is within 700 units of goal */
+  /** stop trying if encoder is within 7000 units of goal (approx. 0.50 in.) */
   public boolean atGoal() {
-    return Math.abs((-lengthToUnits(desired)) - m_actuator.getSelectedSensorPosition()) < 700;
+    return Math.abs((-lengthToUnits(desired)) - m_actuator.getSelectedSensorPosition()) < 14000;
   }
 
   public void extendArm(double power) {
@@ -113,7 +116,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     } else if (getReverseOutput() && (-m_actuator.getMotorOutputPercent() < 0)) {
       m_actuator.set(TalonSRXControlMode.PercentOutput, 0);
       SmartDashboard.putBoolean("FORCE STOP TELE", true);
-      m_actuator.setSelectedSensorPosition(0);
+      // m_actuator.setSelectedSensorPosition(0);
     } else {
       SmartDashboard.putBoolean("FORCE STOP TELE", false);
     }
@@ -186,8 +189,11 @@ public class ExtensionSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("TELE OUTPUT", -m_actuator.getMotorOutputPercent());
     checkLimitSwitches();
 
-    if (Math.abs(m_actuator.getSupplyCurrent()) <= 0.2 && getReverseOutput()){
-      resetEncoder(0);
-    }
+    // if (Math.abs(m_actuator.getSupplyCurrent()) <= 0.2){
+    //   if(getReverseOutput())
+    //   resetEncoder(0);
+    //   if(getForwardOutput())
+    //   resetEncoder(19.4);
+    // }
   }
 }

@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -38,7 +39,12 @@ public class PPCommand extends CommandBase {
       PathPlannerTrajectory trajectory) {
     // Use addRequirements() here to declare subsystem dependencies
 
-    m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, DriverStation.getAlliance());
+    if (DriverStation.getAlliance().equals(Alliance.Blue)){
+      m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, Alliance.Blue);
+    }
+    else{
+      m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, Alliance.Red);
+    }
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     m_pose = m_poseEstimationSubsystem::getPose;
@@ -50,7 +56,9 @@ public class PPCommand extends CommandBase {
   @Override
   public void initialize() {
     m_poseEstimationSubsystem.resetOdometry(m_trajectory.getInitialHolonomicPose());
-    // m_poseEstimationSubsystem.zeroGyro();
+
+    // m_poseEstimationSubsystem.setAdjustment(DriverStation.getAlliance().equals(Alliance.Blue)
+    // ? 0 : 180);
     m_xController = new PIDController(3.5, 0, 0);
     m_yController = new PIDController(3.5, 0, 0);
     m_thetaController = new ProfiledPIDController(6, 0, 0,

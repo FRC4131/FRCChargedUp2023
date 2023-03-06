@@ -90,6 +90,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
     m_desiredPose = m_targetingSubsystem.getTargetGridPose();
     m_xController.setGoal(m_desiredPose.getX());
     m_yController.setGoal(m_desiredPose.getY());
+    m_thetaController.reset(m_poseEstimationSubsystem.getPose().getRotation().getRadians());
     m_thetaController.setGoal(m_desiredPose.getRotation().getRadians());
   }
 
