@@ -4,47 +4,46 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ClawSubsystem;
 
-public class ClawPowerCommand extends CommandBase {
-
-  ClawSubsystem m_claw;
-  double direction;
-
-  /** Creates a new ClawPowerCommand. Intaking is positive <p>
-   *  Auto reduced to 60%. Use a magnitude of 5/3 to run at full speed.
-  */
-  public ClawPowerCommand(ClawSubsystem clawsub, double dir) {
-    m_claw = clawsub;
-    direction = dir;
-
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(clawsub);
+public class ClawTimedCommand extends CommandBase {
+  /** Creates a new ClawTimedCommand. */
+  ClawSubsystem m_clawSubsystem;
+  Timer m_timer;
+  double m_seconds;
+  double m_speed;
+  public ClawTimedCommand(ClawSubsystem clawSubsystem, double seconds, double speed) {
+    m_clawSubsystem = clawSubsystem;
+    m_timer = new Timer();
+    m_seconds = seconds;
+    m_speed = speed; 
+    addRequirements(clawSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_timer.reset();
+    m_timer.start();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_claw.intakeSpeed(.6 * direction);
+    m_clawSubsystem.intakeSpeed(m_speed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_claw.intakeSpeed(0);
+    m_clawSubsystem.intakeSpeed(0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return m_timer.hasElapsed(m_seconds);
   }
 }

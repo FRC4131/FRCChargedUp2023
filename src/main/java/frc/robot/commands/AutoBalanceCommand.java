@@ -7,6 +7,8 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -14,23 +16,26 @@ import frc.robot.subsystems.PoseEstimationSubsystem;
 
 public class AutoBalanceCommand extends CommandBase {
   /** Creates a new AutoBalanceCommand. */
-DrivetrainSubsystem m_drivetrainSubsystem;
-PoseEstimationSubsystem m_poseEstimationSubsystem;
-PIDController pitchPIDController;
+  private DrivetrainSubsystem m_drivetrainSubsystem;
+  private PoseEstimationSubsystem m_poseEstimationSubsystem;
+  private PIDController pitchPIDController;
+  private double balancedAngleDegrees = -0;
 
   public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
 
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
-    pitchPIDController = new PIDController(0.25, 0, 0);
+    pitchPIDController = new PIDController(0.05, 0, 0);
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    pitchPIDController.setSetpoint(-2.4);
+    pitchPIDController.reset();
+    pitchPIDController.setSetpoint(balancedAngleDegrees);
+    pitchPIDController.setTolerance(6.5);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -38,7 +43,6 @@ PIDController pitchPIDController;
   public void execute() {
     double threshold = 0.125;
     double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch());
-    
 
     if (Math.abs(driveSignal) > threshold) {
       if (driveSignal > 0.0) {
@@ -47,16 +51,34 @@ PIDController pitchPIDController;
         driveSignal = -threshold;
       }
     }
-    SmartDashboard.putNumber("DriveSignal", driveSignal);
 
-    
-    m_drivetrainSubsystem.drive(new Translation2d(0, driveSignal * 2) , 0, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
+    if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
+      driveSignal *= 1.5;
     }
+    if (Math.abs(pitchPIDController.getPositionError()) < 5) {
+      driveSignal *= 0.3;
+    }
+    if (Math.abs(pitchPIDController.getPositionError()) < 2) {
+      driveSignal *= 0;
+    }
+
+    boolean isRed = DriverStation.getAlliance().equals(Alliance.Red);
+    SmartDashboard.putNumber("DriveSignal", driveSignal);
+    // if (isRed)
+    //   driveSignal *= -1;
+
+    m_drivetrainSubsystem.drive(new Translation2d(driveSignal * 2, 0), 0,
+        isRed ? m_poseEstimationSubsystem.getPose().getRotation().minus(Rotation2d.fromDegrees(180))
+            : m_poseEstimationSubsystem.getPose().getRotation(),
+        true,
+        false);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_drivetrainSubsystem.drive(new Translation2d(0, 0) , 1, m_poseEstimationSubsystem.getPose().getRotation(), true, false);
+    m_drivetrainSubsystem.drive(new Translation2d(0, 0), 1, m_poseEstimationSubsystem.getPose().getRotation(), true,
+        false);
   }
 
   // Returns true when the command should end.

@@ -46,8 +46,24 @@ public final class Constants {
     */
     public enum ArmPosition {
         LOW(120,1.0),
-        MEDIUM(-62, 8.5),
-        HIGH(-56, 21.8);
+        MEDIUM(-61, 1.5),
+        HIGH(-53, 19.65),
+        STOW(120,0),
+        ZEROES(0,0),
+        MIN(-30, 0),
+        MAX(30, 18),
+        DOUBLESUB(-58, 0),
+        FLOOR(110,15), //guestimate 
+        DEFAULT(0,0), //guestimate 
+        CUBENODEMEDIUM(-67, 1.5),
+        CUBENODEHIGH(-59, 18.8),
+        MEDIUMCOMMIT(-70, 1.5),
+        HIGHCOMMIT(-67, 19.65),
+        SHOOTPOSITION(-70, 0),
+        INTAKEBACK(-117,0), 
+        INTAKEFRONT(120, 0),
+        SALUTE(90,0);
+
 
         public final double rotation;
         public final double length;
@@ -59,12 +75,15 @@ public final class Constants {
     }
 
     public enum GridPositions{
-        BLUE1(1.92, 4.45),
-        BLUE2(1.92, 2.75),
-        BLUE3(1.92, 1.08),
-        RED1(14.92, 4.411),
-        RED2(14.92, 2.75),
-        RED3(14.92, 1.08);
+        RED1(15.1, 1.08),
+        RED2(15.1, 2.75),
+        RED3(15.1, 4.45),
+        BLUE6(1.92, 4.45),
+        BLUE7(1.92, 2.75),
+        BLUE8(1.92, 1.08),
+        REDDUBSUB(1.36195, 7.4),
+        BLUEDUBSUB(15.178784, 7.4);
+        
 
         public final double x;
         public final double y;
@@ -119,7 +138,7 @@ public final class Constants {
         public static final double kDriveEncoderRPM2MeterPerSec = kDriveEncoderRot2Meter / 60;
         public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
 
-        public static final boolean invertGyro = true; // Always ensure Gyro is CCW+ CW-
+        public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
         public static final COTSFalconSwerveConstants chosenModule = // TODO: This must be tuned to specific robot
                 COTSFalconSwerveConstants.SDSMK3(COTSFalconSwerveConstants.driveGearRatios.SDSMK3_Fast);
@@ -250,16 +269,6 @@ public final class Constants {
             public static final Rotation2d angleOffset = Rotation2d.fromRadians((0.75 * Math.PI) / 2);
             public static final SwerveModuleConstants constants = new SwerveModuleConstants(driveMotorID, angleMotorID,
                     canCoderID, angleOffset);
-        }
-    }
-
-    public static final class ArmConstants {
-        public static final class ArmAngles {
-            public static final double STOWED_ANGLE = 0;
-        }
-
-        public static final class TelescopingDistances {
-
         }
     }
 }

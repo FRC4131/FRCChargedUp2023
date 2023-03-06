@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,6 +37,10 @@ public class TargetingSubsystem extends SubsystemBase {
   private final CommandMacroPad m_pad;
   private Button desiredNode = Button.button1;
 
+  public double armAngle = 0;
+  public double elevatorLength = 0;
+  public ArmPosition pos = ArmPosition.HIGH;
+
   /** Creates a new TargettingSubsystem. */
   public TargetingSubsystem(CommandMacroPad m_commandMacroPad) {
     m_pad = m_commandMacroPad;
@@ -42,10 +48,12 @@ public class TargetingSubsystem extends SubsystemBase {
   }
 
   public Pose2d getTargetGridPose() {
+    boolean isRed = DriverStation.getAlliance().equals(Alliance.Red);
+    int grid = isRed ? desiredGrid - 1: desiredGrid - 3;
     Translation2d offset = getNodeOffset();
     SmartDashboard.putNumber("ABOOOOOM", offset.getY());
-    return new Pose2d(GridPositions.values()[desiredGrid].x + offset.getX(),
-        GridPositions.values()[desiredGrid].y + offset.getY(),
+    return new Pose2d(GridPositions.values()[grid].x + offset.getX(),
+        GridPositions.values()[grid].y + offset.getY(),
         Rotation2d.fromDegrees(isBlueAlliance ? 0 : 180));
   }
 
@@ -62,7 +70,8 @@ public class TargetingSubsystem extends SubsystemBase {
 
     int allianceReverse = isBlueAlliance ? 1 : -1;
 
-    double xOffset = desiredNode.row == 1 ? -0.26 * allianceReverse : 0;
+    // double xOffset = desiredNode.row == 1 ? -0.26 * allianceReverse : 0;
+    double xOffset = -0.25;
     double yOffset;
 
     switch (desiredNode.column) {
@@ -111,7 +120,19 @@ public class TargetingSubsystem extends SubsystemBase {
 
   public ArmPosition getScoringHeight() {
     if (desiredNode == null) {
-      return ArmPosition.LOW;
+      return ArmPosition.ZEROES;
+    }
+    if(desiredNode.column == 2){
+      switch (desiredNode.row) {
+        case 1:
+          return ArmPosition.HIGH;
+        case 2:
+          return ArmPosition.MEDIUM;
+        case 3:
+          return ArmPosition.LOW;
+        default:
+          return ArmPosition.ZEROES;
+      }
     }
     switch (desiredNode.row) {
       case 1:
@@ -121,7 +142,23 @@ public class TargetingSubsystem extends SubsystemBase {
       case 3:
         return ArmPosition.LOW;
       default:
+        return ArmPosition.ZEROES;
+    }
+  }
+
+  public ArmPosition getCommitedScoringHeight(){
+    if (desiredNode == null) {
+      return ArmPosition.ZEROES;
+    }
+    switch (desiredNode.row) {
+      case 1:
+        return ArmPosition.HIGHCOMMIT;
+      case 2:
+        return ArmPosition.MEDIUMCOMMIT;
+      case 3:
         return ArmPosition.LOW;
+      default:
+        return ArmPosition.ZEROES;
     }
   }
 
@@ -129,12 +166,22 @@ public class TargetingSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     // isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
-    desiredGrid = selectGrid() + (isBlueAlliance ? 0 : 3) - 1;
+    isBlueAlliance = DriverStation.getAlliance().equals(Alliance.Blue);
+
+    desiredGrid = selectGrid() + (isBlueAlliance ? 5 : 0);
+
+    armAngle = getScoringHeight().rotation;
+    elevatorLength = getScoringHeight().length;
     setNode(selectNode().value());
     SmartDashboard.putNumber("grid selected", desiredGrid);
     SmartDashboard.putNumber("node selected", desiredNode.value());
     SmartDashboard.putNumber("desiredX", getTargetGridPose().getX());
     SmartDashboard.putNumber("desiredY", getTargetGridPose().getY());
     SmartDashboard.putNumber("desiredRotation", getTargetGridPose().getRotation().getDegrees());
+
+    SmartDashboard.putNumber("EXTEND PLS", armAngle);
+    SmartDashboard.putNumber("ROT PLS", elevatorLength);
+
+    pos = getScoringHeight();
   }
 }
