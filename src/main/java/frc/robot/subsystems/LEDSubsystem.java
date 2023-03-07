@@ -59,4 +59,8 @@ public class LEDSubsystem extends SubsystemBase {
     public int getNumberOfLEDs() {
         return m_LEDBuffer.getLength();
     }
+
+    public AddressableLEDBuffer getBuffer() {
+        return m_LEDBuffer;
+    }
 }

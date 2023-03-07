@@ -21,7 +21,7 @@ import frc.robot.subsystems.LEDSubsystem;
 public class LEDControlCommand extends CommandBase {
 
   enum PATTERN {
-    CHASING, SOLID
+    CASCADE, SOLID
 
   }
 
@@ -36,6 +36,7 @@ public class LEDControlCommand extends CommandBase {
   private boolean variegated;
 
   private int pos;
+  private boolean runOnce = false;
 
   /**
    * A command that provides for the creation of a customizable led subsystem
@@ -47,7 +48,8 @@ public class LEDControlCommand extends CommandBase {
    * @param vary      whether to add some randomness to the colors
    * @param colors    ordered list of colors
    */
-  public LEDControlCommand(LEDSubsystem ledsubsys, float delay, PATTERN pattern, int spacing, boolean vary, Color... colors) {
+  public LEDControlCommand(LEDSubsystem ledsubsys, float delay, PATTERN pattern, int spacing, boolean vary,
+      Color... colors) {
 
     m_ledSubsystem = ledsubsys;
     buffer = m_ledSubsystem.getBuffer();
@@ -67,11 +69,12 @@ public class LEDControlCommand extends CommandBase {
    * Creates a command that sets LED strip to single sold color
    * 
    * @param ledsubsys
-   * @param vary whether to add some randomness to the color
+   * @param vary      whether to add some randomness to the color
    * @param color
    */
   public LEDControlCommand(LEDSubsystem ledsubsys, boolean vary, Color color) {
     this(ledsubsys, 99999, PATTERN.SOLID, 1, vary, color);
+    runOnce = true;
   }
 
   // Called when the command is initially scheduled.
@@ -79,7 +82,7 @@ public class LEDControlCommand extends CommandBase {
   public void initialize() {
 
     switch (pattern) {
-      case CHASING:
+      case CASCADE:
 
         for (int i = 0; i < buffer.getLength(); i++) {
           buffer.setLED(i, colors[(i / spacing) % colors.length]);
@@ -94,9 +97,14 @@ public class LEDControlCommand extends CommandBase {
         }
 
         break;
-
       default:
         break;
+    }
+
+    if (variegated) {
+      for (int i = 0; i < buffer.getLength(); i++) {
+        buffer.setLED(i, RNGshift(buffer.getLED(i)));
+      }
     }
 
   }
@@ -108,7 +116,7 @@ public class LEDControlCommand extends CommandBase {
     Timer.delay(delay);
 
     switch (pattern) {
-      case CHASING:
+      case CASCADE:
         for (int i = 0; i < buffer.getLength(); i++) {
           buffer.setLED(i, bufferBuffer.getLED((pos + i) % buffer.getLength()));
         }
@@ -122,7 +130,7 @@ public class LEDControlCommand extends CommandBase {
         break;
     }
 
-    if(variegated){
+    if (variegated) {
       for (int i = 0; i < buffer.getLength(); i++) {
         buffer.setLED(i, RNGshift(buffer.getLED(i)));
       }
@@ -143,56 +151,55 @@ public class LEDControlCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return runOnce;
   }
 
-  private Color RNGshift(Color c){
+  private Color RNGshift(Color c) {
     var hsv = rgb_to_hsv(c.red, c.green, c.blue);
-    hsv[0] += (int)(Math.random() * 2) * ((Math.random() * 2 - 1) * 8);
+    hsv[0] += (int) (Math.random() * 2) * ((Math.random() * 2 - 1) * 10);
+    hsv[0] = Math.max(Math.min(0, hsv[0]), 180);
     return Color.fromHSV(hsv[0], hsv[1], hsv[2]);
   }
 
+  private int[] rgb_to_hsv(double r, double g, double b) {
 
-  private int[] rgb_to_hsv(double r, double g, double b)
-    {
-  
-        // R, G, B values are divided by 255
-        // to change the range from 0..255 to 0..1
-        r = r / 255.0;
-        g = g / 255.0;
-        b = b / 255.0;
-  
-        // h, s, v = hue, saturation, value
-        double cmax = Math.max(r, Math.max(g, b)); // maximum of r, g, b
-        double cmin = Math.min(r, Math.min(g, b)); // minimum of r, g, b
-        double diff = cmax - cmin; // diff of cmax and cmin.
-        double h = -1, s = -1;
-          
-        // if cmax and cmax are equal then h = 0
-        if (cmax == cmin)
-            h = 0;
-  
-        // if cmax equal r then compute h
-        else if (cmax == r)
-            h = (60 * ((g - b) / diff) + 360) % 360;
-  
-        // if cmax equal g then compute h
-        else if (cmax == g)
-            h = (60 * ((b - r) / diff) + 120) % 360;
-  
-        // if cmax equal b then compute h
-        else if (cmax == b)
-            h = (60 * ((r - g) / diff) + 240) % 360;
-  
-        // if cmax equal zero
-        if (cmax == 0)
-            s = 0;
-        else
-            s = (diff / cmax) * 100;
-  
-        // compute v
-        double v = cmax * 100;
-        
-        return new int[]{(int) h,(int)s,(int)v};
-    }
+    // R, G, B values are divided by 255
+    // to change the range from 0..255 to 0..1
+    r = r / 255.0;
+    g = g / 255.0;
+    b = b / 255.0;
+
+    // h, s, v = hue, saturation, value
+    double cmax = Math.max(r, Math.max(g, b)); // maximum of r, g, b
+    double cmin = Math.min(r, Math.min(g, b)); // minimum of r, g, b
+    double diff = cmax - cmin; // diff of cmax and cmin.
+    double h = -1, s = -1;
+
+    // if cmax and cmax are equal then h = 0
+    if (cmax == cmin)
+      h = 0;
+
+    // if cmax equal r then compute h
+    else if (cmax == r)
+      h = (60 * ((g - b) / diff) + 360) % 360;
+
+    // if cmax equal g then compute h
+    else if (cmax == g)
+      h = (60 * ((b - r) / diff) + 120) % 360;
+
+    // if cmax equal b then compute h
+    else if (cmax == b)
+      h = (60 * ((r - g) / diff) + 240) % 360;
+
+    // if cmax equal zero
+    if (cmax == 0)
+      s = 0;
+    else
+      s = (diff / cmax) * 100;
+
+    // compute v
+    double v = cmax * 100;
+
+    return new int[] { (int) h, (int) s, (int) v };
+  }
 }
