@@ -36,6 +36,7 @@ import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.GoToSubstationCommand;
+import frc.robot.commands.LEDSwitchColorsCommand;
 import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TimerCommand;
@@ -45,6 +46,7 @@ import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.ExtensionSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -74,7 +76,7 @@ public class RobotContainer {
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ExtensionSubsystem m_extensionSubsystem = new ExtensionSubsystem();
   private final WristSubsystem m_wristSubsystem = new WristSubsystem();
-  // private final LEDSubsystem m_LEDSubsystem = new LEDSubsystem();
+  private final LEDSubsystem m_LEDSubsystem = new LEDSubsystem();
 
   private SendableChooser<Command> m_autoChooser;
 
@@ -443,8 +445,8 @@ public class RobotContainer {
      * .onTrue(new ExampleCommand(m_exampleSubsystem));
      */
 
-    // m_operatorController.rightStick().onTrue(new
-    // LEDSwitchColorsCommand(m_LEDSubsystem));
+    m_driverController.start().onTrue(new
+    LEDSwitchColorsCommand(m_LEDSubsystem));
 
     m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
     m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));

@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
+import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
@@ -36,15 +38,23 @@ public class PPCommand extends CommandBase {
   /** Creates a new PPCommand. */
   public PPCommand(DrivetrainSubsystem drivetrainSubsystem,
       PoseEstimationSubsystem poseEstimationSubsystem,
-      PathPlannerTrajectory trajectory) {
+      PathPlannerTrajectory trajectory){
     // Use addRequirements() here to declare subsystem dependencies
 
+    DriverStation.refreshData();
     if (DriverStation.getAlliance().equals(Alliance.Blue)){
-      m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, Alliance.Blue);
+      m_trajectory = trajectory;
+      SmartDashboard.putString("Vachan Tose", "Blue");
     }
     else{
       m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, Alliance.Red);
+      SmartDashboard.putString("Vachan Tose", "Red");
     }
+
+    SmartDashboard.putString("El Dave", DriverStation.getAlliance().name());
+    
+
+    // m_trajectory = trajectory;
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     m_pose = m_poseEstimationSubsystem::getPose;
