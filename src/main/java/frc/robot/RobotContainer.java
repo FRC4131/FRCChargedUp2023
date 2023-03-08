@@ -262,8 +262,8 @@ public class RobotContainer {
             .alongWith(
                 new ParallelCommandGroup(
                     new WaitCommand(0.5).andThen(
-                      // moveArm(INTAKEBACK, 1)
-                      ),
+                    // moveArm(INTAKEBACK, 1)
+                    ),
                     new WaitCommand(1)
                         .andThen(new WaitCommand(1.4).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))))
             .alongWith(new InstantCommand(() -> {
@@ -271,11 +271,11 @@ public class RobotContainer {
             })),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 1.2", 4.0, 3.0))
             .alongWith(
-              // moveArm(ZEROES)
-              // .andThen
-              (new WaitCommand(1.8)),
-              // .andThen(moveArm(CUBENODEHIGH, 0.5)))),
-        new ClawPowerCommand(m_clawSubsystem, -0.8)));
+                // moveArm(ZEROES)
+                // .andThen
+                (new WaitCommand(1.8)),
+                // .andThen(moveArm(CUBENODEHIGH, 0.5)))),
+                new ClawPowerCommand(m_clawSubsystem, -0.8)));
   }
 
   public Command oneConeTaxiFAR() {
@@ -485,6 +485,55 @@ public class RobotContainer {
     // new InstantCommand(() -> {
     // m_extensionSubsystem.resetEncoder(0);
     // }, m_extensionSubsystem)));
+
+    // arm position command, right trigger half press is angle (and 0 ext), full
+    // press in extension
+
+  new Trigger(() -> m_operatorController.getRightTriggerAxis() > 0.1 && m_operatorController.getRightTriggerAxis() < 0.9).whileTrue(
+    new InstantCommand(() -> {
+        ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+        m_armSubsystem.snapToAngle(position.rotation);
+        m_extensionSubsystem.extendTo(ZEROES.length);
+    }));
+
+  new Trigger(() -> m_operatorController.getRightTriggerAxis() >= 0.9).whileTrue(
+    new InstantCommand(() -> {
+    ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+    m_extensionSubsystem.extendTo(position.length);
+  }));
+
+  new Trigger(() -> m_operatorController.getRightTriggerAxis() < 0.1).whileTrue(
+    new InstantCommand(() -> {
+      m_extensionSubsystem.extendTo(ZEROES.length);
+      m_armSubsystem.snapToAngle(STOW.rotation);
+    }
+    ));
+
+
+    // m_operatorController.rightTrigger().whileTrue(
+    //     new InstantCommand(() -> {
+    //       double rightAxis = m_operatorController.getRightTriggerAxis();
+    //       if (rightAxis < 0.9 && rightAxis > 0.1) {
+
+    //         ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+    //         m_armSubsystem.snapToAngle(position.rotation);
+    //         m_extensionSubsystem.extendTo(ZEROES.length);
+    //       }
+
+    //       if (rightAxis >= 0.9) {
+    //         ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+    //         m_extensionSubsystem.extendTo(position.length);
+    //       }
+
+    //       if (rightAxis < 0.1) {
+    //         m_extensionSubsystem.extendTo(ZEROES.length);
+    //         m_armSubsystem.snapToAngle(STOW.rotation);
+            
+    //       }
+
+    //     })
+
+    // );
 
     m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(0)
         .alongWith(
