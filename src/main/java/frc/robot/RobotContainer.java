@@ -489,7 +489,7 @@ public class RobotContainer {
     // arm position command, right trigger half press is angle (and 0 ext), full
     // press in extension
 
-  new Trigger(() -> m_operatorController.getRightTriggerAxis() > 0.1 && m_operatorController.getRightTriggerAxis() < 0.9).whileTrue(
+  new Trigger(() -> m_operatorController.getRightTriggerAxis() > 0.1).whileTrue(
     new InstantCommand(() -> {
         ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
         m_armSubsystem.snapToAngle(position.rotation);
