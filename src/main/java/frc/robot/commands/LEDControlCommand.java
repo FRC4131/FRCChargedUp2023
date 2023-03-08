@@ -4,23 +4,15 @@
 
 package frc.robot.commands;
 
-import java.util.Random;
-import java.util.regex.Pattern;
-
-import com.ctre.phoenix.led.ColorFlowAnimation;
-
-import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
 import frc.robot.subsystems.LEDSubsystem;
 
 public class LEDControlCommand extends CommandBase {
 
-  enum PATTERN {
+  public enum PATTERN {
     CASCADE, SOLID
 
   }
@@ -32,7 +24,7 @@ public class LEDControlCommand extends CommandBase {
   private Color[] colors;
   private PATTERN pattern;
   private int spacing;
-  private float delay;
+  private double delay;
   private boolean variegated;
 
   private int pos;
@@ -48,12 +40,14 @@ public class LEDControlCommand extends CommandBase {
    * @param vary      whether to add some randomness to the colors
    * @param colors    ordered list of colors
    */
-  public LEDControlCommand(LEDSubsystem ledsubsys, float delay, PATTERN pattern, int spacing, boolean vary,
+  public LEDControlCommand(LEDSubsystem ledsubsys, double delay, PATTERN pattern, int spacing, boolean vary,
       Color... colors) {
 
     m_ledSubsystem = ledsubsys;
     buffer = m_ledSubsystem.getBuffer();
-    bufferBuffer = new AddressableLEDBuffer(colors.length * spacing);
+    
+    bufferBuffer = new AddressableLEDBuffer(buffer.getLength());
+
 
     this.colors = colors;
     this.pattern = pattern;
@@ -73,13 +67,17 @@ public class LEDControlCommand extends CommandBase {
    * @param color
    */
   public LEDControlCommand(LEDSubsystem ledsubsys, boolean vary, Color color) {
-    this(ledsubsys, 99999, PATTERN.SOLID, 1, vary, color);
+    this(ledsubsys, 0, PATTERN.SOLID, 1, vary, color);
     runOnce = true;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
+    for (int i = 0; i < buffer.getLength(); i++) {
+      bufferBuffer.setLED(i, colors[(i / spacing) % colors.length]);
+    }
 
     switch (pattern) {
       case CASCADE:
@@ -107,6 +105,8 @@ public class LEDControlCommand extends CommandBase {
       }
     }
 
+    m_ledSubsystem.update();
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -118,7 +118,7 @@ public class LEDControlCommand extends CommandBase {
     switch (pattern) {
       case CASCADE:
         for (int i = 0; i < buffer.getLength(); i++) {
-          buffer.setLED(i, bufferBuffer.getLED((pos + i) % buffer.getLength()));
+          buffer.setLED(i, bufferBuffer.getLED((pos + i) % (buffer.getLength() - 1)));
         }
         break;
       case SOLID:
@@ -138,13 +138,15 @@ public class LEDControlCommand extends CommandBase {
 
     pos = ++pos % buffer.getLength();
 
+    m_ledSubsystem.update();
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     for (int i = 0; i < buffer.getLength(); i++) {
-      buffer.setLED(i, new Color(0, 0, 0));
+      buffer.setLED(i, Color.kBlack);
     }
   }
 
@@ -155,12 +157,21 @@ public class LEDControlCommand extends CommandBase {
   }
 
   private Color RNGshift(Color c) {
-    var hsv = rgb_to_hsv(c.red, c.green, c.blue);
-    hsv[0] += (int) (Math.random() * 2) * ((Math.random() * 2 - 1) * 10);
-    hsv[0] = Math.max(Math.min(0, hsv[0]), 180);
-    return Color.fromHSV(hsv[0], hsv[1], hsv[2]);
+/*     var hsv = rgb_to_hsv(c.red, c.green, c.blue);
+    hsv[0] += ((int) (Math.random() * 2)) * ((Math.random() * 2 - 1) * 10);
+    hsv[0] = Math.min(Math.max(0, hsv[0]), 180);
+    return Color.fromHSV(hsv[0], hsv[1], hsv[2]); */
+    c = new Color(c.red + ((int) (Math.random() * 2)) * ((Math.random() * 2 - 1) * 25), c.green  + (int) (Math.random() * 2) * ((Math.random() * 2 - 1) * 25), c.blue + (int) (Math.random() * 2) * ((Math.random() * 2 - 1) * 25));
+    return c;
   }
 
+  /**
+   * 
+   * @param r
+   * @param g
+   * @param b
+   * @return a three-long int array of {h, s, v}
+   */
   private int[] rgb_to_hsv(double r, double g, double b) {
 
     // R, G, B values are divided by 255
@@ -181,25 +192,25 @@ public class LEDControlCommand extends CommandBase {
 
     // if cmax equal r then compute h
     else if (cmax == r)
-      h = (60 * ((g - b) / diff) + 360) % 360;
+      h = 60 * (((g - b) / diff) % 6);
 
     // if cmax equal g then compute h
     else if (cmax == g)
-      h = (60 * ((b - r) / diff) + 120) % 360;
+      h = (60 * ((b - r) / diff) + 2);
 
     // if cmax equal b then compute h
     else if (cmax == b)
-      h = (60 * ((r - g) / diff) + 240) % 360;
+      h = (60 * ((r - g) / diff) + 4);
 
     // if cmax equal zero
     if (cmax == 0)
       s = 0;
     else
-      s = (diff / cmax) * 100;
+      s = (diff / cmax);
 
     // compute v
-    double v = cmax * 100;
+    double v = cmax;
 
-    return new int[] { (int) h, (int) s, (int) v };
+    return new int[] { (int) h, (int) s * 100, (int) v * 100};
   }
 }
