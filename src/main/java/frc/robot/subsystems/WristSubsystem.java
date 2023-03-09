@@ -67,14 +67,14 @@ public class WristSubsystem extends SubsystemBase {
     isMovingClockwise = getCounterClockwiseSwitch();
     if (getClockwiseSwitch() && !isMovingClockwise)
     {
-      m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+      m_WristPID.setReference(-15, ControlType.kSmartVelocity);
     }
     else if (getCounterClockwiseSwitch() && isMovingClockwise)
     {
-      m_WristPID.setReference(8, ControlType.kSmartVelocity);
+      m_WristPID.setReference(15, ControlType.kSmartVelocity);
     }
     else if (!(getClockwiseSwitch() || getClockwiseSwitch())){
-      m_WristPID.setReference(8, ControlType.kSmartVelocity);
+      m_WristPID.setReference(15, ControlType.kSmartVelocity);
     }
 
   }
@@ -85,12 +85,12 @@ public class WristSubsystem extends SubsystemBase {
 
   public void rotateClockwise(){
     isMovingClockwise = false;
-    m_WristPID.setReference(-8, ControlType.kSmartVelocity);
+    m_WristPID.setReference(-15, ControlType.kSmartVelocity);
   }
 
   public void rotateCounterClockwise(){
     isMovingClockwise = true;
-    m_WristPID.setReference(8, ControlType.kSmartVelocity);
+    m_WristPID.setReference(15, ControlType.kSmartVelocity);
   }
 
 

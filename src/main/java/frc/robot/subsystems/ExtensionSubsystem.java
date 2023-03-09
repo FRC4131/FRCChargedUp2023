@@ -63,8 +63,8 @@ public class ExtensionSubsystem extends SubsystemBase {
     m_actuator.config_kD(1, 0);
     m_actuator.config_kF(1, 1e-2);
 
-    m_actuator.configMotionCruiseVelocity(100000);
-    m_actuator.configMotionAcceleration(200000);
+    m_actuator.configMotionCruiseVelocity(200000);
+    m_actuator.configMotionAcceleration(400000);
 
     m_actuator.configPeakCurrentLimit(30);
     m_actuator.configPeakCurrentDuration(100);
@@ -179,6 +179,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     // m_actuator.set(TalonSRXControlMode.PercentOutput, 1/GEAR_RATIO);
 
     SmartDashboard.putNumber("Telescope Position", getPosition());
+    SmartDashboard.putNumber("Telescope Speed", m_actuator.getSelectedSensorVelocity());
     SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
     SmartDashboard.putNumber("OFFSET BRUH",
         Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()));

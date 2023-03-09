@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,14 +21,16 @@ public class AutoBalanceCommand extends CommandBase {
   private PoseEstimationSubsystem m_poseEstimationSubsystem;
   private PIDController pitchPIDController;
   private double balancedAngleDegrees = -0;
+  private boolean isRed;
 
   public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
 
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
-    pitchPIDController = new PIDController(0.05, 0, 0);
+    pitchPIDController = new PIDController(0.0002, 0, 0);
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
+    isRed = DriverStation.getAlliance().equals(Alliance.Red);
   }
 
   // Called when the command is initially scheduled.
@@ -41,33 +44,28 @@ public class AutoBalanceCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double threshold = 0.125;
+    double threshold = 200.0;//was 0.125
     double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch());
+    driveSignal = MathUtil.clamp(driveSignal, -threshold, threshold);
 
-    if (Math.abs(driveSignal) > threshold) {
-      if (driveSignal > 0.0) {
-        driveSignal = threshold;
-      } else {
-        driveSignal = -threshold;
-      }
-    }
+    
 
-    if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
-      driveSignal *= 1.5;
-    }
-    if (Math.abs(pitchPIDController.getPositionError()) < 5) {
-      driveSignal *= 0.3;
-    }
+    // if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
+    //   driveSignal *= 1.5;
+    // }
+    // if (Math.abs(pitchPIDController.getPositionError()) < 5) {
+    //   driveSignal *= 0.3;
+    // }
     if (Math.abs(pitchPIDController.getPositionError()) < 2) {
       driveSignal *= 0;
     }
 
-    boolean isRed = DriverStation.getAlliance().equals(Alliance.Red);
+    
     SmartDashboard.putNumber("DriveSignal", driveSignal);
     // if (isRed)
     //   driveSignal *= -1;
 
-    m_drivetrainSubsystem.drive(new Translation2d(driveSignal * 2, 0), 0,
+    m_drivetrainSubsystem.drive(new Translation2d(driveSignal, 0), 0,
         isRed ? m_poseEstimationSubsystem.getPose().getRotation().minus(Rotation2d.fromDegrees(180))
             : m_poseEstimationSubsystem.getPose().getRotation(),
         true,
@@ -86,4 +84,6 @@ public class AutoBalanceCommand extends CommandBase {
   public boolean isFinished() {
     return false;
   }
+
+
 }

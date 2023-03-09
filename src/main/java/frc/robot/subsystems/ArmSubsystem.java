@@ -55,15 +55,15 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightEncoder.setVelocityConversionFactor(1);
     m_rightRotPIDController.setOutputRange(-1, 1);
     m_rightRotPIDController.setSmartMotionMaxAccel(7500, 0);
-    m_rightRotPIDController.setSmartMotionMaxVelocity(10000, 0);
+    m_rightRotPIDController.setSmartMotionMaxVelocity(5000, 0);
     m_rightRotPIDController.setSmartMotionMinOutputVelocity(0, 0);
-    m_rightRotPIDController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+    m_rightRotPIDController.setSmartMotionAccelStrategy(AccelStrategy.kSCurve, 0);
 
     // Smart Motion
     m_rightRotPIDController.setP(4e-9);
     m_rightRotPIDController.setI(0);
     m_rightRotPIDController.setD(0);
-    m_rightRotPIDController.setFF(9.9e-5);
+    m_rightRotPIDController.setFF(2e-4);
 
     // Position
     // m_rightRotPIDController.setP(5e-2);
@@ -90,6 +90,13 @@ public class ArmSubsystem extends SubsystemBase {
 
     m_rightRot.burnFlash();
     m_rightRotPIDController.setReference(0, ControlType.kDutyCycle);
+  }
+
+  public void adjustSpeed(double maxVelocity, double maxAcceleration){
+    m_rightRotPIDController.setSmartMotionMaxVelocity(maxVelocity, 0);
+    m_rightRotPIDController.setSmartMotionMaxAccel(maxAcceleration, 0);
+
+    SmartDashboard.putNumber("ARM MAX VEL LIMIT", m_rightRotPIDController.getSmartMotionMaxVelocity(0));
   }
 
   public void rotateArm(double power) {
@@ -137,14 +144,15 @@ public class ArmSubsystem extends SubsystemBase {
     // if(m_minLimitSwitch.get()){
     //   m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MIN.rotation));
     // }
+      
 
 
-    SmartDashboard.putNumber("cool speed", m_rightEncoder.getVelocity());
-    SmartDashboard.putString("RightencoderRpos",
-        m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " ticks(?)");
+
+    SmartDashboard.putNumber("Arm Velocity", m_rightEncoder.getVelocity());
+    SmartDashboard.putString("Arm Position",
+        m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " Degrees");
     // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + "
     // ticks(?)");
-    SmartDashboard.getBoolean("BOOL", false);
   }
 
   public CommandBase resetEncoder(double position) {

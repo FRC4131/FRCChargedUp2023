@@ -42,19 +42,7 @@ public class PPCommand extends CommandBase {
     // Use addRequirements() here to declare subsystem dependencies
 
     DriverStation.refreshData();
-    if (DriverStation.getAlliance().equals(Alliance.Blue)){
-      m_trajectory = trajectory;
-      SmartDashboard.putString("Vachan Tose", "Blue");
-    }
-    else{
-      m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, Alliance.Red);
-      SmartDashboard.putString("Vachan Tose", "Red");
-    }
-
-    SmartDashboard.putString("El Dave", DriverStation.getAlliance().name());
-    
-
-    // m_trajectory = trajectory;
+    m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, DriverStation.getAlliance());
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     m_pose = m_poseEstimationSubsystem::getPose;
@@ -69,8 +57,8 @@ public class PPCommand extends CommandBase {
 
     // m_poseEstimationSubsystem.setAdjustment(DriverStation.getAlliance().equals(Alliance.Blue)
     // ? 0 : 180);
-    m_xController = new PIDController(3.5, 0, 0);
-    m_yController = new PIDController(3.5, 0, 0);
+    m_xController = new PIDController(3.45, 0, 0);
+    m_yController = new PIDController(3.25, 0, 0);
     m_thetaController = new ProfiledPIDController(6, 0, 0,
         new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);

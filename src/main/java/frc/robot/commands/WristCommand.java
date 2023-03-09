@@ -12,6 +12,11 @@ public class WristCommand extends CommandBase {
   private final WristSubsystem m_WristSubsystem;
   boolean isClockwise;
 
+  /**
+   * Backwards sorry
+   * @param wristSubsystem
+   * @param isClockwise true for neo to point upward when arm is stowed
+   */
   public WristCommand(WristSubsystem wristSubsystem, boolean isClockwise) {
     m_WristSubsystem = wristSubsystem;
     this.isClockwise = isClockwise;

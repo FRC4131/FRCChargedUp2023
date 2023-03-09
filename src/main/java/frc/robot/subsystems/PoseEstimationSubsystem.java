@@ -97,6 +97,8 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
     SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees());
     SmartDashboard.putNumber("Robot Pitch", getPitch());
+    SmartDashboard.putNumber("Robot Roll", getRoll());
+    SmartDashboard.putNumber("Robot Yaw", getYaw());
     SmartDashboard.putData(field2d);
 
   }

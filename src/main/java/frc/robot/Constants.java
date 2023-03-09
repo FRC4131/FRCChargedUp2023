@@ -58,7 +58,7 @@ public final class Constants {
         CUBENODEMEDIUM(-67, 1.5),
         CUBENODEHIGH(-59, 18.8),
         MEDIUMCOMMIT(-70, 1.5),
-        HIGHCOMMIT(-67, 19.65),
+        HIGHCOMMIT(-64, 19.65),
         SHOOTPOSITION(-70, 0),
         INTAKEBACK(-117,0), 
         INTAKEFRONT(120, 0),
@@ -92,6 +92,13 @@ public final class Constants {
                 this.x = x;
                 this.y = y;
         }
+    }
+
+    public static final class ArmConstants{
+        public static final double DEFAULT_MAX_VELOCITY = 5000;
+        public static final double DEFAULT_MAX_ACCEL = 7500;
+        public static final double FAST_MAX_VELOCITY = 5000;
+        public static final double FAST_MAX_ACCEL = 5000;
     }
 
     public static final class AprilTagConstants {
