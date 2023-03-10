@@ -9,16 +9,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LEDSubsystem extends SubsystemBase {
     private AddressableLED m_LED = new AddressableLED(9);
-<<<<<<< Updated upstream
-    private AddressableLEDBuffer m_LEDBuffer = new AddressableLEDBuffer(10);
-    int h = 130;
-    int s = 255;
-    int v = 255;
-
-    public LEDSubsystem() {
-        setHSVStupid(130, 255, 255, true);
-        m_LED.setLength(10);
-=======
     private AddressableLEDBuffer m_LEDBuffer = new AddressableLEDBuffer(62);
     int h = 130;
     int s = 255;
@@ -28,7 +18,6 @@ public class LEDSubsystem extends SubsystemBase {
     public LEDSubsystem() {
         setHSV(-1, 65, 255, 255);
         m_LED.setLength(m_LEDBuffer.getLength());
->>>>>>> Stashed changes
         m_LED.setData(m_LEDBuffer);
         m_LED.start();
 

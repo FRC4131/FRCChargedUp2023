@@ -14,8 +14,6 @@ import static frc.robot.Constants.ArmPosition.DOUBLESUB;
 import static frc.robot.Constants.ArmPosition.FLOOR;
 import static frc.robot.Constants.ArmPosition.HIGH;
 import static frc.robot.Constants.ArmPosition.HIGHCOMMIT;
-import static frc.robot.Constants.ArmPosition.INTAKEBACK;
-import static frc.robot.Constants.ArmPosition.INTAKEFRONT;
 import static frc.robot.Constants.ArmPosition.LOW;
 import static frc.robot.Constants.ArmPosition.SALUTE;
 import static frc.robot.Constants.ArmPosition.SHOOTPOSITION;
@@ -59,6 +57,7 @@ import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TimerCommand;
 import frc.robot.commands.TurnToAngleCommand;
+import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -69,8 +68,6 @@ import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.WristSubsystem;
-
-import static frc.robot.Constants.ArmPosition.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -190,6 +187,19 @@ public class RobotContainer {
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("Y axis test", 1.0, 1.0)));
 
+    m_autoChooser.addOption("cable testing",
+        new ParallelCommandGroup(
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("CABLESECRET", 4.0, 3.0))
+                .andThen(new WaitCommand(2)
+                    .deadlineWith(
+                        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))),
+            moveArm(ArmPosition.INTAKEFRONT)
+                .andThen(new WaitCommand(2.45).andThen(moveArm(DOUBLESUB, false))),
+            new WaitCommand(1)
+                .andThen(new WaitCommand(2).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))));
+
+    m_autoChooser.addOption("OWWW", owww());
   }
 
   public Command moveArm(ArmPosition position) {
@@ -247,16 +257,64 @@ public class RobotContainer {
                 }, m_extensionSubsystem)));
   }
 
+  public Command owww() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }),
+        moveArm(HIGHCOMMIT, 0.4),
+        new WaitCommand(1),
+        new WaitCommand(0.5).deadlineWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem).alongWith(
+                new WaitCommand(0.1).andThen(
+                    new ClawPowerCommand(m_clawSubsystem, -1)))),
+        new ParallelCommandGroup(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("OWWW", 4.0, 3.0))
+            .andThen(new WaitCommand(2)
+                .deadlineWith(
+                    new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))),
+                new WaitCommand(1.8).andThen(moveArm(ArmPosition.INTAKEBACK, false))
+                .andThen(new WaitCommand(4))
+                .andThen(moveArm(CUBENODEHIGH, 3.0, false))
+                .andThen(new WaitCommand(1.5))
+                .andThen(moveArm(SALUTE)),
+            new WaitCommand(1.5)
+                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
+                .andThen(new WaitCommand(4))
+                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -1)))));
+  }
+
   public Command seeeeecret() {
-    return new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-        PathPlanner.loadPath("snugPath", 4.0, 3.0));
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }),
+        moveArm(HIGHCOMMIT, 0.4),
+        new WaitCommand(1),
+        new WaitCommand(0.5).deadlineWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem).alongWith(
+                new WaitCommand(0.1).andThen(
+                    new ClawPowerCommand(m_clawSubsystem, -1)))),
+        new WristCommand(m_wristSubsystem, true).alongWith(
+            moveArm(STOW)).andThen(
+                new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                    PathPlanner.loadPath("CABLESECRET", 4.0, 3.0)))
+            .alongWith(
+                new SequentialCommandGroup(
+                    new WaitCommand(2)
+
+                )));
   }
 
   public Command ppAuto() {
     return new SequentialCommandGroup(
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)),
-        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
+        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false));
   }
 
   public Command spinClimb() {
@@ -298,7 +356,8 @@ public class RobotContainer {
         new WaitCommand(1),
         moveArm(SALUTE),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)),
-        new WaitCommand(5).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
+        new WaitCommand(5)
+            .deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false)));
   }
 
   public Command secret2Cone() {
@@ -376,7 +435,7 @@ public class RobotContainer {
                 new WaitCommand(0.1).andThen(
                     new ClawPowerCommand(m_clawSubsystem, -1)))),
         new WristCommand(m_wristSubsystem, true).alongWith(
-        moveArm(STOW)));
+            moveArm(STOW)));
   }
 
   public Command testAuto() {
@@ -416,7 +475,8 @@ public class RobotContainer {
         moveArm(STOW),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("path 1.3", 0.8, 3.0)),
-        waitCommand(1.37).deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
+        waitCommand(1.37)
+            .deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false)));
   }
 
   public Command threePiece() {
@@ -466,11 +526,15 @@ public class RobotContainer {
      * .onTrue(new ExampleCommand(m_exampleSubsystem));
      */
 
-    m_driverController.start().onTrue(new
-    LEDSwitchColorsCommand(m_LEDSubsystem));
+    m_driverController.start().onTrue(new LEDSwitchColorsCommand(m_LEDSubsystem));
 
     m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
-    m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
+    m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
+        -1));
+
+    // m_operatorController.a().onTrue(moveArm(DOUBLESUB, true));
+    // m_operatorController.b().onTrue(moveArm(SALUTE, false));
+
     // m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
     // 1));
     // m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
@@ -489,7 +553,7 @@ public class RobotContainer {
         (new InstantCommand(() -> {
           m_extensionSubsystem.extendTo(0);
         }, m_extensionSubsystem)));
-    m_operatorController.povLeft().onTrue(moveArm(HIGHCOMMIT, 0.4));
+    m_operatorController.povLeft().onTrue(moveArm(ArmPosition.INTAKEFRONT));
     m_operatorController.povDown().onTrue(
         new InstantCommand(
             () -> {
@@ -534,15 +598,29 @@ public class RobotContainer {
                       m_extensionSubsystem.extendTo(0);
                     }, m_extensionSubsystem))));
 
-    m_operatorController.povUp().onTrue(moveArm(DOUBLESUB));
+    m_operatorController.povUp().onTrue(moveArm(ArmPosition.INTAKEBACK));
 
     m_operatorController.leftStick().onTrue(moveArm(SHOOTPOSITION));
 
     // m_operatorController.rightTrigger().onTrue(moveArm(INTAKEBACK));
 
-    m_operatorController.rightTrigger().onTrue(new WristCommand(m_wristSubsystem, true));
+    new Trigger(
+        () -> m_operatorController.getRightTriggerAxis() > 0.2 && m_operatorController.getRightTriggerAxis() < 0.9)
+        .onTrue(
+            new InstantCommand(() -> {
+              ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+              m_armSubsystem.snapToAngle(position.rotation);
+              m_extensionSubsystem.extendTo(ZEROES.length);
+            }));
 
-    m_operatorController.leftTrigger().onTrue(moveArm(INTAKEFRONT));
+    new Trigger(() -> m_operatorController.getRightTriggerAxis() >= 0.9).onTrue(
+        new InstantCommand(() -> {
+          ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
+          m_extensionSubsystem.extendTo(position.length);
+        }));
+
+    new Trigger(() -> m_operatorController.getRightTriggerAxis() < 0.2).onTrue(
+        moveArm(SALUTE, true));
 
     m_operatorController.x().whileTrue(
         new InstantCommand(() -> {
@@ -649,7 +727,7 @@ public class RobotContainer {
     // m_poseEstimationSubsystem,
     // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
-    m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
+    m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, true));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
     // m_poseEstimationSubsystem,

@@ -58,6 +58,10 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     m_navX.zeroYaw();
   }
 
+  public void setAngleAdjustment(double adjustment){
+    m_navX.setAngleAdjustment(adjustment);
+  }
+
   private Rotation2d getGyroYaw() {
     return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - m_navX.getYaw())
         : Rotation2d.fromDegrees(m_navX.getYaw());
@@ -99,6 +103,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Robot Pitch", getPitch());
     SmartDashboard.putNumber("Robot Roll", getRoll());
     SmartDashboard.putNumber("Robot Yaw", getYaw());
+    
     SmartDashboard.putData(field2d);
 
   }

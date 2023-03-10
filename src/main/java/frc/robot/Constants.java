@@ -45,10 +45,10 @@ public final class Constants {
      * TEMPORARY MAYBE
     */
     public enum ArmPosition {
-        LOW(120,1.0),
+        LOW(110,1.0),
         MEDIUM(-61, 1.5),
         HIGH(-53, 19.65),
-        STOW(120,0),
+        STOW(110,0),
         ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18),
@@ -60,9 +60,10 @@ public final class Constants {
         MEDIUMCOMMIT(-70, 1.5),
         HIGHCOMMIT(-64, 19.65),
         SHOOTPOSITION(-70, 0),
-        INTAKEBACK(-117,0), 
-        INTAKEFRONT(120, 0),
-        SALUTE(90,0);
+        INTAKEBACK(-114.5,0), 
+        INTAKEFRONT(117, 5.7),
+        SALUTE(90,0),
+        AUTONCUBEHIGH(-58, 10);
 
 
         public final double rotation;
@@ -95,10 +96,10 @@ public final class Constants {
     }
 
     public static final class ArmConstants{
-        public static final double DEFAULT_MAX_VELOCITY = 5000;
-        public static final double DEFAULT_MAX_ACCEL = 7500;
+        public static final double DEFAULT_MAX_VELOCITY = 4500;
+        public static final double DEFAULT_MAX_ACCEL = 4500;
         public static final double FAST_MAX_VELOCITY = 5000;
-        public static final double FAST_MAX_ACCEL = 5000;
+        public static final double FAST_MAX_ACCEL = 7500;
     }
 
     public static final class AprilTagConstants {
