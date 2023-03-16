@@ -52,18 +52,21 @@ public final class Constants {
         ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18),
-        DOUBLESUB(-58, 0),
+        DOUBLESUB(-60, 0),
         FLOOR(110,15), //guestimate 
         DEFAULT(0,0), //guestimate 
-        CUBENODEMEDIUM(-67, 1.5),
-        CUBENODEHIGH(-59, 18.8),
-        MEDIUMCOMMIT(-70, 1.5),
-        HIGHCOMMIT(-64, 19.65),
+        CUBENODEMEDIUM(-65, 1.5),
+        CUBENODEHIGH(-59, 7.8),
+        MEDIUMCOMMIT(-74, 1.5),
+        HIGHCOMMIT(-68, 19.65),
         SHOOTPOSITION(-70, 0),
-        INTAKEBACK(-114.5,0), 
-        INTAKEFRONT(117, 5.7),
+        INTAKEBACK(-117,0), 
+        INTAKEFRONT(119, 5.25),
+        INTAKEFRONTTELEOP(116, 11),
         SALUTE(90,0),
-        AUTONCUBEHIGH(-58, 10);
+        AUTONCUBEHIGH(-57, 5),
+        AUTONCUBECOMMIT(-57, 12),
+        ACK(113, 11.75);
 
 
         public final double rotation;

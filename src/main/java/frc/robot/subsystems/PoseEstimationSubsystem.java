@@ -90,6 +90,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     EstimatedRobotPose aprilTagPose = m_visionSubsystem.getAprilTagRobotPose().orElse(null);
+    DriverStation.refreshData();
     if (aprilTagPose != null && (!DriverStation.isAutonomous())) {
       m_swerveDrivePoseEst.addVisionMeasurement(aprilTagPose.estimatedPose.toPose2d(), aprilTagPose.timestampSeconds);
     }

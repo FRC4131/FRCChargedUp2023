@@ -58,7 +58,7 @@ public class AutoBalanceCommand extends CommandBase {
   public void execute() {
     double threshold = 0.7; // was 0.125
     if (Math.abs(m_poseEstimationSubsystem.getPitch()) > 8.5) {
-      pitchPIDController.setP(0.05);
+      pitchPIDController.setP(0.03);
     } else {
       pitchPIDController.setP(0.0002);
     }
@@ -70,18 +70,17 @@ public class AutoBalanceCommand extends CommandBase {
     // if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
     // driveSignal *= 1.5;
     // }
-    // if (Math.abs(pitchPIDController.getPositionError()) < 5) {
-    // driveSignal *= 0.3;
-    // }
-    if (Math.abs(pitchPIDController.getPositionError()) < 2) {
+    if (Math.abs(pitchPIDController.getPositionError()) < 10) {
       driveSignal *= 0;
+      }
+    if (Math.abs(pitchPIDController.getPositionError()) < 12) {
+    driveSignal *= 0.5;
     }
 
     SmartDashboard.putNumber("DriveSignal", driveSignal);
-    if (isRed)
-      driveSignal *= -1;
+    driveSignal *= -1;
 
-    m_drivetrainSubsystem.drive(new Translation2d(driveSignal, 0), alignRot ? rotationSignal : 0,
+    m_drivetrainSubsystem.drive(new Translation2d(driveSignal, 0), driveSignal/1.5,
         isRed ? m_poseEstimationSubsystem.getPose().getRotation().rotateBy(Rotation2d.fromDegrees(180))
             : m_poseEstimationSubsystem.getPose().getRotation(),
         true,

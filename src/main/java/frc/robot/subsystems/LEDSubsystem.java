@@ -8,9 +8,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // Code based on the old code from frc2022
 
 public class LEDSubsystem extends SubsystemBase {
-    private AddressableLED m_LED = new AddressableLED(9);
-    private AddressableLEDBuffer m_LEDBuffer = new AddressableLEDBuffer(62);
-    int h = 130;
+    private AddressableLED m_LED = new AddressableLED(8);
+    private AddressableLEDBuffer m_LEDBuffer = new AddressableLEDBuffer(17);
+    int h = 65;
     int s = 255;
     int v = 255;
     private int m_rainbowFirstPixelHue = 0;
@@ -29,8 +29,8 @@ public class LEDSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         m_LED.setData(m_LEDBuffer);
-        setHSV(-1, (int)SmartDashboard.getNumber("H", 65), (int)SmartDashboard.getNumber("S", 65),
-                (int)SmartDashboard.getNumber("V", 65));
+        // setHSV(-1, (int)SmartDashboard.getNumber("H", 65), (int)SmartDashboard.getNumber("S", 65),
+        //         (int)SmartDashboard.getNumber("V", 65));
         // rainbow();
     }
 
@@ -60,8 +60,11 @@ public class LEDSubsystem extends SubsystemBase {
      * @param initV    value value [0, 255]
      */
     public void setHSV(int ledIndex, int h, int s, int v) {
+        this.h = h;
+        this.s = s;
+        this.v = v;
         if (ledIndex == -1) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 17; i++) {
                 SmartDashboard.putNumber("LED index", i);
                 m_LEDBuffer.setHSV(i, h, s, v);
             }
@@ -83,7 +86,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public void rainbow() {
-        for (var i = 0; i < 62; i++) {
+        for (var i = 0; i < 17; i++) {
             // Calculate the hue - hue is easier for rainbows because the color
             // shape is a circle so only one value needs to precess
             final var hue = (m_rainbowFirstPixelHue + (i * 180 / 62)) % 180;
