@@ -4,40 +4,39 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.WristSubsystem;
 
-public class WristCommand extends CommandBase {
-  /** Creates a new WristCommand. */
+public class OtherWristSwitchCommand extends CommandBase {
   private final WristSubsystem m_WristSubsystem;
-  boolean isClockwise;
+  private boolean movingClockwise;
 
   /**
-   * Backwards sorry
+   * Command to turn the wrist to the opposite orientation.
+   * <p>
+   * Will turn clockwise if wrist has not hit either extrema upon activation.
+   * 
    * @param wristSubsystem
-   * @param isClockwise true for neo to point upward when arm is stowed
    */
-  public WristCommand(WristSubsystem wristSubsystem, boolean isClockwise) {
+  public OtherWristSwitchCommand(WristSubsystem wristSubsystem) {
     m_WristSubsystem = wristSubsystem;
-    this.isClockwise = isClockwise;
-    // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(wristSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if (!isClockwise) {
-      m_WristSubsystem.rotateCounterClockwise();
-    } else {
-      m_WristSubsystem.rotateClockwise();
+    movingClockwise = true;
+    if (m_WristSubsystem.getClockwiseSwitch()) {
+      movingClockwise = false;
     }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (!isClockwise) {
+    if (movingClockwise) {
       m_WristSubsystem.rotateCounterClockwise();
     } else {
       m_WristSubsystem.rotateClockwise();
@@ -53,11 +52,6 @@ public class WristCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (isClockwise && m_WristSubsystem.getClockwiseSwitch()) {
-      return true;
-    } else if (!isClockwise && m_WristSubsystem.getCounterClockwiseSwitch()) {
-      return true;
-    } else
-      return false;
+    return true;
   }
 }

@@ -29,7 +29,7 @@ public class ExtensionSubsystem extends SubsystemBase {
   private DigitalInput m_forwardLimit = new DigitalInput(3); // arbitrary channel values for now
   private DigitalInput m_reverseLimit = new DigitalInput(0); // ID for forward lim switch is 4
 
-  private double desired;
+  private double desired = 0;
   private PIDController m_actuatorPIDController = new PIDController(
       1,
       0,
@@ -54,17 +54,17 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     m_actuator.configNominalOutputForward(0);
     m_actuator.configNominalOutputReverse(0);
-    m_actuator.configPeakOutputForward(1);
-    m_actuator.configPeakOutputReverse(-1);
+    m_actuator.configPeakOutputForward(0.9);
+    m_actuator.configPeakOutputReverse(-0.9);
 
     m_actuator.selectProfileSlot(1, 0);
-    m_actuator.config_kP(1, 0.0165);
+    m_actuator.config_kP(1, 0.01);
     m_actuator.config_kI(1, 0);
     m_actuator.config_kD(1, 0);
-    m_actuator.config_kF(1, 1e-2);
+    m_actuator.config_kF(1, 0);
 
-    m_actuator.configMotionCruiseVelocity(100000);
-    m_actuator.configMotionAcceleration(200000);
+    m_actuator.configMotionCruiseVelocity(200000);
+    m_actuator.configMotionAcceleration(400000);
 
     m_actuator.configPeakCurrentLimit(30);
     m_actuator.configPeakCurrentDuration(100);
@@ -90,7 +90,7 @@ public class ExtensionSubsystem extends SubsystemBase {
    * @param desired position of the telescope in inches from retracted
    */
   public void extendTo(double desired) {
-    m_actuator.set(ControlMode.MotionMagic, -desired * (1024 * GEAR_RATIO * 0.748));
+    m_actuator.set(ControlMode.Position, -desired * (1024 * GEAR_RATIO * 0.748));
     this.desired = desired;
   }
 
@@ -179,6 +179,7 @@ public class ExtensionSubsystem extends SubsystemBase {
     // m_actuator.set(TalonSRXControlMode.PercentOutput, 1/GEAR_RATIO);
 
     SmartDashboard.putNumber("Telescope Position", getPosition());
+    SmartDashboard.putNumber("Telescope Speed", m_actuator.getSelectedSensorVelocity());
     SmartDashboard.putBoolean("Telescope AtGoal", atGoal());
     SmartDashboard.putNumber("OFFSET BRUH",
         Math.abs((-desired * (1024 * GEAR_RATIO * 0.748)) - m_actuator.getSelectedSensorPosition()));
@@ -189,11 +190,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("TELE OUTPUT", -m_actuator.getMotorOutputPercent());
     checkLimitSwitches();
 
-    // if (Math.abs(m_actuator.getSupplyCurrent()) <= 0.2){
-    //   if(getReverseOutput())
-    //   resetEncoder(0);
-    //   if(getForwardOutput())
-    //   resetEncoder(19.4);
-    // }
+    if (Math.abs(m_actuator.getSupplyCurrent()) <= 0.2){
+      if(getReverseOutput())
+      resetEncoder(0);
+    }
   }
 }

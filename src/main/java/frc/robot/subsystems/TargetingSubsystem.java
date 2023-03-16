@@ -40,6 +40,8 @@ public class TargetingSubsystem extends SubsystemBase {
   public double armAngle = 0;
   public double elevatorLength = 0;
   public ArmPosition pos = ArmPosition.HIGH;
+  public ArmPosition commitPos = ArmPosition.HIGHCOMMIT;
+  public boolean isCone = false;
 
   /** Creates a new TargettingSubsystem. */
   public TargetingSubsystem(CommandMacroPad m_commandMacroPad) {
@@ -125,11 +127,11 @@ public class TargetingSubsystem extends SubsystemBase {
     if(desiredNode.column == 2){
       switch (desiredNode.row) {
         case 1:
-          return ArmPosition.HIGH;
+          return ArmPosition.CUBENODEHIGH;
         case 2:
-          return ArmPosition.MEDIUM;
+          return ArmPosition.CUBENODEMEDIUM;
         case 3:
-          return ArmPosition.LOW;
+          return ArmPosition.INTAKEFRONT;
         default:
           return ArmPosition.ZEROES;
       }
@@ -140,7 +142,7 @@ public class TargetingSubsystem extends SubsystemBase {
       case 2:
         return ArmPosition.MEDIUM;
       case 3:
-        return ArmPosition.LOW;
+        return ArmPosition.INTAKEFRONT;
       default:
         return ArmPosition.ZEROES;
     }
@@ -156,7 +158,7 @@ public class TargetingSubsystem extends SubsystemBase {
       case 2:
         return ArmPosition.MEDIUMCOMMIT;
       case 3:
-        return ArmPosition.LOW;
+        return ArmPosition.INTAKEFRONT;
       default:
         return ArmPosition.ZEROES;
     }
@@ -172,6 +174,8 @@ public class TargetingSubsystem extends SubsystemBase {
 
     armAngle = getScoringHeight().rotation;
     elevatorLength = getScoringHeight().length;
+
+    isCone = desiredNode.column != 2;
     setNode(selectNode().value());
     SmartDashboard.putNumber("grid selected", desiredGrid);
     SmartDashboard.putNumber("node selected", desiredNode.value());
@@ -183,5 +187,6 @@ public class TargetingSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("ROT PLS", elevatorLength);
 
     pos = getScoringHeight();
+    commitPos = getCommitedScoringHeight();
   }
 }

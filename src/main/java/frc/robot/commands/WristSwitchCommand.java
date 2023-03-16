@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.WristSubsystem;
 
@@ -13,7 +14,9 @@ public class WristSwitchCommand extends CommandBase {
 
   /**
    * Command to turn the wrist to the opposite orientation.
-   * <p>Will turn clockwise if wrist has not hit either extrema upon activation.
+   * <p>
+   * Will turn clockwise if wrist has not hit either extrema upon activation.
+   * 
    * @param wristSubsystem
    */
   public WristSwitchCommand(WristSubsystem wristSubsystem) {
@@ -25,7 +28,7 @@ public class WristSwitchCommand extends CommandBase {
   @Override
   public void initialize() {
     movingClockwise = false;
-    if(m_WristSubsystem.getCounterClockwiseSwitch()){
+    if (m_WristSubsystem.getCounterClockwiseSwitch()) {
       movingClockwise = true;
     }
   }
@@ -33,7 +36,7 @@ public class WristSwitchCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(movingClockwise){
+    if (movingClockwise) {
       m_WristSubsystem.rotateCounterClockwise();
     } else {
       m_WristSubsystem.rotateClockwise();
@@ -49,10 +52,11 @@ public class WristSwitchCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-  if(!movingClockwise && m_WristSubsystem.getClockwiseSwitch()){
-    return true;
-  }else if(movingClockwise && m_WristSubsystem.getCounterClockwiseSwitch()){
+    if (movingClockwise && m_WristSubsystem.getClockwiseSwitch()) {
       return true;
-    } else return false;
-  } 
+    } else if (!movingClockwise && m_WristSubsystem.getCounterClockwiseSwitch()) {
+      return true;
+    } else
+      return false;
+  }
 }

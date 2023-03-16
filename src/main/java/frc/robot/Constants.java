@@ -45,24 +45,28 @@ public final class Constants {
      * TEMPORARY MAYBE
     */
     public enum ArmPosition {
-        LOW(120,1.0),
+        LOW(110,1.0),
         MEDIUM(-61, 1.5),
         HIGH(-53, 19.65),
-        STOW(120,0),
+        STOW(110,0),
         ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18),
-        DOUBLESUB(-58, 0),
+        DOUBLESUB(-60, 0),
         FLOOR(110,15), //guestimate 
         DEFAULT(0,0), //guestimate 
-        CUBENODEMEDIUM(-67, 1.5),
-        CUBENODEHIGH(-59, 18.8),
-        MEDIUMCOMMIT(-70, 1.5),
-        HIGHCOMMIT(-67, 19.65),
+        CUBENODEMEDIUM(-65, 1.5),
+        CUBENODEHIGH(-59, 7.8),
+        MEDIUMCOMMIT(-74, 1.5),
+        HIGHCOMMIT(-68, 19.65),
         SHOOTPOSITION(-70, 0),
         INTAKEBACK(-117,0), 
-        INTAKEFRONT(120, 0),
-        SALUTE(90,0);
+        INTAKEFRONT(119, 5.25),
+        INTAKEFRONTTELEOP(116, 11),
+        SALUTE(90,0),
+        AUTONCUBEHIGH(-57, 5),
+        AUTONCUBECOMMIT(-57, 12),
+        ACK(113, 11.75);
 
 
         public final double rotation;
@@ -92,6 +96,13 @@ public final class Constants {
                 this.x = x;
                 this.y = y;
         }
+    }
+
+    public static final class ArmConstants{
+        public static final double DEFAULT_MAX_VELOCITY = 4500;
+        public static final double DEFAULT_MAX_ACCEL = 4500;
+        public static final double FAST_MAX_VELOCITY = 5000;
+        public static final double FAST_MAX_ACCEL = 7500;
     }
 
     public static final class AprilTagConstants {

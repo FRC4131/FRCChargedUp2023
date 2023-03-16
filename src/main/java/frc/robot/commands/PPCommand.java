@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
+import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
@@ -36,15 +38,11 @@ public class PPCommand extends CommandBase {
   /** Creates a new PPCommand. */
   public PPCommand(DrivetrainSubsystem drivetrainSubsystem,
       PoseEstimationSubsystem poseEstimationSubsystem,
-      PathPlannerTrajectory trajectory) {
+      PathPlannerTrajectory trajectory){
     // Use addRequirements() here to declare subsystem dependencies
 
-    if (DriverStation.getAlliance().equals(Alliance.Blue)){
-      m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, Alliance.Blue);
-    }
-    else{
-      m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, Alliance.Red);
-    }
+    DriverStation.refreshData();
+    m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(trajectory, DriverStation.getAlliance());
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_poseEstimationSubsystem = poseEstimationSubsystem;
     m_pose = m_poseEstimationSubsystem::getPose;
@@ -59,8 +57,8 @@ public class PPCommand extends CommandBase {
 
     // m_poseEstimationSubsystem.setAdjustment(DriverStation.getAlliance().equals(Alliance.Blue)
     // ? 0 : 180);
-    m_xController = new PIDController(3.5, 0, 0);
-    m_yController = new PIDController(3.5, 0, 0);
+    m_xController = new PIDController(3.45, 0, 0);
+    m_yController = new PIDController(3.25, 0, 0);
     m_thetaController = new ProfiledPIDController(6, 0, 0,
         new TrapezoidProfile.Constraints(Math.PI * 4, Math.PI * 4));
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);

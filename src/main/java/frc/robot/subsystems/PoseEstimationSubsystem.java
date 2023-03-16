@@ -58,6 +58,10 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     m_navX.zeroYaw();
   }
 
+  public void setAngleAdjustment(double adjustment){
+    m_navX.setAngleAdjustment(adjustment);
+  }
+
   private Rotation2d getGyroYaw() {
     return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - m_navX.getYaw())
         : Rotation2d.fromDegrees(m_navX.getYaw());
@@ -86,6 +90,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     EstimatedRobotPose aprilTagPose = m_visionSubsystem.getAprilTagRobotPose().orElse(null);
+    DriverStation.refreshData();
     if (aprilTagPose != null && (!DriverStation.isAutonomous())) {
       m_swerveDrivePoseEst.addVisionMeasurement(aprilTagPose.estimatedPose.toPose2d(), aprilTagPose.timestampSeconds);
     }
@@ -97,6 +102,9 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("y", m_swerveDrivePoseEst.getEstimatedPosition().getY());
     SmartDashboard.putNumber("Odom Rotation", m_swerveDrivePoseEst.getEstimatedPosition().getRotation().getDegrees());
     SmartDashboard.putNumber("Robot Pitch", getPitch());
+    SmartDashboard.putNumber("Robot Roll", getRoll());
+    SmartDashboard.putNumber("Robot Yaw", getYaw());
+    
     SmartDashboard.putData(field2d);
 
   }

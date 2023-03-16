@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ClawSubsystem extends SubsystemBase {
 
 
-  CANSparkMax m_clawController = new CANSparkMax(60, MotorType.kBrushless);
+  CANSparkMax m_clawController = new CANSparkMax(57, MotorType.kBrushless);
   RelativeEncoder m_clawEncoder;
   SparkMaxPIDController m_clawPID;
 
@@ -47,6 +47,6 @@ public class ClawSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
+    SmartDashboard.putNumber("Claw Current", m_clawController.getOutputCurrent());
   }
 }
