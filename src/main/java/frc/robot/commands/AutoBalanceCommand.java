@@ -20,7 +20,7 @@ public class AutoBalanceCommand extends CommandBase {
   private DrivetrainSubsystem m_drivetrainSubsystem;
   private PoseEstimationSubsystem m_poseEstimationSubsystem;
   private PIDController pitchPIDController;
-  private double balancedAngleDegrees = -0;
+  private double balancedAngleDegrees = 0;
   private boolean isRed;
   private boolean alignRot;
   private PIDController yawPIDController;
@@ -36,8 +36,6 @@ public class AutoBalanceCommand extends CommandBase {
     pitchPIDController = new PIDController(0.0002, 0, 0);
     yawPIDController = new PIDController(0.0002, 0, 0);
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
-    DriverStation.refreshData();
-    isRed = DriverStation.getAlliance().equals(Alliance.Red);
 
     yawPIDController.enableContinuousInput(-Math.PI, Math.PI);
   }
@@ -45,6 +43,8 @@ public class AutoBalanceCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    DriverStation.refreshData();
+    isRed = DriverStation.getAlliance().equals(Alliance.Red);
     pitchPIDController.reset();
     pitchPIDController.setSetpoint(balancedAngleDegrees);
     pitchPIDController.setTolerance(2);
@@ -65,12 +65,13 @@ public class AutoBalanceCommand extends CommandBase {
     double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch());
     driveSignal = MathUtil.clamp(driveSignal, -threshold, threshold);
 
+    // UNUSED
     double rotationSignal = yawPIDController.calculate(m_poseEstimationSubsystem.getYaw());
 
     // if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
     // driveSignal *= 1.5;
     // }
-    if (Math.abs(pitchPIDController.getPositionError()) < 10) {
+    if (Math.abs(pitchPIDController.getPositionError()) < 7.5) {
       driveSignal *= 0;
       }
     if (Math.abs(pitchPIDController.getPositionError()) < 12) {
@@ -78,6 +79,7 @@ public class AutoBalanceCommand extends CommandBase {
     }
 
     SmartDashboard.putNumber("DriveSignal", driveSignal);
+
     driveSignal *= -1;
 
     m_drivetrainSubsystem.drive(new Translation2d(driveSignal, 0), driveSignal/1.5,

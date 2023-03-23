@@ -51,13 +51,12 @@ import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.ClawPowerCommand;
 import frc.robot.commands.ClawTimedCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.EmergencyDrive;
 import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
-import frc.robot.commands.LockedRotDriveCommand;
 import frc.robot.commands.OtherWristSwitchCommand;
 import frc.robot.commands.PPCommand;
 import frc.robot.commands.TimerCommand;
-import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
@@ -178,15 +177,21 @@ public class RobotContainer {
     m_autoChooser.addOption("taxi", taxiAuto());
     m_autoChooser.addOption("1 cone FAR TAXI", oneConeTaxiFAR());
     // m_autoChooser.addOption("super secret 2 cone", secret2Cone());
-    m_autoChooser.addOption("secret 1 cube + climb", oneCubeBalance());
+    m_autoChooser.addOption("TESTED 1 cube + balance 2910", oneCubeBalance());
 
-    // m_autoChooser.addOption("Y axis test",
-    // new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    // PathPlanner.loadPath("Y axis test", 1.0, 1.0)));
+    m_autoChooser.addOption("Y axis test",
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)));
 
-    m_autoChooser.addOption("2 piece + balance TESTED", thisWorky());
-    m_autoChooser.addOption("UNTESTED 2 piece + balance", goodAutoLessSpace());
-    m_autoChooser.addOption("2 piece cable ONLY", twoPieceCable());
+    m_autoChooser.addOption("2 piece + balance TESTED 2910", thisWorky());
+    m_autoChooser.addOption("UNTESTED 2 piece + balance slightly less spacey", goodAutoLessSpace());
+    m_autoChooser.addOption("2 piece cable ONLY 2910", twoPieceCable());
+    m_autoChooser.addOption("UNTESTED just 1 cone + balance", slowTwoPiece());
+    m_autoChooser.addOption("TESTING AUTO 2910291029102910", new SequentialCommandGroup(
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("twoPieceCable.2", 4.0, 3.0)),
+        new WaitCommand(15).deadlineWith(
+            new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))));
   }
 
   public Command thisWorky() {
@@ -224,8 +229,9 @@ public class RobotContainer {
             }),
             new WaitCommand(1)
                 .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
-                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 0.1)))
-                .andThen(new WaitCommand(0.8).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -0.8)))));
+                .andThen(new WaitCommand(2.8).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 0.1)))));
+    // .andThen(new WaitCommand(0.8).deadlineWith(new
+    // ClawPowerCommand(m_clawSubsystem, -0.8)))));
   }
 
   public Command goodAutoLessSpace() {
@@ -263,8 +269,9 @@ public class RobotContainer {
             }),
             new WaitCommand(1)
                 .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
-                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 0.1)))
-                .andThen(new WaitCommand(0.8).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -0.8)))));
+                .andThen(new WaitCommand(2.8).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 0.1)))));
+    // .andThen(new WaitCommand(0.8).deadlineWith(new
+    // ClawPowerCommand(m_clawSubsystem, -0.8)))));
   }
 
   public Command twoPieceCable() {
@@ -285,6 +292,41 @@ public class RobotContainer {
                 PathPlanner.loadPath("twoPieceCable.1", 4.0, 3.0)),
             moveArm(SALUTE, true)
                 .andThen(new WaitCommand(1))
+                .andThen(moveArm(ArmPosition.INTAKEFRONT))
+                .andThen(new WaitCommand(3))
+                .andThen(moveArm(SALUTE))
+                .andThen(new WaitCommand(1.5))
+                .andThen(moveArm(AUTONCUBEHIGH))
+                .andThen(new WaitCommand(2.2))
+                .andThen(moveArm(SALUTE)),
+            new InstantCommand(() -> {
+              m_wristSubsystem.rotate();
+            }),
+            new WaitCommand(1)
+                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
+                .andThen(new WaitCommand(2.8).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 0.1)))));
+    // .andThen(new WaitCommand(0.8).deadlineWith(new
+    // ClawPowerCommand(m_clawSubsystem, -0.8)))));
+  }
+
+  public Command slowTwoPiece() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }),
+        moveArm(HIGHCOMMIT, 0.6),
+        new WaitCommand(0.8),
+        new WaitCommand(0.5).deadlineWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem).alongWith(
+                new WaitCommand(0.1).andThen(
+                    new ClawPowerCommand(m_clawSubsystem, -1)))),
+        new ParallelCommandGroup(
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("twoPieceCable.4", 4.0, 2.25)),
+            moveArm(SALUTE, true)
+                .andThen(new WaitCommand(1))
                 .andThen(moveArm(INTAKEFRONT))
                 .andThen(new WaitCommand(3))
                 .andThen(moveArm(SALUTE))
@@ -297,8 +339,9 @@ public class RobotContainer {
             }),
             new WaitCommand(1)
                 .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
-                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 0.1)))
-                .andThen(new WaitCommand(0.8).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -0.8)))));
+                .andThen(new WaitCommand(2.8).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 0.1)))));
+    // .andThen(new WaitCommand(0.8).deadlineWith(new
+    // ClawPowerCommand(m_clawSubsystem, -0.8)))));
   }
 
   public Command moveArm(ArmPosition position) {
@@ -588,8 +631,33 @@ public class RobotContainer {
             }, m_extensionSubsystem).alongWith(
                 new WaitCommand(0.1).andThen(
                     new ClawPowerCommand(m_clawSubsystem, -1)))),
-        new WristCommand(m_wristSubsystem, true).alongWith(
-            moveArm(STOW)));
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }).alongWith(
+            moveArm(SALUTE)));
+  }
+
+  public Command coneBalance() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }),
+        moveArm(HIGHCOMMIT, 0.4),
+        new WaitCommand(1),
+        new WaitCommand(0.5).deadlineWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem).alongWith(
+                new WaitCommand(0.1).andThen(
+                    new ClawPowerCommand(m_clawSubsystem, -1)))),
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }).alongWith(
+            moveArm(SALUTE)),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)),
+        new WaitCommand(8.0)
+            .deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false)));
   }
 
   public Command testAuto() {
@@ -920,20 +988,23 @@ public class RobotContainer {
             () -> m_driverController.getLeftTriggerAxis(),
             true))
         .whileFalse(
-            new LockedRotDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+            new EmergencyDrive(m_drivetrainSubsystem, m_poseEstimationSubsystem,
                 () -> -modifyAxis(m_driverController.getLeftY(), false) *
                     Constants.Swerve.maxSpeed,
                 () -> -modifyAxis(m_driverController.getLeftX(), false) *
                     Constants.Swerve.maxSpeed,
-                () -> -modifyAxis(m_driverController.getRightX(), false),
-                () -> -modifyAxis(m_driverController.getRightY(), false),
-                () -> -modifyAxis(m_driverController.getRightTriggerAxis(), false)));
+                () -> -modifyAxis(m_driverController.getRightX(), false) *
+                    MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                () -> m_driverController.getLeftTriggerAxis(),
+                true));
 
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
 
-    m_driverController.b()
-        .whileTrue(new TurnToAngleCommand(m_drivetrainSubsystem,
-            m_poseEstimationSubsystem, Math.PI / 2.0));
+    m_driverController.x()
+        .onTrue(new InstantCommand(() -> {
+          isInDefaultDriveMode = isInDefaultDriveMode ? false : true;
+          SmartDashboard.putBoolean("EMERGENCY DRIVE ON", !isInDefaultDriveMode);
+        }));
 
     m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
         m_poseEstimationSubsystem,

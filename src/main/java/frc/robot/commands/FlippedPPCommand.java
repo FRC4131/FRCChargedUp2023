@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 
-public class PPCommand extends CommandBase {
+public class FlippedPPCommand extends CommandBase {
   private PathPlannerTrajectory m_trajectory;
   private final Supplier<Pose2d> m_pose;
   private final DrivetrainSubsystem m_drivetrainSubsystem;
@@ -36,7 +36,7 @@ public class PPCommand extends CommandBase {
   private ProfiledPIDController m_thetaController;
 
   /** Creates a new PPCommand. */
-  public PPCommand(DrivetrainSubsystem drivetrainSubsystem,
+  public FlippedPPCommand(DrivetrainSubsystem drivetrainSubsystem,
       PoseEstimationSubsystem poseEstimationSubsystem,
       PathPlannerTrajectory trajectory) {
     // Use addRequirements() here to declare subsystem dependencies

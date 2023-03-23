@@ -97,6 +97,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    DriverStation.refreshData();
     boolean isBlue = DriverStation.getAlliance().equals(Alliance.Blue);
     double pidDesiredRotation = m_thetaController.calculate(
         m_poseEstimationSubsystem.getPose().getRotation().getRadians(), m_desiredPose.getRotation().getRadians());
