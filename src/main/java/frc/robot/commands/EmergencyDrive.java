@@ -44,6 +44,10 @@ public class EmergencyDrive extends CommandBase {
     addRequirements(poseEstimationSubsystem);
   }
 
+  public EmergencyDrive(DrivetrainSubsystem m_drivetrainSubsystem2, PoseEstimationSubsystem m_poseEstimationSubsystem2,
+      DoubleSupplier x2, DoubleSupplier y2, DoubleSupplier theta2, DoubleSupplier throttle2, Object fieldRelative2) {
+  }
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {

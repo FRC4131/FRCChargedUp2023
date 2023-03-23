@@ -105,26 +105,31 @@ public final class Constants {
         public static final double FAST_MAX_ACCEL = 7500;
     }
 
-    public static final class AprilTagConstants {
-        public static final AprilTag tag1 = new AprilTag(1,
-                new Pose3d(15.513558, 1.071626, 0.462788,
+    public static final class AprilTagConstantsRed{ //red april tags
+        public static final double fieldLength = 16.54175;
+        public static final double fieldWidth = 8.0137;
+        public static final AprilTag tag3 = new AprilTag(1,
+                new Pose3d(fieldLength - 15.513558, fieldWidth - 1.071626, 0.462788,
                         new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
 
         public static final AprilTag tag2 = new AprilTag(2,
-                new Pose3d(15.513558, 2.748026, 0.462788,
+                new Pose3d(fieldLength - 15.513558, fieldWidth - 2.748026, 0.462788,
                         new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
 
-        public static final AprilTag tag3 = new AprilTag(3,
-                new Pose3d(15.513558, 4.424426, 0.462788,
+        public static final AprilTag tag1 = new AprilTag(3,
+                new Pose3d(fieldLength - 15.513558, fieldWidth - 4.424426, 0.462788,
                         new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+
+        public static final AprilTag tag5 = new AprilTag(5,
+                new Pose3d(fieldLength - 0.36195, fieldWidth - 6.749796, 0.695452,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+    }
+
+    public static final class AprilTagConstantsBlue{ //blue april tags
 
         public static final AprilTag tag4 = new AprilTag(4,
                 new Pose3d(16.178784, 6.749796, 0.695452,
                         new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
-
-        public static final AprilTag tag5 = new AprilTag(5,
-                new Pose3d(0.36195, 6.749796, 0.695452,
-                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
 
         public static final AprilTag tag6 = new AprilTag(6,
                 new Pose3d(1.02743, 4.424426, 0.462788,

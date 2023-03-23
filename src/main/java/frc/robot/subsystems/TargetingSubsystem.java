@@ -50,10 +50,10 @@ public class TargetingSubsystem extends SubsystemBase {
   }
 
   public Pose2d getTargetGridPose() {
+    DriverStation.refreshData();
     boolean isRed = DriverStation.getAlliance().equals(Alliance.Red);
     int grid = isRed ? desiredGrid - 1: desiredGrid - 3;
     Translation2d offset = getNodeOffset();
-    SmartDashboard.putNumber("ABOOOOOM", offset.getY());
     return new Pose2d(GridPositions.values()[grid].x + offset.getX(),
         GridPositions.values()[grid].y + offset.getY(),
         Rotation2d.fromDegrees(isBlueAlliance ? 0 : 180));
@@ -167,7 +167,8 @@ public class TargetingSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    // isBlueAlliance = SmartDashboard.getBoolean("alliance", true);
+    // isBlueAlliance = SmartDashboard.getBoolean("alliance", true)
+    // DriverStation.refreshData();
     isBlueAlliance = DriverStation.getAlliance().equals(Alliance.Blue);
 
     desiredGrid = selectGrid() + (isBlueAlliance ? 5 : 0);

@@ -98,6 +98,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
   @Override
   public void execute() {
     DriverStation.refreshData();
+
     boolean isBlue = DriverStation.getAlliance().equals(Alliance.Blue);
     double pidDesiredRotation = m_thetaController.calculate(
         m_poseEstimationSubsystem.getPose().getRotation().getRadians(), m_desiredPose.getRotation().getRadians());
@@ -110,11 +111,10 @@ public class GoToPoseTeleopCommand extends CommandBase {
     Translation2d pidVector = new Translation2d(pidDesiredX, pidDesiredY);
     double pidScaling = getSpeedScaling(pidVector);
     Translation2d scaledPidVector = pidVector
-        .times(DriverStation.getAlliance().equals(Alliance.Blue) ? pidScaling : -pidScaling);
+        .times(pidScaling);
 
     // Get the driver input vector rotated into the global coordinate system
-    Translation2d rotatedDriveVector = new Translation2d(isBlue ? m_x.getAsDouble() : -m_x.getAsDouble(),
-        isBlue ? m_y.getAsDouble() : -m_y.getAsDouble())
+    Translation2d rotatedDriveVector = new Translation2d(m_x.getAsDouble(), m_y.getAsDouble())
         .rotateBy(m_poseEstimationSubsystem.getPose().getRotation());
 
     // Calculate the throttle scaling factor

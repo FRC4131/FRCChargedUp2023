@@ -44,13 +44,13 @@ public class AutoBalanceCommand extends CommandBase {
   @Override
   public void initialize() {
     DriverStation.refreshData();
-    isRed = DriverStation.getAlliance().equals(Alliance.Red);
+    isRed = DriverStation.getAlliance().equals(Alliance.Red); 
     pitchPIDController.reset();
     pitchPIDController.setSetpoint(balancedAngleDegrees);
     pitchPIDController.setTolerance(2);
     yawPIDController.reset();
     yawPIDController.setTolerance(Math.toRadians(1.0));
-    yawPIDController.setSetpoint(isRed ? 180.0 : 0.0);
+    // yawPIDController.setSetpoint(isRed ? 180.0 : 0.0); //change 
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -83,7 +83,7 @@ public class AutoBalanceCommand extends CommandBase {
     driveSignal *= -1;
 
     m_drivetrainSubsystem.drive(new Translation2d(driveSignal, 0), driveSignal/1.5,
-        isRed ? m_poseEstimationSubsystem.getPose().getRotation().rotateBy(Rotation2d.fromDegrees(180))
+        isRed ? m_poseEstimationSubsystem.getPose().getRotation().rotateBy(Rotation2d.fromDegrees(180)) //change
             : m_poseEstimationSubsystem.getPose().getRotation(),
         true,
         false);

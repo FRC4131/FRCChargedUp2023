@@ -54,13 +54,10 @@ public class DefaultDriveCommand extends CommandBase {
   public void execute() {
     double slope = 1 - minThrottle;
     double scale = slope * this.throttle.getAsDouble() + minThrottle;
-
-    DriverStation.refreshData();
     m_drivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale,
         y.getAsDouble() * scale),
         theta.getAsDouble() * scale,
-        DriverStation.getAlliance().equals(Alliance.Blue) ? m_poseEstimationSubsystem.getPose().getRotation()
-            : m_poseEstimationSubsystem.getPose().getRotation().minus(Rotation2d.fromDegrees(180)),
+        m_poseEstimationSubsystem.getPose().getRotation(),
         fieldRelative,
         true);
   }

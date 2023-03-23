@@ -24,7 +24,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.AprilTagConstants;
+// import frc.robot.Constants.AprilTagConstants;
+import frc.robot.Constants.AprilTagConstantsBlue;
+import frc.robot.Constants.AprilTagConstantsRed;
 import frc.robot.Constants.VisionConstants;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -46,14 +48,14 @@ public class VisionSubsystem extends SubsystemBase {
   {
     m_camera = new PhotonCamera("4131Camera0");
     m_cameraToRobot = new Transform3d(new Translation3d(Units.inchesToMeters(-11), 0.0, Units.inchesToMeters(6)), new Rotation3d(0.0, 0.0, Math.PI));
-    tagList.add(AprilTagConstants.tag1);
-    tagList.add(AprilTagConstants.tag2);
-    tagList.add(AprilTagConstants.tag3);
-    tagList.add(AprilTagConstants.tag4);
-    tagList.add(AprilTagConstants.tag5);
-    tagList.add(AprilTagConstants.tag6);
-    tagList.add(AprilTagConstants.tag7);
-    tagList.add(AprilTagConstants.tag8);
+    tagList.add(AprilTagConstantsRed.tag1);
+    tagList.add(AprilTagConstantsRed.tag2);
+    tagList.add(AprilTagConstantsRed.tag3);
+    tagList.add(AprilTagConstantsBlue.tag4);
+    tagList.add(AprilTagConstantsRed.tag5);
+    tagList.add(AprilTagConstantsBlue.tag6);
+    tagList.add(AprilTagConstantsBlue.tag7);
+    tagList.add(AprilTagConstantsBlue.tag8);
     fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
     m_photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_camera, m_cameraToRobot);
   }
