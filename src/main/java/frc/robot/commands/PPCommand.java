@@ -53,6 +53,7 @@ public class PPCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    DriverStation.refreshData();
     boolean isBlue = DriverStation.getAlliance().equals(Alliance.Blue);
     if (!isBlue)
       m_trajectory = PathPlannerTrajectory.transformTrajectoryForAlliance(m_trajectory, Alliance.Red);

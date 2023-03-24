@@ -177,21 +177,22 @@ public class RobotContainer {
     m_autoChooser.addOption("taxi", taxiAuto());
     m_autoChooser.addOption("1 cone FAR TAXI", oneConeTaxiFAR());
     // m_autoChooser.addOption("super secret 2 cone", secret2Cone());
-    m_autoChooser.addOption("TESTED 1 cube + balance 2910", oneCubeBalance());
+    m_autoChooser.addOption("TESTED 1 cube + balance", oneCubeBalance());
 
     m_autoChooser.addOption("Y axis test",
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)));
 
-    m_autoChooser.addOption("2 piece + balance TESTED 2910", thisWorky());
+    m_autoChooser.addOption("2 piece + balance TESTED", thisWorky());
     m_autoChooser.addOption("UNTESTED 2 piece + balance slightly less spacey", goodAutoLessSpace());
-    m_autoChooser.addOption("2 piece cable ONLY 2910", twoPieceCable());
+    m_autoChooser.addOption("2 piece cable ONLY", twoPieceCable());
     m_autoChooser.addOption("UNTESTED just 1 cone + balance", slowTwoPiece());
-    m_autoChooser.addOption("TESTING AUTO 2910291029102910", new SequentialCommandGroup(
+    m_autoChooser.addOption("TESTING AUTO", new SequentialCommandGroup(
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("twoPieceCable.2", 4.0, 3.0)),
         new WaitCommand(15).deadlineWith(
             new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))));
+    m_autoChooser.addOption("Juli auton", twoPieceLoadingAuto());
   }
 
   public Command thisWorky() {
@@ -613,6 +614,42 @@ public class RobotContainer {
         new WaitCommand(1.5),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             PathPlanner.loadPath("taxi very far", 4.0, 3.0)));
+  }
+
+  public Command twoPieceLoadingAuto() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }),
+        moveArm(HIGHCOMMIT, 0.6),
+        new WaitCommand(0.8),
+        new WaitCommand(0.5).deadlineWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem).alongWith(
+                new WaitCommand(0.1).andThen(
+                    new ClawPowerCommand(m_clawSubsystem, -1)))),
+        new ParallelCommandGroup(
+            new WaitCommand(1)
+            .andThen(new InstantCommand(() -> {
+              m_wristSubsystem.rotate();
+            }))
+            .andThen(new WaitCommand(3.22))
+            .andThen(new InstantCommand(() -> {
+              m_wristSubsystem.rotate();
+            })),
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("path 2.1", 2.0, 2.0))
+                .andThen(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                    PathPlanner.loadPath("path 2.2", 4.0, 3.0))),
+            moveArm(SALUTE)
+                .andThen(new WaitCommand(1))
+                .andThen(moveArm(ArmPosition.INTAKEFRONTTELEOP))
+                .andThen(new WaitCommand(2.22))
+                .andThen(moveArm(SALUTE))
+                .andThen(new WaitCommand(2.78)),
+            new WaitCommand(1)
+                .andThen(new WaitCommand(1.72).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))));
   }
 
   /**

@@ -22,6 +22,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.Constants.AprilTagConstants;
@@ -44,35 +46,47 @@ public class VisionSubsystem extends SubsystemBase {
   List<AprilTag> tagList = new ArrayList<>(8);
   AprilTagFieldLayout fieldLayout;
 
-  public VisionSubsystem()
-  {
+  public VisionSubsystem() {
     m_camera = new PhotonCamera("4131Camera0");
-    m_cameraToRobot = new Transform3d(new Translation3d(Units.inchesToMeters(-11), 0.0, Units.inchesToMeters(6)), new Rotation3d(0.0, 0.0, Math.PI));
-    tagList.add(AprilTagConstantsRed.tag1);
-    tagList.add(AprilTagConstantsRed.tag2);
-    tagList.add(AprilTagConstantsRed.tag3);
-    tagList.add(AprilTagConstantsBlue.tag4);
-    tagList.add(AprilTagConstantsRed.tag5);
-    tagList.add(AprilTagConstantsBlue.tag6);
-    tagList.add(AprilTagConstantsBlue.tag7);
-    tagList.add(AprilTagConstantsBlue.tag8);
-    fieldLayout = new AprilTagFieldLayout(tagList, 16.54175,8.0137);
-    m_photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_camera, m_cameraToRobot);
+    m_cameraToRobot = new Transform3d(new Translation3d(Units.inchesToMeters(-11), 0.0, Units.inchesToMeters(6)),
+        new Rotation3d(0.0, 0.0, Math.PI));
+
+    DriverStation.refreshData();
+    if (DriverStation.getAlliance().equals(Alliance.Red)) {
+      tagList.add(AprilTagConstantsRed.tag1);
+      tagList.add(AprilTagConstantsRed.tag2);
+      tagList.add(AprilTagConstantsRed.tag3);
+      tagList.add(AprilTagConstantsRed.tag5);
+    }
+
+    if (DriverStation.getAlliance().equals(Alliance.Blue)) {
+      tagList.add(AprilTagConstantsBlue.tag4);
+      tagList.add(AprilTagConstantsBlue.tag6);
+      tagList.add(AprilTagConstantsBlue.tag7);
+      tagList.add(AprilTagConstantsBlue.tag8);
+    }
+      fieldLayout = new AprilTagFieldLayout(tagList, 16.54175, 8.0137);
+      m_photonPoseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.LOWEST_AMBIGUITY, m_camera,
+          m_cameraToRobot);
   }
 
-  public Optional<EstimatedRobotPose> getAprilTagRobotPose()
-  {
+  public Optional<EstimatedRobotPose> getAprilTagRobotPose() {
     return m_estimatedRobotPose;
   }
 
+  public int getTagID() {
+    return m_camera.getLatestResult().getBestTarget().getFiducialId();
+  }
+
   @Override
-  public void periodic() {    
+  public void periodic() {
     SmartDashboard.putString("Name", m_camera.getName());
     m_estimatedRobotPose = m_photonPoseEstimator.update();
-    if(m_estimatedRobotPose.isPresent()){
+    if (m_estimatedRobotPose.isPresent()) {
       SmartDashboard.putNumber("Apriltag X", m_estimatedRobotPose.get().estimatedPose.toPose2d().getX());
       SmartDashboard.putNumber("Apriltag Y", m_estimatedRobotPose.get().estimatedPose.toPose2d().getY());
-      SmartDashboard.putNumber("Apriltag Heading (degrees)", m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getDegrees());
+      SmartDashboard.putNumber("Apriltag Heading (degrees)",
+          m_estimatedRobotPose.get().estimatedPose.toPose2d().getRotation().getDegrees());
     }
   }
 

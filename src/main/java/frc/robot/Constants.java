@@ -79,9 +79,9 @@ public final class Constants {
     }
 
     public enum GridPositions{
-        RED1(15.1, 1.08),
-        RED2(15.1, 2.75),
-        RED3(15.1, 4.45),
+        RED1(1.92, 7.00),
+        RED2(1.92, 5.28),
+        RED3(1.92, 3.59),
         BLUE6(1.92, 4.45),
         BLUE7(1.92, 2.75),
         BLUE8(1.92, 1.08),
@@ -110,19 +110,19 @@ public final class Constants {
         public static final double fieldWidth = 8.0137;
         public static final AprilTag tag3 = new AprilTag(1,
                 new Pose3d(fieldLength - 15.513558, fieldWidth - 1.071626, 0.462788,
-                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
 
         public static final AprilTag tag2 = new AprilTag(2,
                 new Pose3d(fieldLength - 15.513558, fieldWidth - 2.748026, 0.462788,
-                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
 
         public static final AprilTag tag1 = new AprilTag(3,
                 new Pose3d(fieldLength - 15.513558, fieldWidth - 4.424426, 0.462788,
-                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
 
         public static final AprilTag tag5 = new AprilTag(5,
                 new Pose3d(fieldLength - 0.36195, fieldWidth - 6.749796, 0.695452,
-                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
     }
 
     public static final class AprilTagConstantsBlue{ //blue april tags

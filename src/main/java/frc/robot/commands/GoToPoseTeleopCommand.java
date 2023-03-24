@@ -104,8 +104,8 @@ public class GoToPoseTeleopCommand extends CommandBase {
         m_poseEstimationSubsystem.getPose().getRotation().getRadians(), m_desiredPose.getRotation().getRadians());
     double pidDesiredX = m_xController.calculate(m_poseEstimationSubsystem.getPose().getX(), m_desiredPose.getX());
     double pidDesiredY = m_yController.calculate(m_poseEstimationSubsystem.getPose().getY(), m_desiredPose.getY());
-    SmartDashboard.putNumber("xErr", m_xController.getPositionError());
-    SmartDashboard.putNumber("yErr", m_yController.getPositionError());
+    SmartDashboard.putNumber("xErr", m_desiredPose.getX());
+    SmartDashboard.putNumber("yErr", m_desiredPose.getY());
     SmartDashboard.putNumber("ThetaErr", m_thetaController.getPositionError());
     // Cap the PID's velocity vector by the max speed
     Translation2d pidVector = new Translation2d(pidDesiredX, pidDesiredY);
@@ -124,6 +124,10 @@ public class GoToPoseTeleopCommand extends CommandBase {
     Translation2d finalVector = new Translation2d(
         (rotatedDriveVector.getX() * throttleScale + scaledPidVector.getX()),
         (rotatedDriveVector.getY() * throttleScale + scaledPidVector.getY()));
+
+    SmartDashboard.putNumber("SCALEX", scaledPidVector.getX());
+    SmartDashboard.putNumber("SCALEY", scaledPidVector.getY());
+
     double finalRotation = (m_theta.getAsDouble() + pidDesiredRotation) * throttleScale;
 
     m_drivetrainSubsystem.drive(finalVector, finalRotation, new Rotation2d(), false, false);
