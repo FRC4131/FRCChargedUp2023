@@ -136,8 +136,8 @@ public class RobotContainer {
     // Configure the trigger bindings
     setDefaultCommands();
     configureDriver1Bindings();
-    // configureDriver2Bindings();
-    configureCompOperatorBindings();
+    configureDriver2Bindings();
+    // configureCompOperatorBindings();
   }
 
   public void setDefaultCommands() {
@@ -152,17 +152,18 @@ public class RobotContainer {
         () -> m_driverController.getLeftTriggerAxis(),
         true));
 
-    new Trigger(isCone).onTrue(new InstantCommand(() -> {
-      m_LEDSubsystem.setHSV(-1, 170, 255, 255);
-    })).onFalse(new InstantCommand(() -> {
-      m_LEDSubsystem.setHSV(-1, 35, 255, 255);
-    }));
-    // m_armSubsystem.setDefaultCommand(
-    // new ArmJoystickCommand(m_armSubsystem, () ->
-    // modifyAxis(m_operatorController.getRightY(), false)));
-    // m_extensionSubsystem.setDefaultCommand(
-    // new ExtensionJoystickCommand(m_extensionSubsystem, () ->
-    // modifyAxis(m_operatorController.getLeftY(), false)));
+    // new Trigger(isCone).onTrue(new InstantCommand(() -> {
+    //   m_LEDSubsystem.setHSV(-1, 170, 255, 255);
+    // })).onFalse(new InstantCommand(() -> {
+    //   m_LEDSubsystem.setHSV(-1, 35, 255, 255);
+    // }));
+
+    new Trigger(isCone).onTrue(new RepeatCommand(new InstantCommand(() -> {
+      m_LEDSubsystem.pulse(170);
+    }))).onFalse(new RepeatCommand(new InstantCommand(() -> {
+      m_LEDSubsystem.pulse(35);
+    })));
+
   }
 
   public Command getAutonomousCommand() {
@@ -873,136 +874,13 @@ public class RobotContainer {
   }
 
   private void configureDriver2Bindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    /*
-     * new Trigger(m_exampleSubsystem::exampleCondition)
-     * .onTrue(new ExampleCommand(m_exampleSubsystem));
-     */
-
-    m_operatorController.b().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
-    m_operatorController.a().whileTrue(new ClawPowerCommand(m_clawSubsystem,
-        -1));
-
-    // m_operatorController.a().onTrue(moveArm(DOUBLESUB, true));
-    // m_operatorController.b().onTrue(moveArm(SALUTE, false));
-
-    // m_operatorController.povLeft().whileTrue(new WristCommand(m_wristSubsystem,
-    // 1));
-    // m_operatorController.povRight().whileTrue(new WristCommand(m_wristSubsystem,
-    // -1));
-
-    // m_operatorController.y().onTrue(new WristSwitchCommand(m_wristSubsystem));
-    // m_operatorController.a().whileTrue(new InstantCommand(() ->
-    // m_wristSubsystem.rotateAt(-8)));
-
-    // m_operatorController.povRight().onTrue(new InstantCommand(() -> {
-    // m_armSubsystem.snapToAngle(90);
-    // }, m_armSubsystem).alongWith(new InstantCommand(() -> {
-    // m_extensionSubsystem.extendTo(0);
-    // }, m_extensionSubsystem)));
-    m_operatorController.povRight().onTrue(
-        (new InstantCommand(() -> {
-          m_extensionSubsystem.extendTo(0);
-        }, m_extensionSubsystem)));
-    m_operatorController.povLeft().onTrue(moveArm(ArmPosition.INTAKEFRONT));
-    m_operatorController.povDown().onTrue(
-        new InstantCommand(
-            () -> {
-              ArmPosition position = m_targetingSubsystem.getScoringHeight();
-              m_armSubsystem.snapToAngle(position.rotation);
-            }, m_armSubsystem)
-            .alongWith(
-                new InstantCommand(() -> {
-                  ArmPosition position = m_targetingSubsystem.getScoringHeight();
-                  m_extensionSubsystem.extendTo(position.length);
-                }, m_extensionSubsystem)));
-    // m_operatorController.b().whileTrue(new ExtendToCommand(m_extensionSubsystem,
-    // 21.8));
-    // m_operatorController.x().whileTrue(new ExtendToCommand(m_extensionSubsystem,
-    // 19.5));
-    // m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(45)
-    // .alongWith(
-    // new InstantCommand(() -> {
-    // m_extensionSubsystem.resetEncoder(0);
-    // }, m_extensionSubsystem)));
-
-    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(0)
-        .alongWith(
-            new InstantCommand(() -> {
-              m_extensionSubsystem.resetEncoder(0);
-            }, m_extensionSubsystem)));
-
-    m_operatorController.povUp().onTrue(moveArm(ArmPosition.INTAKEBACK));
-
-    m_operatorController.leftStick().onTrue(moveArm(SHOOTPOSITION));
-
-    // m_operatorController.rightTrigger().onTrue(moveArm(INTAKEBACK));
-
-    boolean isCommitted = m_driverController.rightStick().getAsBoolean();
-
-    new Trigger(
-        () -> m_operatorController.getRightTriggerAxis() > 0.2 && m_operatorController.getRightTriggerAxis() < 0.9)
-        .onTrue(
-            new InstantCommand(() -> {
-              ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
-              m_armSubsystem.snapToAngle(position.rotation);
-            }, m_armSubsystem).alongWith(new InstantCommand(() -> {
-              m_extensionSubsystem.extendTo(ZEROES.length);
-            }, m_extensionSubsystem)));
-
-    new Trigger(() -> m_operatorController.getRightTriggerAxis() >= 0.9).onTrue(
-        new InstantCommand(() -> {
-          ArmPosition position = m_targetingSubsystem.getCommitedScoringHeight();
-          m_extensionSubsystem.extendTo(position.length);
-        })).onFalse(new InstantCommand(() -> {
-          m_extensionSubsystem.extendTo(SALUTE.length);
-        }));
-
-    new Trigger(() -> m_operatorController.getRightTriggerAxis() <= 0.2).onTrue(
-        new InstantCommand(() -> {
-          m_extensionSubsystem.extendTo(SALUTE.length);
-        }).alongWith(new InstantCommand(() -> {
-          m_armSubsystem.adjustSpeed(FAST_MAX_VELOCITY, FAST_MAX_ACCEL);
-          m_armSubsystem.snapToAngle(SALUTE.rotation);
-        }, m_armSubsystem)));
-
-    m_operatorController.x().whileTrue(
-        new InstantCommand(() -> {
-          m_extensionSubsystem.extendTo(19.3);
-        }, m_extensionSubsystem).alongWith(new WaitCommand(0.5).andThen(
-            new ClawPowerCommand(m_clawSubsystem, -(5 / 3)))));
-
-    m_operatorController.y().onTrue(
-        new InstantCommand(() -> {
-          m_wristSubsystem.rotate();
-        }));
-
+    m_operatorController.a().onTrue(moveArm(ArmPosition.MEDIUM));
+    m_operatorController.b().onTrue(moveArm(SALUTE));
     m_operatorController.rightBumper().whileTrue(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
 
     m_operatorController.rightBumper().whileTrue(new ExtensionJoystickCommand(m_extensionSubsystem,
         () -> modifyAxis(m_operatorController.getLeftY(), false)));
-
-    // m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {
-    // rumble = rumble == 0 ? 1 : 0;
-    // m_operatorController.getHID().setRumble(RumbleType.kBothRumble, rumble);
-    // }));
-
-    m_operatorController.leftBumper().onTrue(moveArm(ArmPosition.ACK, false));
-
-    // m_operatorController.start().onTrue(moveArm(ZEROES));
-
-    m_operatorController.start().onTrue((new InstantCommand(() -> {
-      m_wristSubsystem.setReference(-90);
-      SmartDashboard.putBoolean("WristStop", false);
-    })));
-
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is
-    // pressed,
-    // cancelling on release.
-
-    // m_operatorController.rightBumper().onTrue(new
-    // ExampleCommand(m_targetingSubsystem));
   }
 
   private void configureDriver1Bindings() {

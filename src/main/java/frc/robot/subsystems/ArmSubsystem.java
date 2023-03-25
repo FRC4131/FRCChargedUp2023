@@ -59,17 +59,17 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightRotPIDController.setSmartMotionMinOutputVelocity(0, 0);
     m_rightRotPIDController.setSmartMotionAccelStrategy(AccelStrategy.kSCurve, 0);
 
-    // Smart Motion
-    m_rightRotPIDController.setP(4e-9);
-    m_rightRotPIDController.setI(0);
-    m_rightRotPIDController.setD(0);
-    m_rightRotPIDController.setFF(2e-4);
-
-    // Position
-    // m_rightRotPIDController.setP(5e-2);
+    // // Smart Motion
+    // m_rightRotPIDController.setP(4e-9);
     // m_rightRotPIDController.setI(0);
     // m_rightRotPIDController.setD(0);
-    // m_rightRotPIDController.setFF(0);
+    // m_rightRotPIDController.setFF(2e-4);
+
+    // Position
+    m_rightRotPIDController.setP(5e-2);
+    m_rightRotPIDController.setI(0);
+    m_rightRotPIDController.setD(0);
+    m_rightRotPIDController.setFF(0);
 
     SmartDashboard.putBoolean("bool", bool);
     // m_leftRot.setIdleMode(IdleMode.kCoast);
@@ -107,7 +107,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void snapToAngle(double angleDegrees) {
     double encoderRotations = angleToMotorRotations(angleDegrees);
-    m_rightRotPIDController.setReference(encoderRotations, ControlType.kSmartMotion);
+    m_rightRotPIDController.setReference(encoderRotations, ControlType.kPosition);
   };
 
   public void resetPosition(double position) {

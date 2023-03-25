@@ -14,6 +14,7 @@ public class LEDSubsystem extends SubsystemBase {
     int s = 255;
     int v = 255;
     private int m_rainbowFirstPixelHue = 0;
+    private int lastValue = 0;
 
     public LEDSubsystem() {
         setHSV(-1, 65, 255, 255);
@@ -29,8 +30,9 @@ public class LEDSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         m_LED.setData(m_LEDBuffer);
-        // setHSV(-1, (int)SmartDashboard.getNumber("H", 65), (int)SmartDashboard.getNumber("S", 65),
-        //         (int)SmartDashboard.getNumber("V", 65));
+        // setHSV(-1, (int)SmartDashboard.getNumber("H", 65),
+        // (int)SmartDashboard.getNumber("S", 65),
+        // (int)SmartDashboard.getNumber("V", 65));
         // rainbow();
     }
 
@@ -97,6 +99,16 @@ public class LEDSubsystem extends SubsystemBase {
         m_rainbowFirstPixelHue += 3;
         // Check bounds
         m_rainbowFirstPixelHue %= 180;
+    }
+
+    public void pulse(int hue) {
+        for (var i = 0; i < 17; i++) {
+            final var value = (lastValue + (i * 255 / 17)) % 255;
+            m_LEDBuffer.setHSV(i, hue, 255, 180 - value);
+        }
+
+        lastValue += 3;
+        lastValue %= 255;
     }
 
 }
