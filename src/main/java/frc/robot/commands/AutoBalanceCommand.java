@@ -24,6 +24,8 @@ public class AutoBalanceCommand extends CommandBase {
   private boolean isRed;
   private boolean alignRot;
   private PIDController yawPIDController;
+  private double OFFSET = 1;
+  private double flipPitch;
 
   public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem,
       boolean alignRot) {
@@ -38,6 +40,22 @@ public class AutoBalanceCommand extends CommandBase {
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
 
     yawPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    flipPitch = 1;
+  }
+  public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem,
+      boolean alignRot, boolean flipPitch) {
+    // Use addRequirements() here to declare subsystem dependencies.
+
+    this.alignRot = alignRot;
+    m_drivetrainSubsystem = drivetrainSubsystem;
+    m_poseEstimationSubsystem = poseEstimationSubsystem;
+    // pitchPIDController = new PIDController(0.0002, 0, 0);
+    pitchPIDController = new PIDController(0.0002, 0, 0);
+    yawPIDController = new PIDController(0.0002, 0, 0);
+    addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
+
+    yawPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    this.flipPitch = flipPitch ? -1 : 1;
   }
 
   // Called when the command is initially scheduled.
@@ -57,12 +75,12 @@ public class AutoBalanceCommand extends CommandBase {
   @Override
   public void execute() {
     double threshold = 0.7; // was 0.125
-    if (Math.abs(m_poseEstimationSubsystem.getPitch()) > 8.5) {
+    if (Math.abs(m_poseEstimationSubsystem.getPitch()) + OFFSET > 8.5) {
       pitchPIDController.setP(0.03);
     } else {
-      pitchPIDController.setP(0.0002);
+      pitchPIDController.setP(0.0004);
     }
-    double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch());
+    double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch() + OFFSET);
     driveSignal = MathUtil.clamp(driveSignal, -threshold, threshold);
 
     // UNUSED
@@ -71,16 +89,17 @@ public class AutoBalanceCommand extends CommandBase {
     // if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
     // driveSignal *= 1.5;
     // }
-    if (Math.abs(pitchPIDController.getPositionError()) < 7.5) {
+    if (Math.abs(pitchPIDController.getPositionError()) + OFFSET < 7.5) {
       driveSignal *= 0;
       }
-    if (Math.abs(pitchPIDController.getPositionError()) < 12) {
-    driveSignal *= 0.5;
+    if (Math.abs(pitchPIDController.getPositionError()) + OFFSET < 12) {
+    driveSignal *= 0.7;
     }
-
+ 
     SmartDashboard.putNumber("DriveSignal", driveSignal);
 
     driveSignal *= -1;
+    driveSignal *= flipPitch;
 
     m_drivetrainSubsystem.drive(new Translation2d(driveSignal, 0), driveSignal/1.5,
         isRed ? m_poseEstimationSubsystem.getPose().getRotation().rotateBy(Rotation2d.fromDegrees(180)) //change

@@ -4,21 +4,16 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
-import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-//import com.revrobotics.SparkMaxLimitSwitch;
-import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
+//import com.revrobotics.SparkMaxLimitSwitch;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -40,6 +35,8 @@ public class ArmSubsystem extends SubsystemBase {
 
   private RelativeEncoder m_rightEncoder;
 
+  private RelativeEncoder m_leftEncoder;
+
   // private DigitalInput m_minLimitSwitch = new DigitalInput(0);//TODO: Channel #s
   // private DigitalInput m_maxLimitSwitch = new DigitalInput(1);//TODO: Channel #s
   
@@ -48,11 +45,15 @@ public class ArmSubsystem extends SubsystemBase {
 
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
+    SmartDashboard.putNumber("CLAMP ARM SPEED", 1);
     // m_actuator.configFeed
     m_rightEncoder = m_rightRot.getEncoder();
-    m_rightRotPIDController = m_rightRot.getPIDController();
+    m_leftEncoder = m_leftRot.getEncoder();
+    m_rightRotPIDController = m_leftRot.getPIDController();
     m_rightEncoder.setPositionConversionFactor(1);
     m_rightEncoder.setVelocityConversionFactor(1);
+    m_leftEncoder.setPositionConversionFactor(1);
+    m_leftEncoder.setVelocityConversionFactor(1);
     m_rightRotPIDController.setOutputRange(-1, 1);
     m_rightRotPIDController.setSmartMotionMaxAccel(7500, 0);
     m_rightRotPIDController.setSmartMotionMaxVelocity(5000, 0);
@@ -75,7 +76,7 @@ public class ArmSubsystem extends SubsystemBase {
     // m_leftRot.setIdleMode(IdleMode.kCoast);
 
     // m_leftRot.fp
-    resetPosition(45.0);
+    resetPosition(47.5);
 
     m_rightRot.setIdleMode(IdleMode.kBrake);
     m_leftRot.setIdleMode(IdleMode.kBrake);
@@ -87,8 +88,11 @@ public class ArmSubsystem extends SubsystemBase {
     // m_actuatorPIDController = m_actuator.getPIDController();
 
     // m_leftRot.follow(m_rightRot, true);
+    // m_leftRot.follow(m_leftRot);
+    // m_rightRot.follow(m_leftRot, true);
 
     m_rightRot.burnFlash();
+    m_leftRot.burnFlash();
     m_rightRotPIDController.setReference(0, ControlType.kDutyCycle);
   }
 
@@ -97,6 +101,10 @@ public class ArmSubsystem extends SubsystemBase {
     m_rightRotPIDController.setSmartMotionMaxAccel(maxAcceleration, 0);
 
     SmartDashboard.putNumber("ARM MAX VEL LIMIT", m_rightRotPIDController.getSmartMotionMaxVelocity(0));
+  }
+
+  public void clampSpeed(double outputPercent){
+    m_rightRotPIDController.setOutputRange(-outputPercent, outputPercent);
   }
 
   public void rotateArm(double power) {
@@ -112,6 +120,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void resetPosition(double position) {
     m_rightEncoder.setPosition(angleToMotorRotations(position));
+    m_leftEncoder.setPosition(angleToMotorRotations(position));
     // m_rightRotPIDController.setReference(0, ControlType.kPosition);
   }
 
@@ -131,7 +140,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public double getArmAngle(){
-    return m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360;
+    return m_leftEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360;
   }
 
   @Override
@@ -145,14 +154,13 @@ public class ArmSubsystem extends SubsystemBase {
     //   m_rightEncoder.setPosition(angleToMotorRotations(ArmPosition.MIN.rotation));
     // }
       
-
+      // clampSpeed(SmartDashboard.getNumber("CLAMP ARM SPEED", 1));
 
 
     SmartDashboard.putNumber("Arm Velocity", m_rightEncoder.getVelocity());
     SmartDashboard.putString("Arm Position",
         m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " Degrees");
-    // SmartDashboard.putString("LeftencoderRpos", m_leftEncoder.getPosition() + "
-    // ticks(?)");
+    SmartDashboard.putString("Left Arm Motor Pos", m_leftEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + "Degrees");
   }
 
   public CommandBase resetEncoder(double position) {

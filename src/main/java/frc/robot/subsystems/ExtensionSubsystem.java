@@ -47,8 +47,9 @@ public class ExtensionSubsystem extends SubsystemBase {
     // m_actuator.configSelectedFeedbackCoefficient(100 / (1024 * GEAR_RATIO *
     // 0.748), 1, 0);
 
+    // INVERT IF DEIMOS.
     m_actuator.setSensorPhase(false);
-    m_actuator.setInverted(false);
+    m_actuator.setInverted(true);
 
     m_actuator.configNeutralDeadband(0.001);
 

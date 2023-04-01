@@ -30,6 +30,7 @@ import java.util.function.DoubleSupplier;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -66,7 +67,7 @@ import frc.robot.subsystems.ExtensionSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 import frc.robot.subsystems.TargetingSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.VisionSubsystemLL3;
 import frc.robot.subsystems.WristSubsystem;
 
 /**
@@ -85,7 +86,7 @@ public class RobotContainer {
   private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
   private final TargetingSubsystem m_targetingSubsystem = new TargetingSubsystem(
       new CommandMacroPad(OperatorConstants.kMacropadPort));
-  private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+  private final VisionSubsystemLL3 m_visionSubsystem = new VisionSubsystemLL3();
   private final PoseEstimationSubsystem m_poseEstimationSubsystem = new PoseEstimationSubsystem(m_drivetrainSubsystem,
       m_visionSubsystem);
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
@@ -136,8 +137,11 @@ public class RobotContainer {
     // Configure the trigger bindings
     setDefaultCommands();
     configureDriver1Bindings();
-    configureDriver2Bindings();
-    // configureCompOperatorBindings();
+    configureCompOperatorBindings();
+
+    // Only for debugging.
+    // configureDriver2Bindings();
+
   }
 
   public void setDefaultCommands() {
@@ -152,17 +156,17 @@ public class RobotContainer {
         () -> m_driverController.getLeftTriggerAxis(),
         true));
 
-    // new Trigger(isCone).onTrue(new InstantCommand(() -> {
-    //   m_LEDSubsystem.setHSV(-1, 170, 255, 255);
-    // })).onFalse(new InstantCommand(() -> {
-    //   m_LEDSubsystem.setHSV(-1, 35, 255, 255);
-    // }));
+    new Trigger(isCone).onTrue(new InstantCommand(() -> {
+      m_LEDSubsystem.setHSV(-1, 170, 255, 255);
+    })).onFalse(new InstantCommand(() -> {
+      m_LEDSubsystem.setHSV(-1, 35, 255, 255);
+    }));
 
-    new Trigger(isCone).onTrue(new RepeatCommand(new InstantCommand(() -> {
-      m_LEDSubsystem.pulse(170);
-    }))).onFalse(new RepeatCommand(new InstantCommand(() -> {
-      m_LEDSubsystem.pulse(35);
-    })));
+    // new Trigger(isCone).onTrue(new RepeatCommand(new InstantCommand(() -> {
+    // m_LEDSubsystem.pulse(170);
+    // }))).onFalse(new RepeatCommand(new InstantCommand(() -> {
+    // m_LEDSubsystem.pulse(35);
+    // })));
 
   }
 
@@ -172,28 +176,29 @@ public class RobotContainer {
 
   public void addAuton() {
     m_autoChooser = new SendableChooser<Command>();
-    m_autoChooser.setDefaultOption("1 Cone + Straight FWD", oneConeAndTaxiAuto());
-    m_autoChooser.addOption("1 Cone + Straight FWD", oneConeAndTaxiAuto());
+    m_autoChooser.setDefaultOption("MIDDLE Cube + Balance", dcmpAuto1());
+    m_autoChooser.addOption("MIDDLE Cube + Balance", dcmpAuto1());
+    m_autoChooser.addOption("OPEN SIDE 2 Cube + Balance", dcmpAuto2());
+    m_autoChooser.addOption("CABLE SIDE 2.5 Cube + Balance", dcmpAuto3());
+    m_autoChooser.addOption("TAXI from grid to cube", taxiAuto());
+    m_autoChooser.addOption("1 Cube + balance NO TAXI", oneCubeBalance());
+    m_autoChooser.addOption("1 Cone + taxi", oneConeAndTaxiAuto());
     m_autoChooser.addOption("1 Cone ONLY", oneConeAuto());
-    m_autoChooser.addOption("taxi", taxiAuto());
-    m_autoChooser.addOption("1 cone FAR TAXI", oneConeTaxiFAR());
-    // m_autoChooser.addOption("super secret 2 cone", secret2Cone());
-    m_autoChooser.addOption("TESTED 1 cube + balance", oneCubeBalance());
+    m_autoChooser.addOption("1 Cone FAR TAXI", oneConeTaxiFAR());
 
-    m_autoChooser.addOption("Y axis test",
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)));
+    // m_autoChooser.addOption("Y axis test",
+    //     new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    //         PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)));
 
-    m_autoChooser.addOption("2 piece + balance TESTED", thisWorky());
-    m_autoChooser.addOption("UNTESTED 2 piece + balance slightly less spacey", goodAutoLessSpace());
-    m_autoChooser.addOption("2 piece cable ONLY", twoPieceCable());
-    m_autoChooser.addOption("UNTESTED just 1 cone + balance", slowTwoPiece());
-    m_autoChooser.addOption("TESTING AUTO", new SequentialCommandGroup(
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("twoPieceCable.2", 4.0, 3.0)),
-        new WaitCommand(15).deadlineWith(
-            new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))));
-    m_autoChooser.addOption("Juli auton", twoPieceLoadingAuto());
+    // m_autoChooser.addOption("2 piece + balance TESTED", thisWorky());
+    // m_autoChooser.addOption("UNTESTED 2 piece + balance slightly less spacey", goodAutoLessSpace());
+    // m_autoChooser.addOption("2 piece cable ONLY", twoPieceCable());
+    // m_autoChooser.addOption("UNTESTED just 1 cone + balance", slowTwoPiece());
+    // m_autoChooser.addOption("TESTING AUTO", new SequentialCommandGroup(
+    //     new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    //         PathPlanner.loadPath("dcmp1.1", 2.0, 1.0)),
+    //     new WaitCommand(15).deadlineWith(
+    //         new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))));
   }
 
   public Command thisWorky() {
@@ -362,6 +367,7 @@ public class RobotContainer {
         () -> {
           m_armSubsystem.adjustSpeed(fast ? FAST_MAX_VELOCITY : DEFAULT_MAX_VELOCITY,
               fast ? FAST_MAX_ACCEL : DEFAULT_MAX_ACCEL);
+          m_armSubsystem.clampSpeed(fast ? 1 : 0.5);
           m_armSubsystem.snapToAngle(position.rotation);
         }, m_armSubsystem)
         .alongWith(
@@ -376,6 +382,7 @@ public class RobotContainer {
         () -> {
           m_armSubsystem.adjustSpeed(fast ? FAST_MAX_VELOCITY : DEFAULT_MAX_VELOCITY,
               fast ? FAST_MAX_ACCEL : DEFAULT_MAX_ACCEL);
+          m_armSubsystem.clampSpeed(fast ? 1 : 0.5);
           m_armSubsystem.snapToAngle(position.rotation);
         }, m_armSubsystem)
         .alongWith(
@@ -392,6 +399,7 @@ public class RobotContainer {
         () -> {
           m_armSubsystem.adjustSpeed(DEFAULT_MAX_VELOCITY,
               DEFAULT_MAX_ACCEL);
+          m_armSubsystem.clampSpeed(1);
           m_armSubsystem.snapToAngle(position.rotation);
         }, m_armSubsystem)
         .alongWith(
@@ -559,43 +567,6 @@ public class RobotContainer {
             .deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false)));
   }
 
-  public Command secret2Cone() {
-    return new SequentialCommandGroup(
-        new InstantCommand(() -> {
-          m_wristSubsystem.rotate();
-        }),
-        // moveArm(HIGH, 0.5),
-        new WaitCommand(1.5),
-        // moveArm(HIGHCOMMIT),
-        new WaitCommand(0.5),
-        new WaitCommand(0.75).deadlineWith(
-            new InstantCommand(() -> {
-              m_extensionSubsystem.extendTo(0);
-            }, m_extensionSubsystem).alongWith(
-                new WaitCommand(0.25).andThen(
-                    new ClawPowerCommand(m_clawSubsystem, -1)))),
-        // moveArm(ZEROES),
-        new WaitCommand(0.5),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 1.1", 4.0, 3.0))
-            .alongWith(
-                new ParallelCommandGroup(
-                    new WaitCommand(0.5).andThen(
-                    // moveArm(INTAKEBACK, 1)
-                    ),
-                    new WaitCommand(1)
-                        .andThen(new WaitCommand(1.4).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))))
-            .alongWith(new InstantCommand(() -> {
-              m_wristSubsystem.rotate();
-            })),
-        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 1.2", 4.0, 3.0))
-            .alongWith(
-                // moveArm(ZEROES)
-                // .andThen
-                (new WaitCommand(1.8)),
-                // .andThen(moveArm(CUBENODEHIGH, 0.5)))),
-                new ClawPowerCommand(m_clawSubsystem, -0.8)));
-  }
-
   public Command oneConeTaxiFAR() {
     return new SequentialCommandGroup(
         new InstantCommand(() -> {
@@ -614,7 +585,7 @@ public class RobotContainer {
         moveArm(ZEROES),
         new WaitCommand(1.5),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-            PathPlanner.loadPath("taxi very far", 4.0, 3.0)));
+            PathPlanner.loadPath("the taxi", 2.0, 3.0)));
   }
 
   public Command twoPieceLoadingAuto() {
@@ -632,13 +603,13 @@ public class RobotContainer {
                     new ClawPowerCommand(m_clawSubsystem, -1)))),
         new ParallelCommandGroup(
             new WaitCommand(1)
-            .andThen(new InstantCommand(() -> {
-              m_wristSubsystem.rotate();
-            }))
-            .andThen(new WaitCommand(3.22))
-            .andThen(new InstantCommand(() -> {
-              m_wristSubsystem.rotate();
-            })),
+                .andThen(new InstantCommand(() -> {
+                  m_wristSubsystem.rotate();
+                }))
+                .andThen(new WaitCommand(3.22))
+                .andThen(new InstantCommand(() -> {
+                  m_wristSubsystem.rotate();
+                })),
             new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
                 PathPlanner.loadPath("path 2.1", 2.0, 2.0))
                 .andThen(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
@@ -708,7 +679,7 @@ public class RobotContainer {
   }
 
   public Command taxiAuto() {
-    return new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 10.1", 4.0, 3.0));
+    return new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("the taxi", 2.0, 3.0));
   }
 
   /**
@@ -785,6 +756,7 @@ public class RobotContainer {
         .onTrue(
             new InstantCommand(() -> {
               m_armSubsystem.adjustSpeed(DEFAULT_MAX_VELOCITY, DEFAULT_MAX_ACCEL);
+              m_armSubsystem.clampSpeed(1);
               ArmPosition position = m_targetingSubsystem.getScoringHeight();
               m_armSubsystem.snapToAngle(position.rotation);
             }, m_armSubsystem).alongWith(new InstantCommand(() -> {
@@ -803,6 +775,7 @@ public class RobotContainer {
           m_extensionSubsystem.extendTo(SALUTE.length);
         }).alongWith(new InstantCommand(() -> {
           m_armSubsystem.adjustSpeed(FAST_MAX_VELOCITY, FAST_MAX_ACCEL);
+          m_armSubsystem.clampSpeed(1);
           m_armSubsystem.snapToAngle(SALUTE.rotation);
         }, m_armSubsystem)));
 
@@ -837,7 +810,7 @@ public class RobotContainer {
     m_operatorController.a().onFalse(moveArm(SALUTE, 0.2, true));
 
     m_operatorController.b()
-        .whileTrue(moveArm(ArmPosition.INTAKEBACK, false).alongWith(new ClawPowerCommand(m_clawSubsystem, 1)));
+        .whileTrue(moveArm(ArmPosition.INTAKEBACK, true).alongWith(new ClawPowerCommand(m_clawSubsystem, 1)));
 
     m_operatorController.b().onFalse(moveArm(SALUTE, true));
 
@@ -876,6 +849,10 @@ public class RobotContainer {
   private void configureDriver2Bindings() {
     m_operatorController.a().onTrue(moveArm(ArmPosition.MEDIUM));
     m_operatorController.b().onTrue(moveArm(SALUTE));
+    m_operatorController.x().onTrue(moveArm(ArmPosition.INTAKEBACK));
+    m_operatorController.y().onTrue(moveArm(ZEROES));
+    m_operatorController.povUp().onTrue(moveArm(INTAKEFRONT));
+    m_operatorController.povDown().onTrue(new InstantCommand(() -> {m_extensionSubsystem.extendTo(10);}));
     m_operatorController.rightBumper().whileTrue(
         new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
 
@@ -891,6 +868,10 @@ public class RobotContainer {
     m_driverController.back().onTrue(new InstantCommand(() -> {
       m_LEDSubsystem.setHSV(-1, 65, 255, 255);
     }));
+
+    new Trigger(() -> m_visionSubsystem.IsAprilTagPersistent())
+        .whileTrue(new InstantCommand(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)))
+        .whileFalse(new InstantCommand(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
 
     new Trigger(() -> isInDefaultDriveMode)
         .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
@@ -1011,5 +992,193 @@ public class RobotContainer {
       value = Math.copySign(value * value, value);
     }
     return value;
+  }
+
+  // im putting all the autons written after sundome down here because i hate this
+  // file's organization
+
+  public Command templateAuto() {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }),
+        moveArm(HIGHCOMMIT, 0.4),
+        new WaitCommand(1),
+        new WaitCommand(0.5).deadlineWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem).alongWith(
+                new WaitCommand(0.1).andThen(
+                    new ClawPowerCommand(m_clawSubsystem, -1)))),
+        new ParallelCommandGroup(
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("OWWW", 4.0, 3.0))
+                .andThen(new WaitCommand(2)
+                    .deadlineWith(
+                        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))),
+            new WaitCommand(1.8).andThen(moveArm(ArmPosition.INTAKEBACK, false))
+                .andThen(new WaitCommand(4))
+                .andThen(moveArm(CUBENODEHIGH, 3.0, false))
+                .andThen(new WaitCommand(1.5))
+                .andThen(moveArm(SALUTE)),
+            new WaitCommand(1.5)
+                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
+                .andThen(new WaitCommand(4))
+                .andThen(new WaitCommand(3).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -1)))));
+  }
+
+  /**
+   * @return DCMP auto #1
+   *         <p>
+   *         Scores one cube mid, taxi, and then balance
+   */
+  public Command dcmpAuto1() {
+    return new SequentialCommandGroup(
+        moveArm(CUBENODEHIGH, 0.5),
+        new WaitCommand(1),
+        new WaitCommand(1).deadlineWith(
+            new WaitCommand(0.25).andThen(
+                new ClawPowerCommand(m_clawSubsystem, -1))),
+        moveArm(ZEROES),
+        new WaitCommand(1),
+        moveArm(SALUTE),
+        new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("dcmp1.1", 2.0, 1.0)),
+        new WaitCommand(5)
+            .deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false)));
+  }
+
+  public Command dcmpAuto1NOBAL() {
+    return new SequentialCommandGroup(
+        moveArm(CUBENODEHIGH, 0.5),
+        new WaitCommand(1),
+        new WaitCommand(1).deadlineWith(
+            new WaitCommand(0.25).andThen(
+                new ClawPowerCommand(m_clawSubsystem, -1))),
+        moveArm(ZEROES),
+        new WaitCommand(1),
+        moveArm(SALUTE));
+  }
+  /**
+   * @return DCMP auto #2
+   *         <p>
+   *         Scores one cube open side, grab + score another, and then balance in community
+   */
+  public Command dcmpAuto2() {
+    return new SequentialCommandGroup(
+        moveArm(ZEROES, true),
+        new WaitCommand(0.5),
+        moveArm(ArmPosition.FRONTCUBEHIGH, true),
+        new WaitCommand(0.5),
+        new WaitCommand(0.25).deadlineWith(
+            new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))),
+        moveArm(ArmPosition.PRE_FRONTCUBEHIGH, true),
+        new ParallelCommandGroup(
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("dcmp2.1", 4.0, 3.0))
+                .andThen(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                    PathPlanner.loadPath("dcmp2.2", 4.0, 3.0)))
+                .andThen(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                    PathPlanner.loadPath("dcmp2.3", 2.0, 2.0)))
+                .andThen(new WaitCommand(4)
+                    .deadlineWith(
+                        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))),
+            new WaitCommand(0.5).andThen(moveArm(ArmPosition.INTAKEBACK, true))
+                .andThen(new WaitCommand(1.9))
+                .andThen(moveArm(SALUTE, true)),
+            new WaitCommand(1.5)
+                .andThen(new WaitCommand(1.4).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
+                .andThen(new WaitCommand(2))
+                .andThen(new WaitCommand(1).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -1)))));
+  }
+  public Command dcmpAuto2NOBAL() {
+    return new SequentialCommandGroup(
+        moveArm(ZEROES, true),
+        new WaitCommand(0.5),
+        moveArm(ArmPosition.FRONTCUBEHIGH, true),
+        new WaitCommand(0.5),
+        new WaitCommand(0.25).deadlineWith(
+            new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))),
+        moveArm(ArmPosition.PRE_FRONTCUBEHIGH, true),
+        new ParallelCommandGroup(
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("dcmp2.1", 4.0, 3.0))
+                .andThen(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                    PathPlanner.loadPath("dcmp2.2", 4.0, 3.0))),
+            new WaitCommand(0.5).andThen(moveArm(ArmPosition.INTAKEBACK, true))
+                .andThen(new WaitCommand(1.9))
+                .andThen(moveArm(SALUTE, true)),
+            new WaitCommand(1.5)
+                .andThen(new WaitCommand(1.4).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
+                .andThen(new WaitCommand(2))
+                .andThen(new WaitCommand(1).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -1)))));
+  }
+
+  /**
+   * @return DCMP auto #3
+   *         <p>
+   *         Scores 2 cubes mid, grabs another, then balances outside.
+   */
+  public Command dcmpAuto3() {
+    return new SequentialCommandGroup(
+        moveArm(ZEROES, true),
+        new WaitCommand(0.5),
+        moveArm(ArmPosition.FRONTCUBEHIGH, true),
+        new WaitCommand(0.25),
+        new WaitCommand(0.25).deadlineWith(
+            new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))),
+        moveArm(ArmPosition.PRE_FRONTCUBEHIGH, true),
+        new ParallelCommandGroup(
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("dcmp3.1", 2.0, 3.0))
+                .andThen(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                    PathPlanner.loadPath("dcmp3.2", 4.0, 3.0)))
+                .andThen(new WaitCommand(4)
+                    .deadlineWith(
+                        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false, true))),
+            new WaitCommand(0.5).andThen(moveArm(ArmPosition.INTAKEBACK, true))
+                .andThen(new WaitCommand(2.5))
+                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
+                .andThen(new WaitCommand(3.5))
+                .andThen(moveArm(ArmPosition.INTAKEBACKCUBESLIGHTLYLOWER, true))
+                .andThen(new WaitCommand(2.5))
+                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
+                ,
+            new WaitCommand(1.5)
+                .andThen(new WaitCommand(1.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
+                .andThen(new WaitCommand(3))
+                .andThen(new WaitCommand(0.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -(3.0/5.0))))
+                .andThen(new WaitCommand(2))
+                .andThen(new WaitCommand(3.2).deadlineWith(new ClawPowerCommand(m_clawSubsystem,  1)))
+                ));
+  }
+  public Command dcmpAuto3NOBAL() {
+    return new SequentialCommandGroup(
+        moveArm(ZEROES, true),
+        new WaitCommand(0.5),
+        moveArm(ArmPosition.FRONTCUBEHIGH, true),
+        new WaitCommand(0.25),
+        new WaitCommand(0.25).deadlineWith(
+            new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))),
+        moveArm(ArmPosition.PRE_FRONTCUBEHIGH, true),
+        new ParallelCommandGroup(
+            new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                PathPlanner.loadPath("dcmp3.1", 2.0, 3.0))
+                .andThen(new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+                    PathPlanner.loadPath("dcmp3.2.2", 2.0, 3.0))),
+            new WaitCommand(0.5).andThen(moveArm(ArmPosition.INTAKEBACK, true))
+                .andThen(new WaitCommand(2.5))
+                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
+                .andThen(new WaitCommand(3.5))
+                .andThen(moveArm(ArmPosition.INTAKEBACKCUBESLIGHTLYLOWER, true))
+                .andThen(new WaitCommand(2.5))
+                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
+                ,
+            new WaitCommand(1.5)
+                .andThen(new WaitCommand(1.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
+                .andThen(new WaitCommand(3))
+                .andThen(new WaitCommand(0.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -(3.0/5.0))))
+                .andThen(new WaitCommand(2))
+                .andThen(new WaitCommand(3.2).deadlineWith(new ClawPowerCommand(m_clawSubsystem,  1)))
+                ));
   }
 }

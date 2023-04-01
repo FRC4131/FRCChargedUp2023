@@ -46,13 +46,13 @@ public final class Constants {
     */
     public enum ArmPosition {
         LOW(110,1.0),
-        MEDIUM(-61, 1.5),
-        HIGH(-53, 19.65),
+        MEDIUM(-60, 1.5),
+        HIGH(-52, 19.65),
         STOW(110,0),
         ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18),
-        DOUBLESUB(-60, 0),
+        DOUBLESUB(-58.5, 0),
         FLOOR(110,15), //guestimate 
         DEFAULT(0,0), //guestimate 
         CUBENODEMEDIUM(-65, 1.5),
@@ -60,13 +60,19 @@ public final class Constants {
         MEDIUMCOMMIT(-74, 1.5),
         HIGHCOMMIT(-68, 19.65),
         SHOOTPOSITION(-70, 0),
-        INTAKEBACK(-117,0), 
+        INTAKEBACK(-111,0), 
+        INTAKEBACKCONE(-118, 0),
         INTAKEFRONT(119, 5.25),
-        INTAKEFRONTTELEOP(116, 11),
+        INTAKEFRONTTELEOP(116.5, 11),
         SALUTE(90,0),
         AUTONCUBEHIGH(-57, 5),
         AUTONCUBECOMMIT(-57, 12),
-        ACK(113, 11.75);
+        ACK(113, 11.75),
+        PRE_FRONTCUBEHIGH(40, 0),
+        FRONTCUBEHIGH(73, 19),
+        MIDCUBEFRONT(80, 0),
+        INTAKEBACKCUBESLIGHTLYLOWER(-111.5, 0);
+
 
 
         public final double rotation;
@@ -154,7 +160,8 @@ public final class Constants {
         public static final double kDriveEncoderRPM2MeterPerSec = kDriveEncoderRot2Meter / 60;
         public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
 
-        public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
+        // TRUE IF DEIMOS. FALSE IF PHOBOS.
+        public static final boolean invertGyro = true; // Always ensure Gyro is CCW+ CW-
 
         public static final COTSFalconSwerveConstants chosenModule = // TODO: This must be tuned to specific robot
                 COTSFalconSwerveConstants.SDSMK3(COTSFalconSwerveConstants.driveGearRatios.SDSMK3_Fast);
