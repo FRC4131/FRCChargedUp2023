@@ -180,7 +180,10 @@ public class RobotContainer {
     m_autoChooser.addOption("MIDDLE Cube + Balance", dcmpAuto1());
     m_autoChooser.addOption("OPEN SIDE 2 Cube + Balance", dcmpAuto2());
     m_autoChooser.addOption("CABLE SIDE 2.5 Cube + Balance", dcmpAuto3());
-    m_autoChooser.addOption("TAXI from grid to cube", taxiAuto());
+    m_autoChooser.addOption("NO BALANCE middle Cube + Balance", dcmpAuto1());
+    m_autoChooser.addOption("NO BALANCE open side 2 Cube + Balance", dcmpAuto2());
+    m_autoChooser.addOption("NO BALANCE cable side 2.5 Cube + Balance", dcmpAuto3());
+    m_autoChooser.addOption("just taxi from grid to cube", taxiAuto());
     m_autoChooser.addOption("1 Cube + balance NO TAXI", oneCubeBalance());
     m_autoChooser.addOption("1 Cone + taxi", oneConeAndTaxiAuto());
     m_autoChooser.addOption("1 Cone ONLY", oneConeAuto());
