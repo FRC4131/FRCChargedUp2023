@@ -180,9 +180,9 @@ public class RobotContainer {
     m_autoChooser.addOption("MIDDLE Cube + Balance", dcmpAuto1());
     m_autoChooser.addOption("OPEN SIDE 2 Cube + Balance", dcmpAuto2());
     m_autoChooser.addOption("CABLE SIDE 2.5 Cube + Balance", dcmpAuto3());
-    m_autoChooser.addOption("NO BALANCE middle Cube + Balance", dcmpAuto1());
-    m_autoChooser.addOption("NO BALANCE open side 2 Cube + Balance", dcmpAuto2());
-    m_autoChooser.addOption("NO BALANCE cable side 2.5 Cube + Balance", dcmpAuto3());
+    m_autoChooser.addOption("NO BALANCE middle Cube + Balance", dcmpAuto1NOBAL());
+    m_autoChooser.addOption("NO BALANCE open side 2 Cube + Balance", dcmpAuto2NOBAL());
+    m_autoChooser.addOption("NO BALANCE cable side 2.5 Cube + Balance", dcmpAuto3NOBAL());
     m_autoChooser.addOption("just taxi from grid to cube", taxiAuto());
     m_autoChooser.addOption("1 Cube + balance NO TAXI", oneCubeBalance());
     m_autoChooser.addOption("1 Cone + taxi", oneConeAndTaxiAuto());
@@ -540,17 +540,18 @@ public class RobotContainer {
         new InstantCommand(() -> {
           m_wristSubsystem.rotate();
         }),
-        moveArm(HIGH, 0.5),
-        new WaitCommand(1.5),
+        new WaitCommand(0.5),
+        moveArm(HIGH, 0.2),
+        new WaitCommand(0.7),
         moveArm(HIGHCOMMIT),
-        new WaitCommand(2),
-        new WaitCommand(3).deadlineWith(
+        new WaitCommand(1),
+        new WaitCommand(1).deadlineWith(
             new InstantCommand(() -> {
               m_extensionSubsystem.extendTo(0);
             }, m_extensionSubsystem).alongWith(
                 new WaitCommand(0.25).andThen(
                     new ClawPowerCommand(m_clawSubsystem, -1)))),
-        moveArm(ZEROES),
+        moveArm(SALUTE),
         new WaitCommand(1.5),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("path 10.1", 4.0, 3.0)));
   }

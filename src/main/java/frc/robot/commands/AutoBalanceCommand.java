@@ -24,7 +24,7 @@ public class AutoBalanceCommand extends CommandBase {
   private boolean isRed;
   private boolean alignRot;
   private PIDController yawPIDController;
-  private double OFFSET = 1;
+  private double OFFSET = 0;
   private double flipPitch;
 
   public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem,
@@ -75,8 +75,8 @@ public class AutoBalanceCommand extends CommandBase {
   @Override
   public void execute() {
     double threshold = 0.7; // was 0.125
-    if (Math.abs(m_poseEstimationSubsystem.getPitch()) + OFFSET > 8.5) {
-      pitchPIDController.setP(0.03);
+    if (Math.abs(m_poseEstimationSubsystem.getPitch()) + OFFSET > 6.5) {
+      pitchPIDController.setP(0.045);
     } else {
       pitchPIDController.setP(0.0004);
     }
@@ -89,9 +89,9 @@ public class AutoBalanceCommand extends CommandBase {
     // if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
     // driveSignal *= 1.5;
     // }
-    if (Math.abs(pitchPIDController.getPositionError()) + OFFSET < 7.5) {
+    if (Math.abs(pitchPIDController.getPositionError()) + OFFSET < 4) {
       driveSignal *= 0;
-      }
+    }
     if (Math.abs(pitchPIDController.getPositionError()) + OFFSET < 12) {
     driveSignal *= 0.7;
     }
