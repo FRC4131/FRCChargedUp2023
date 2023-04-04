@@ -49,7 +49,7 @@ public class ExtensionSubsystem extends SubsystemBase {
 
     // INVERT IF DEIMOS.
     m_actuator.setSensorPhase(false);
-    m_actuator.setInverted(true);
+    m_actuator.setInverted(false);
 
     m_actuator.configNeutralDeadband(0.001);
 

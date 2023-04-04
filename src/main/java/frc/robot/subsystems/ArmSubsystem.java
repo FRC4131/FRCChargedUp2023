@@ -49,7 +49,7 @@ public class ArmSubsystem extends SubsystemBase {
     // m_actuator.configFeed
     m_rightEncoder = m_rightRot.getEncoder();
     m_leftEncoder = m_leftRot.getEncoder();
-    m_rightRotPIDController = m_leftRot.getPIDController();
+    m_rightRotPIDController = m_rightRot.getPIDController();
     m_rightEncoder.setPositionConversionFactor(1);
     m_rightEncoder.setVelocityConversionFactor(1);
     m_leftEncoder.setPositionConversionFactor(1);
@@ -140,7 +140,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public double getArmAngle(){
-    return m_leftEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360;
+    return m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360;
   }
 
   @Override
@@ -160,7 +160,7 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Arm Velocity", m_rightEncoder.getVelocity());
     SmartDashboard.putString("Arm Position",
         m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " Degrees");
-    SmartDashboard.putString("Left Arm Motor Pos", m_leftEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + "Degrees");
+    SmartDashboard.putString("Left Arm Motor Pos", m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + "Degrees");
   }
 
   public CommandBase resetEncoder(double position) {
