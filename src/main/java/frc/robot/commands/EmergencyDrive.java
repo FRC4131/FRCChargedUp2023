@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 
-public class DefaultDriveCommand extends CommandBase {
+public class EmergencyDrive extends CommandBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
   PoseEstimationSubsystem m_poseEstimationSubsystem;
   DoubleSupplier x;
@@ -25,7 +25,7 @@ public class DefaultDriveCommand extends CommandBase {
   double minThrottle = 0.2;
 
   /** Creates a new DefaultDriveCommand. */
-  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
+  public EmergencyDrive(DrivetrainSubsystem drivetrainSubsystem,
       PoseEstimationSubsystem poseEstimationSubsystem,
       DoubleSupplier x,
       DoubleSupplier y,
@@ -44,6 +44,10 @@ public class DefaultDriveCommand extends CommandBase {
     addRequirements(poseEstimationSubsystem);
   }
 
+  public EmergencyDrive(DrivetrainSubsystem m_drivetrainSubsystem2, PoseEstimationSubsystem m_poseEstimationSubsystem2,
+      DoubleSupplier x2, DoubleSupplier y2, DoubleSupplier theta2, DoubleSupplier throttle2, Object fieldRelative2) {
+  }
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
@@ -54,10 +58,11 @@ public class DefaultDriveCommand extends CommandBase {
   public void execute() {
     double slope = 1 - minThrottle;
     double scale = slope * this.throttle.getAsDouble() + minThrottle;
+
     m_drivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale,
         y.getAsDouble() * scale),
         theta.getAsDouble() * scale,
-        m_poseEstimationSubsystem.getPose().getRotation(),
+        Rotation2d.fromDegrees(m_poseEstimationSubsystem.getYaw()),
         fieldRelative,
         true);
   }

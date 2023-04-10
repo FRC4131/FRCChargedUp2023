@@ -26,7 +26,7 @@ import frc.robot.Constants;
 
 public class PoseEstimationSubsystem extends SubsystemBase {
   DrivetrainSubsystem m_drivetrainSubsystem;
-  VisionSubsystem m_visionSubsystem;
+  VisionSubsystemLL3 m_visionSubsystem;
   private final Field2d field2d = new Field2d();
   static SwerveDrivePoseEstimator m_swerveDrivePoseEst;
   AHRS m_navX;
@@ -34,7 +34,7 @@ public class PoseEstimationSubsystem extends SubsystemBase {
   public frc.lib.util.SwerveModule[] mSwerveMods;
 
   /** Creates a new PoseEstimationSubsystem. */
-  public PoseEstimationSubsystem(DrivetrainSubsystem drivetrainSubsystem, VisionSubsystem visionSubsystem) {
+  public PoseEstimationSubsystem(DrivetrainSubsystem drivetrainSubsystem, VisionSubsystemLL3 visionSubsystem) {
     m_drivetrainSubsystem = drivetrainSubsystem;
     m_visionSubsystem = visionSubsystem;
 
@@ -47,8 +47,8 @@ public class PoseEstimationSubsystem extends SubsystemBase {
         getGyroYaw(),
         m_drivetrainSubsystem.getModulePositions(),
         new Pose2d()
-        ,VecBuilder.fill(0.1, 0.1, 0.1),
-        VecBuilder.fill(0.16, 0.16, 0.16)
+        ,VecBuilder.fill(0.05, 0.05, 0.05),
+        VecBuilder.fill(0.6, 0.6, 100.0)
         );
     
         
@@ -87,6 +87,10 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     return m_navX.getYaw();
   }
 
+  public double[] getTargetTagData(){
+    return m_visionSubsystem.getTargetTagData();
+  }
+
   @Override
   public void periodic() {
     EstimatedRobotPose aprilTagPose = m_visionSubsystem.getAprilTagRobotPose().orElse(null);
@@ -104,6 +108,8 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Robot Pitch", getPitch());
     SmartDashboard.putNumber("Robot Roll", getRoll());
     SmartDashboard.putNumber("Robot Yaw", getYaw());
+
+    SmartDashboard.putNumber("Mi Distanco Por Favor", m_visionSubsystem.getTargetTagData()[0]);
     
     SmartDashboard.putData(field2d);
 

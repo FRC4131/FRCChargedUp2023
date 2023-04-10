@@ -14,7 +14,10 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.PoseEstimationSubsystem;
 
-public class DefaultDriveCommand extends CommandBase {
+public class RampingDriveCommand extends CommandBase {
+  private static final double maxDist = 2.5;
+  private static final double maxSpeedScale = 1;
+  private static final double minSpeedScale = 0.2;
   DrivetrainSubsystem m_drivetrainSubsystem;
   PoseEstimationSubsystem m_poseEstimationSubsystem;
   DoubleSupplier x;
@@ -25,7 +28,7 @@ public class DefaultDriveCommand extends CommandBase {
   double minThrottle = 0.2;
 
   /** Creates a new DefaultDriveCommand. */
-  public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
+  public RampingDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
       PoseEstimationSubsystem poseEstimationSubsystem,
       DoubleSupplier x,
       DoubleSupplier y,
@@ -54,6 +57,9 @@ public class DefaultDriveCommand extends CommandBase {
   public void execute() {
     double slope = 1 - minThrottle;
     double scale = slope * this.throttle.getAsDouble() + minThrottle;
+    double dist = 16.25 - Math.max(m_poseEstimationSubsystem.getPose().getX(), 13);
+    scale *= Math.max(Math.min(dist / maxDist, maxSpeedScale), minSpeedScale);
+    
     m_drivetrainSubsystem.drive(new Translation2d(x.getAsDouble() * scale,
         y.getAsDouble() * scale),
         theta.getAsDouble() * scale,

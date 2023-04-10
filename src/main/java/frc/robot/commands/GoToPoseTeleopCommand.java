@@ -36,7 +36,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
 
   ProfiledPIDController m_xController;
   ProfiledPIDController m_yController;
-  ProfiledPIDController m_thetaController;
+  PIDController m_thetaController;
 
   /**
    * Command to run to selected grid position while also giving driver fine tuning
@@ -74,8 +74,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
     m_yController = new ProfiledPIDController(3, 0, 0,
         new TrapezoidProfile.Constraints(Constants.Swerve.maxSpeed, Constants.Swerve.maxSpeed));
 
-    m_thetaController = new ProfiledPIDController(8, 0, 0,
-        new Constraints(Constants.Swerve.maxAngularVelocity, Constants.Swerve.maxAngularVelocity));
+    m_thetaController = new PIDController(4.0, 0, 0);
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem);
@@ -90,39 +89,50 @@ public class GoToPoseTeleopCommand extends CommandBase {
     m_desiredPose = m_targetingSubsystem.getTargetGridPose();
     m_xController.setGoal(m_desiredPose.getX());
     m_yController.setGoal(m_desiredPose.getY());
-    m_thetaController.reset(m_poseEstimationSubsystem.getPose().getRotation().getRadians());
-    m_thetaController.setGoal(m_desiredPose.getRotation().getRadians());
+    m_thetaController.reset();
+    m_thetaController.setSetpoint(m_desiredPose.getRotation().getRadians());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    DriverStation.refreshData();
+
     boolean isBlue = DriverStation.getAlliance().equals(Alliance.Blue);
     double pidDesiredRotation = m_thetaController.calculate(
         m_poseEstimationSubsystem.getPose().getRotation().getRadians(), m_desiredPose.getRotation().getRadians());
     double pidDesiredX = m_xController.calculate(m_poseEstimationSubsystem.getPose().getX(), m_desiredPose.getX());
     double pidDesiredY = m_yController.calculate(m_poseEstimationSubsystem.getPose().getY(), m_desiredPose.getY());
-    SmartDashboard.putNumber("xErr", m_xController.getPositionError());
-    SmartDashboard.putNumber("yErr", m_yController.getPositionError());
+    SmartDashboard.putNumber("xErr", m_desiredPose.getX());
+    SmartDashboard.putNumber("yErr", m_desiredPose.getY());
     SmartDashboard.putNumber("ThetaErr", m_thetaController.getPositionError());
     // Cap the PID's velocity vector by the max speed
     Translation2d pidVector = new Translation2d(pidDesiredX, pidDesiredY);
     double pidScaling = getSpeedScaling(pidVector);
     Translation2d scaledPidVector = pidVector
-        .times(DriverStation.getAlliance().equals(Alliance.Blue) ? pidScaling : -pidScaling);
+        .times(pidScaling);
 
     // Get the driver input vector rotated into the global coordinate system
-    Translation2d rotatedDriveVector = new Translation2d(isBlue ? m_x.getAsDouble() : -m_x.getAsDouble(),
-        isBlue ? m_y.getAsDouble() : -m_y.getAsDouble())
+    Translation2d rotatedDriveVector = new Translation2d(m_x.getAsDouble(), m_y.getAsDouble())
         .rotateBy(m_poseEstimationSubsystem.getPose().getRotation());
 
     // Calculate the throttle scaling factor
     double throttleSlope = 1 - m_minThrottle;
     double throttleScale = throttleSlope * m_throttle.getAsDouble() + m_minThrottle;
 
+    // Locks left, right, forwards, and backwards + rotation
+    // Translation2d finalVector = new Translation2d(
+    //     (rotatedDriveVector.getX() * throttleScale + scaledPidVector.getX()),
+    //     (rotatedDriveVector.getY() * throttleScale + scaledPidVector.getY()));
+
+    // Locks left and right + rotation
     Translation2d finalVector = new Translation2d(
-        (rotatedDriveVector.getX() * throttleScale + scaledPidVector.getX()),
+        (rotatedDriveVector.getX() * throttleScale),
         (rotatedDriveVector.getY() * throttleScale + scaledPidVector.getY()));
+
+    SmartDashboard.putNumber("SCALEX", scaledPidVector.getX());
+    SmartDashboard.putNumber("SCALEY", scaledPidVector.getY());
+
     double finalRotation = (m_theta.getAsDouble() + pidDesiredRotation) * throttleScale;
 
     m_drivetrainSubsystem.drive(finalVector, finalRotation, new Rotation2d(), false, false);

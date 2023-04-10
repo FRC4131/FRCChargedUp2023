@@ -35,7 +35,7 @@ public class GoToSubstationCommand extends CommandBase {
 
   ProfiledPIDController m_xController;
   ProfiledPIDController m_yController;
-  ProfiledPIDController m_thetaController;
+  PIDController m_thetaController;
 
   /**
    * Command to run to the alliance's double substation
@@ -65,8 +65,7 @@ public class GoToSubstationCommand extends CommandBase {
     m_yController = new ProfiledPIDController(3, 0, 0,
         new Constraints(Constants.Swerve.maxSpeed, Constants.Swerve.maxSpeed));
 
-    m_thetaController = new ProfiledPIDController(6, 0, 0,
-        new Constraints(Constants.Swerve.maxAngularVelocity, Constants.Swerve.maxAngularVelocity));
+    m_thetaController = new PIDController(4.0, 0, 0);
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
@@ -83,7 +82,7 @@ public class GoToSubstationCommand extends CommandBase {
     m_yController.reset(m_poseEstimationSubsystem.getPose().getY());
     m_xController.setGoal(m_desiredPose.getX());
     m_yController.setGoal(m_desiredPose.getY());
-    m_thetaController.setGoal(m_desiredPose.getRotation().getRadians());
+    m_thetaController.setSetpoint(m_desiredPose.getRotation().getRadians());
   }
 
   // Called every time the scheduler runs while the command is scheduled.

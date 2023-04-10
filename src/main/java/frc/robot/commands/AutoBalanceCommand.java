@@ -20,10 +20,12 @@ public class AutoBalanceCommand extends CommandBase {
   private DrivetrainSubsystem m_drivetrainSubsystem;
   private PoseEstimationSubsystem m_poseEstimationSubsystem;
   private PIDController pitchPIDController;
-  private double balancedAngleDegrees = -0;
+  private double balancedAngleDegrees = 0;
   private boolean isRed;
   private boolean alignRot;
   private PIDController yawPIDController;
+  private double OFFSET = 0;
+  private double flipPitch;
 
   public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem,
       boolean alignRot) {
@@ -36,52 +38,71 @@ public class AutoBalanceCommand extends CommandBase {
     pitchPIDController = new PIDController(0.0002, 0, 0);
     yawPIDController = new PIDController(0.0002, 0, 0);
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
-    DriverStation.refreshData();
-    isRed = DriverStation.getAlliance().equals(Alliance.Red);
 
     yawPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    flipPitch = 1;
+  }
+  public AutoBalanceCommand(DrivetrainSubsystem drivetrainSubsystem, PoseEstimationSubsystem poseEstimationSubsystem,
+      boolean alignRot, boolean flipPitch) {
+    // Use addRequirements() here to declare subsystem dependencies.
+
+    this.alignRot = alignRot;
+    m_drivetrainSubsystem = drivetrainSubsystem;
+    m_poseEstimationSubsystem = poseEstimationSubsystem;
+    // pitchPIDController = new PIDController(0.0002, 0, 0);
+    pitchPIDController = new PIDController(0.0002, 0, 0);
+    yawPIDController = new PIDController(0.0002, 0, 0);
+    addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem);
+
+    yawPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    this.flipPitch = flipPitch ? -1 : 1;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    DriverStation.refreshData();
+    isRed = DriverStation.getAlliance().equals(Alliance.Red); 
     pitchPIDController.reset();
     pitchPIDController.setSetpoint(balancedAngleDegrees);
     pitchPIDController.setTolerance(2);
     yawPIDController.reset();
     yawPIDController.setTolerance(Math.toRadians(1.0));
-    yawPIDController.setSetpoint(isRed ? 180.0 : 0.0);
+    // yawPIDController.setSetpoint(isRed ? 180.0 : 0.0); //change 
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     double threshold = 0.7; // was 0.125
-    if (Math.abs(m_poseEstimationSubsystem.getPitch()) > 8.5) {
-      pitchPIDController.setP(0.03);
+    if (Math.abs(m_poseEstimationSubsystem.getPitch()) + OFFSET > 6.5) {
+      pitchPIDController.setP(0.045);
     } else {
-      pitchPIDController.setP(0.0002);
+      pitchPIDController.setP(0.0004);
     }
-    double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch());
+    double driveSignal = pitchPIDController.calculate(m_poseEstimationSubsystem.getPitch() + OFFSET);
     driveSignal = MathUtil.clamp(driveSignal, -threshold, threshold);
 
+    // UNUSED
     double rotationSignal = yawPIDController.calculate(m_poseEstimationSubsystem.getYaw());
 
     // if (Math.abs(pitchPIDController.getPositionError()) > 9.5) {
     // driveSignal *= 1.5;
     // }
-    if (Math.abs(pitchPIDController.getPositionError()) < 10) {
+    if (Math.abs(pitchPIDController.getPositionError()) + OFFSET < 4) {
       driveSignal *= 0;
-      }
-    if (Math.abs(pitchPIDController.getPositionError()) < 12) {
-    driveSignal *= 0.5;
     }
-
+    if (Math.abs(pitchPIDController.getPositionError()) + OFFSET < 12) {
+    driveSignal *= 0.7;
+    }
+ 
     SmartDashboard.putNumber("DriveSignal", driveSignal);
+
     driveSignal *= -1;
+    driveSignal *= flipPitch;
 
     m_drivetrainSubsystem.drive(new Translation2d(driveSignal, 0), driveSignal/1.5,
-        isRed ? m_poseEstimationSubsystem.getPose().getRotation().rotateBy(Rotation2d.fromDegrees(180))
+        isRed ? m_poseEstimationSubsystem.getPose().getRotation().rotateBy(Rotation2d.fromDegrees(180)) //change
             : m_poseEstimationSubsystem.getPose().getRotation(),
         true,
         false);

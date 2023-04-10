@@ -46,27 +46,34 @@ public final class Constants {
     */
     public enum ArmPosition {
         LOW(110,1.0),
-        MEDIUM(-61, 1.5),
-        HIGH(-53, 19.65),
+        MEDIUM(-58, 1.5),
+        HIGH(-50, 19.65),
         STOW(110,0),
         ZEROES(0,0),
         MIN(-30, 0),
         MAX(30, 18),
-        DOUBLESUB(-60, 0),
+        DOUBLESUB(-55.75, 0),
         FLOOR(110,15), //guestimate 
         DEFAULT(0,0), //guestimate 
-        CUBENODEMEDIUM(-65, 1.5),
-        CUBENODEHIGH(-59, 7.8),
-        MEDIUMCOMMIT(-74, 1.5),
-        HIGHCOMMIT(-68, 19.65),
+        CUBENODEMEDIUM(-63, 1.5),
+        CUBENODEHIGH(-57, 7.8),
+        MEDIUMCOMMIT(-74.5, 1.5),
+        HIGHCOMMIT(-66, 19.65),
         SHOOTPOSITION(-70, 0),
-        INTAKEBACK(-117,0), 
+        INTAKEBACK(-113,0), 
+        INTAKEBACKCONE(-116, 0),
         INTAKEFRONT(119, 5.25),
-        INTAKEFRONTTELEOP(116, 11),
+        INTAKEFRONTTELEOP(117.5, 11),
         SALUTE(90,0),
         AUTONCUBEHIGH(-57, 5),
         AUTONCUBECOMMIT(-57, 12),
-        ACK(113, 11.75);
+        ACK(113, 11.75),
+        PRE_FRONTCUBEHIGH(40, 0),
+        FRONTCUBEHIGH(73, 19),
+        MIDCUBEFRONT(80, 0),
+        INTAKEBACKCUBESLIGHTLYLOWER(-114, 0),
+        SINGLESUB(82.15, 0);
+
 
 
         public final double rotation;
@@ -79,9 +86,9 @@ public final class Constants {
     }
 
     public enum GridPositions{
-        RED1(15.1, 1.08),
-        RED2(15.1, 2.75),
-        RED3(15.1, 4.45),
+        RED1(1.92, 7.00),
+        RED2(1.92, 5.28),
+        RED3(1.92, 3.59),
         BLUE6(1.92, 4.45),
         BLUE7(1.92, 2.75),
         BLUE8(1.92, 1.08),
@@ -105,26 +112,31 @@ public final class Constants {
         public static final double FAST_MAX_ACCEL = 7500;
     }
 
-    public static final class AprilTagConstants {
-        public static final AprilTag tag1 = new AprilTag(1,
-                new Pose3d(15.513558, 1.071626, 0.462788,
-                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+    public static final class AprilTagConstantsRed{ //red april tags
+        public static final double fieldLength = 16.54175;
+        public static final double fieldWidth = 8.0137;
+        public static final AprilTag tag3 = new AprilTag(1,
+                new Pose3d(fieldLength - 15.513558, fieldWidth - 1.071626, 0.462788,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
 
         public static final AprilTag tag2 = new AprilTag(2,
-                new Pose3d(15.513558, 2.748026, 0.462788,
-                        new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+                new Pose3d(fieldLength - 15.513558, fieldWidth - 2.748026, 0.462788,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
 
-        public static final AprilTag tag3 = new AprilTag(3,
-                new Pose3d(15.513558, 4.424426, 0.462788,
+        public static final AprilTag tag1 = new AprilTag(3,
+                new Pose3d(fieldLength - 15.513558, fieldWidth - 4.424426, 0.462788,
+                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+
+        public static final AprilTag tag5 = new AprilTag(5,
+                new Pose3d(fieldLength - 0.36195, fieldWidth - 6.749796, 0.695452,
                         new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
+    }
+
+    public static final class AprilTagConstantsBlue{ //blue april tags
 
         public static final AprilTag tag4 = new AprilTag(4,
                 new Pose3d(16.178784, 6.749796, 0.695452,
                         new Rotation3d(new Quaternion(0.0, 0.0, 0.0, 1.0))));
-
-        public static final AprilTag tag5 = new AprilTag(5,
-                new Pose3d(0.36195, 6.749796, 0.695452,
-                        new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
 
         public static final AprilTag tag6 = new AprilTag(6,
                 new Pose3d(1.02743, 4.424426, 0.462788,
@@ -149,6 +161,7 @@ public final class Constants {
         public static final double kDriveEncoderRPM2MeterPerSec = kDriveEncoderRot2Meter / 60;
         public static final double kTurningEncoderRPM2RadPerSec = kTurningEncoderRot2Rad / 60;
 
+        // TRUE IF DEIMOS. FALSE IF PHOBOS.
         public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
         public static final COTSFalconSwerveConstants chosenModule = // TODO: This must be tuned to specific robot
@@ -233,7 +246,7 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = 4.4; // TODO: This must be tuned to specific robot
+        public static final double maxSpeed = 4.5; // TODO: This must be tuned to specific robot
         /** Radians per Second */
         public static final double maxAngularVelocity = 10.0; // TODO: This must be tuned to specific robot
 
