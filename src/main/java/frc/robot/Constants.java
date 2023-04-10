@@ -57,10 +57,10 @@ public final class Constants {
         DEFAULT(0,0), //guestimate 
         CUBENODEMEDIUM(-63, 1.5),
         CUBENODEHIGH(-57, 7.8),
-        MEDIUMCOMMIT(-72, 1.5),
+        MEDIUMCOMMIT(-74.5, 1.5),
         HIGHCOMMIT(-66, 19.65),
         SHOOTPOSITION(-70, 0),
-        INTAKEBACK(-111,0), 
+        INTAKEBACK(-113,0), 
         INTAKEBACKCONE(-116, 0),
         INTAKEFRONT(119, 5.25),
         INTAKEFRONTTELEOP(117.5, 11),
@@ -71,7 +71,8 @@ public final class Constants {
         PRE_FRONTCUBEHIGH(40, 0),
         FRONTCUBEHIGH(73, 19),
         MIDCUBEFRONT(80, 0),
-        INTAKEBACKCUBESLIGHTLYLOWER(-111.5, 0);
+        INTAKEBACKCUBESLIGHTLYLOWER(-114, 0),
+        SINGLESUB(82.15, 0);
 
 
 
@@ -245,7 +246,7 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = 4.8; // TODO: This must be tuned to specific robot
+        public static final double maxSpeed = 4.5; // TODO: This must be tuned to specific robot
         /** Radians per Second */
         public static final double maxAngularVelocity = 10.0; // TODO: This must be tuned to specific robot
 

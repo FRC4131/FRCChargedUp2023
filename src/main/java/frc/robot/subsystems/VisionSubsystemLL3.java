@@ -52,6 +52,10 @@ public class VisionSubsystemLL3 extends SubsystemBase {
       }
   }
 
+  public double[] getTargetTagData(){
+    return NetworkTableInstance.getDefault().getTable("limelight").getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
+  }
+
   public Optional<EstimatedRobotPose> AprilTagUpdate()
   {
     double[] rawBotPose;

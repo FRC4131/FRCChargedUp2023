@@ -33,7 +33,7 @@ public class WristSubsystem extends SubsystemBase {
 
     m_Encoder.setVelocityConversionFactor(0.00818123109638691);
     m_WristPID.setOutputRange(-1, 1);
-    m_WristPID.setSmartMotionMaxAccel(25, 0);
+    m_WristPID.setSmartMotionMaxAccel(60, 0);
     m_WristPID.setSmartMotionMaxVelocity(20, 0);
     m_WristPID.setSmartMotionMinOutputVelocity(0, 0);
     m_WristPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
@@ -81,7 +81,6 @@ public class WristSubsystem extends SubsystemBase {
   }
 
   public void stopRotate() {
-    SmartDashboard.putBoolean("Wrist Give it a Wrist", true);
     isMovingClockwise = isMovingClockwise ? false : true;
     m_WristPID.setReference(0, ControlType.kDutyCycle);
   }
@@ -94,6 +93,26 @@ public class WristSubsystem extends SubsystemBase {
   public void rotateCounterClockwise() {
     isMovingClockwise = true;
     m_WristPID.setReference(15, ControlType.kSmartVelocity);
+  }
+
+  /**
+   * Neo up when scoring
+   */
+  public void forceCCW() {
+    if (!getCounterClockwiseSwitch()) {
+      isMovingClockwise = false;
+      m_WristPID.setReference(-15, ControlType.kSmartVelocity);
+    }
+  }
+
+  /**
+   * Neo up when intaking from front
+   */
+  public void forceCW() {
+    if (!getClockwiseSwitch()) {
+      isMovingClockwise = true;
+      m_WristPID.setReference(15, ControlType.kSmartVelocity);
+    }
   }
 
   public void checkLimitSwitch() {

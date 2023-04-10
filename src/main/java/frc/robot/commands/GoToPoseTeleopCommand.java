@@ -36,7 +36,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
 
   ProfiledPIDController m_xController;
   ProfiledPIDController m_yController;
-  ProfiledPIDController m_thetaController;
+  PIDController m_thetaController;
 
   /**
    * Command to run to selected grid position while also giving driver fine tuning
@@ -74,8 +74,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
     m_yController = new ProfiledPIDController(3, 0, 0,
         new TrapezoidProfile.Constraints(Constants.Swerve.maxSpeed, Constants.Swerve.maxSpeed));
 
-    m_thetaController = new ProfiledPIDController(8, 0, 0,
-        new Constraints(Constants.Swerve.maxAngularVelocity, Constants.Swerve.maxAngularVelocity));
+    m_thetaController = new PIDController(4.0, 0, 0);
     m_thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(m_drivetrainSubsystem, m_poseEstimationSubsystem, m_targetingSubsystem);
@@ -90,8 +89,8 @@ public class GoToPoseTeleopCommand extends CommandBase {
     m_desiredPose = m_targetingSubsystem.getTargetGridPose();
     m_xController.setGoal(m_desiredPose.getX());
     m_yController.setGoal(m_desiredPose.getY());
-    m_thetaController.reset(m_poseEstimationSubsystem.getPose().getRotation().getRadians());
-    m_thetaController.setGoal(m_desiredPose.getRotation().getRadians());
+    m_thetaController.reset();
+    m_thetaController.setSetpoint(m_desiredPose.getRotation().getRadians());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -121,8 +120,14 @@ public class GoToPoseTeleopCommand extends CommandBase {
     double throttleSlope = 1 - m_minThrottle;
     double throttleScale = throttleSlope * m_throttle.getAsDouble() + m_minThrottle;
 
+    // Locks left, right, forwards, and backwards + rotation
+    // Translation2d finalVector = new Translation2d(
+    //     (rotatedDriveVector.getX() * throttleScale + scaledPidVector.getX()),
+    //     (rotatedDriveVector.getY() * throttleScale + scaledPidVector.getY()));
+
+    // Locks left and right + rotation
     Translation2d finalVector = new Translation2d(
-        (rotatedDriveVector.getX() * throttleScale + scaledPidVector.getX()),
+        (rotatedDriveVector.getX() * throttleScale),
         (rotatedDriveVector.getY() * throttleScale + scaledPidVector.getY()));
 
     SmartDashboard.putNumber("SCALEX", scaledPidVector.getX());

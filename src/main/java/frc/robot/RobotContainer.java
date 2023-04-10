@@ -55,9 +55,9 @@ import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.EmergencyDrive;
 import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
-import frc.robot.commands.OtherWristSwitchCommand;
+import frc.robot.commands.NewAutoBalanceCommand;
 import frc.robot.commands.PPCommand;
-import frc.robot.commands.TimerCommand;
+import frc.robot.commands.RampingDriveCommand;
 import frc.robot.commands.WristCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClawSubsystem;
@@ -156,17 +156,17 @@ public class RobotContainer {
         () -> m_driverController.getLeftTriggerAxis(),
         true));
 
-    new Trigger(isCone).onTrue(new InstantCommand(() -> {
-      m_LEDSubsystem.setHSV(-1, 170, 255, 255);
-    })).onFalse(new InstantCommand(() -> {
-      m_LEDSubsystem.setHSV(-1, 35, 255, 255);
-    }));
+    // new Trigger(isCone).onTrue(new InstantCommand(() -> {
+    // m_LEDSubsystem.setHSV(-1, 170, 255, 255);
+    // })).onFalse(new InstantCommand(() -> {
+    // m_LEDSubsystem.setHSV(-1, 35, 255, 255);
+    // }));
 
-    // new Trigger(isCone).onTrue(new RepeatCommand(new InstantCommand(() -> {
-    // m_LEDSubsystem.pulse(170);
-    // }))).onFalse(new RepeatCommand(new InstantCommand(() -> {
-    // m_LEDSubsystem.pulse(35);
-    // })));
+    new Trigger(isCone).onTrue(new RepeatCommand(new InstantCommand(() -> {
+      m_LEDSubsystem.pulse(170);
+    }, m_LEDSubsystem))).onFalse(new RepeatCommand(new InstantCommand(() -> {
+      m_LEDSubsystem.pulse(35);
+    }, m_LEDSubsystem)));
 
   }
 
@@ -190,18 +190,20 @@ public class RobotContainer {
     m_autoChooser.addOption("1 Cone FAR TAXI", oneConeTaxiFAR());
 
     // m_autoChooser.addOption("Y axis test",
-    //     new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    //         PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)));
+    // new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    // PathPlanner.loadPath("climbPlz.1", 1.0, 1.0)));
 
     // m_autoChooser.addOption("2 piece + balance TESTED", thisWorky());
-    // m_autoChooser.addOption("UNTESTED 2 piece + balance slightly less spacey", goodAutoLessSpace());
+    // m_autoChooser.addOption("UNTESTED 2 piece + balance slightly less spacey",
+    // goodAutoLessSpace());
     // m_autoChooser.addOption("2 piece cable ONLY", twoPieceCable());
     // m_autoChooser.addOption("UNTESTED just 1 cone + balance", slowTwoPiece());
     // m_autoChooser.addOption("TESTING AUTO", new SequentialCommandGroup(
-    //     new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-    //         PathPlanner.loadPath("dcmp1.1", 2.0, 1.0)),
-    //     new WaitCommand(15).deadlineWith(
-    //         new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))));
+    // new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    // PathPlanner.loadPath("dcmp1.1", 2.0, 1.0)),
+    // new WaitCommand(15).deadlineWith(
+    // new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    // false))));
   }
 
   public Command thisWorky() {
@@ -811,7 +813,10 @@ public class RobotContainer {
     m_operatorController.a()
         .whileTrue(moveArm(ArmPosition.INTAKEFRONTTELEOP, true).alongWith(new ClawPowerCommand(m_clawSubsystem, 1)));
 
-    m_operatorController.a().onFalse(moveArm(SALUTE, 0.2, true));
+    m_operatorController.a().onFalse(moveArm(SALUTE, 0.2, true)
+        .alongWith(new InstantCommand(() -> {
+          m_wristSubsystem.forceCCW();
+        })));
 
     m_operatorController.b()
         .whileTrue(moveArm(ArmPosition.INTAKEBACK, true).alongWith(new ClawPowerCommand(m_clawSubsystem, 1)));
@@ -835,33 +840,42 @@ public class RobotContainer {
     m_operatorController.rightBumper().whileTrue(new ExtensionJoystickCommand(m_extensionSubsystem,
         () -> modifyAxis(m_operatorController.getLeftY(), false)));
 
-    m_operatorController.back().onTrue(m_armSubsystem.resetEncoder(0)
-        .alongWith(
-            new InstantCommand(() -> {
-              m_extensionSubsystem.resetEncoder(0);
-            }, m_extensionSubsystem)));
-
     m_operatorController.povLeft().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
     m_operatorController.povRight().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
 
-    m_operatorController.povUp().onTrue(moveArm(ArmPosition.INTAKEFRONT, false));
+    m_operatorController.povUp().onTrue(new InstantCommand(() -> {
+      m_armSubsystem.resetPosition(currentArmAngle.getAsDouble() + 0.5);
+    }));
 
-    m_operatorController.povDown().onTrue(new OtherWristSwitchCommand(m_wristSubsystem));
+    m_operatorController.povDown().onTrue(new InstantCommand(() -> {
+      m_armSubsystem.resetPosition(currentArmAngle.getAsDouble() - 0.5);
+    }));
+
+    m_operatorController.leftBumper().onTrue(new InstantCommand(() -> {
+      m_wristSubsystem.forceCCW();
+    }));
+
+    m_operatorController.back().onTrue(moveArm(SALUTE));
+    m_operatorController.start()
+        .whileTrue(moveArm(ArmPosition.SINGLESUB, true).alongWith(new ClawPowerCommand(m_clawSubsystem, 1)));
 
   }
 
   private void configureDriver2Bindings() {
-    m_operatorController.a().onTrue(moveArm(ArmPosition.MEDIUM));
-    m_operatorController.b().onTrue(moveArm(SALUTE));
-    m_operatorController.x().onTrue(moveArm(ArmPosition.INTAKEBACK));
-    m_operatorController.y().onTrue(moveArm(ZEROES));
-    m_operatorController.povUp().onTrue(moveArm(INTAKEFRONT));
-    m_operatorController.povDown().onTrue(new InstantCommand(() -> {m_extensionSubsystem.extendTo(10);}));
-    m_operatorController.rightBumper().whileTrue(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
+    // m_operatorController.a().onTrue(moveArm(ArmPosition.MEDIUM));
+    // m_operatorController.b().onTrue(moveArm(SALUTE));
+    // m_operatorController.x().onTrue(moveArm(ArmPosition.INTAKEBACK));
+    // m_operatorController.y().onTrue(moveArm(ZEROES));
+    // m_operatorController.povUp().onTrue(moveArm(INTAKEFRONT));
+    // m_operatorController.povDown().onTrue(new InstantCommand(() ->
+    // {m_extensionSubsystem.extendTo(10);}));
+    // m_operatorController.rightBumper().whileTrue(
+    // new ArmJoystickCommand(m_armSubsystem, () ->
+    // modifyAxis(m_operatorController.getRightY(), false)));
 
-    m_operatorController.rightBumper().whileTrue(new ExtensionJoystickCommand(m_extensionSubsystem,
-        () -> modifyAxis(m_operatorController.getLeftY(), false)));
+    // m_operatorController.rightBumper().whileTrue(new
+    // ExtensionJoystickCommand(m_extensionSubsystem,
+    // () -> modifyAxis(m_operatorController.getLeftY(), false)));
   }
 
   private void configureDriver1Bindings() {
@@ -873,10 +887,6 @@ public class RobotContainer {
       m_LEDSubsystem.setHSV(-1, 65, 255, 255);
     }));
 
-    new Trigger(() -> m_visionSubsystem.IsAprilTagPersistent())
-        .whileTrue(new InstantCommand(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)))
-        .whileFalse(new InstantCommand(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
-
     new Trigger(() -> isInDefaultDriveMode)
         .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             () -> -modifyAxis(m_driverController.getLeftY(), false) *
@@ -887,16 +897,17 @@ public class RobotContainer {
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
             () -> m_driverController.getLeftTriggerAxis(),
             true))
-        .whileFalse(
-            new EmergencyDrive(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-                () -> -modifyAxis(m_driverController.getLeftY(), false) *
-                    Constants.Swerve.maxSpeed,
-                () -> -modifyAxis(m_driverController.getLeftX(), false) *
-                    Constants.Swerve.maxSpeed,
-                () -> -modifyAxis(m_driverController.getRightX(), false) *
-                    MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                () -> m_driverController.getLeftTriggerAxis(),
-                true));
+        // .whileFalse(
+        //     new EmergencyDrive(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+        //         () -> -modifyAxis(m_driverController.getLeftY(), false) *
+        //             Constants.Swerve.maxSpeed,
+        //         () -> -modifyAxis(m_driverController.getLeftX(), false) *
+        //             Constants.Swerve.maxSpeed,
+        //         () -> -modifyAxis(m_driverController.getRightX(), false) *
+        //             MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        //         () -> m_driverController.getLeftTriggerAxis(),
+        //         true))
+                ;
 
     m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
 
@@ -906,7 +917,7 @@ public class RobotContainer {
           SmartDashboard.putBoolean("EMERGENCY DRIVE ON", !isInDefaultDriveMode);
         }));
 
-    m_driverController.rightBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
+    m_driverController.leftBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
         m_poseEstimationSubsystem,
         m_targetingSubsystem,
         () -> -modifyAxis(m_driverController.getLeftY(), false) *
@@ -917,24 +928,39 @@ public class RobotContainer {
             MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
         () -> m_driverController.getLeftTriggerAxis()));
 
-    m_driverController.a().whileTrue(
-        new InstantCommand(
-            () -> {
-              m_armSubsystem.snapToAngle(commitAngle.getAsDouble());
-              SmartDashboard.putNumber("COMMIT ANG", commitAngle.getAsDouble());
-            }, m_armSubsystem)
-            .alongWith(new TimerCommand(0.75)).andThen(
-                new ClawPowerCommand(m_clawSubsystem, -1).alongWith(
-                    new InstantCommand(() -> {
-                      m_extensionSubsystem.extendTo(0);
-                    }, m_extensionSubsystem))));
+    m_driverController.rightBumper().whileTrue(new RampingDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+        () -> -modifyAxis(m_driverController.getLeftY(), false) *
+            Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getLeftX(), false) *
+            Constants.Swerve.maxSpeed,
+        () -> -modifyAxis(m_driverController.getRightX(), false) *
+            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+        () -> m_driverController.getLeftTriggerAxis(),
+        true));
+
+    new Trigger(
+        () -> m_driverController.getRightTriggerAxis() > 0.1 && m_driverController.getRightTriggerAxis() < 0.9)
+        .onTrue(
+            new InstantCommand(
+                () -> {
+                  m_armSubsystem.snapToAngle(commitAngle.getAsDouble());
+                  SmartDashboard.putNumber("COMMIT ANG", commitAngle.getAsDouble());
+                }, m_armSubsystem));
+
+    new Trigger(() -> m_driverController.getRightTriggerAxis() >= 0.9).whileTrue(
+        new ClawPowerCommand(m_clawSubsystem, -1).alongWith(
+            new InstantCommand(() -> {
+              m_extensionSubsystem.extendTo(0);
+            }, m_extensionSubsystem)));
 
     m_driverController.povUp().onTrue(new InstantCommand(() -> {
       m_LEDSubsystem.setHSV(-1, 125, 255, 255);
     }));
+
     m_driverController.povDown().onTrue(new InstantCommand(() -> {
       m_LEDSubsystem.setHSV(-1, 60, 255, 255);
     }));
+
     m_driverController.povRight().toggleOnTrue(new RepeatCommand(new InstantCommand(() -> {
       m_LEDSubsystem.rainbow();
     })));
@@ -965,6 +991,7 @@ public class RobotContainer {
     // new Pose2d(new Translation2d(0, 0), new Rotation2d())));
 
     m_driverController.y().whileTrue(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, true));
+    m_driverController.b().whileTrue(new NewAutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem));
 
     // m_driverController.x().whileTrue(new GoToPoseCommand(m_drivetrainSubsystem,
     // m_poseEstimationSubsystem,
@@ -1048,7 +1075,7 @@ public class RobotContainer {
         moveArm(SALUTE),
         new PPCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, PathPlanner.loadPath("dcmp1.1", 2.0, 1.0)),
         new WaitCommand(5)
-            .deadlineWith(new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false)));
+            .deadlineWith(new NewAutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem)));
   }
 
   public Command dcmpAuto1NOBAL() {
@@ -1062,10 +1089,12 @@ public class RobotContainer {
         new WaitCommand(1),
         moveArm(SALUTE));
   }
+
   /**
    * @return DCMP auto #2
    *         <p>
-   *         Scores one cube open side, grab + score another, and then balance in community
+   *         Scores one cube open side, grab + score another, and then balance in
+   *         community
    */
   public Command dcmpAuto2() {
     return new SequentialCommandGroup(
@@ -1085,7 +1114,7 @@ public class RobotContainer {
                     PathPlanner.loadPath("dcmp2.3", 2.0, 2.0)))
                 .andThen(new WaitCommand(4)
                     .deadlineWith(
-                        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false))),
+                        new NewAutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))),
             new WaitCommand(0.5).andThen(moveArm(ArmPosition.INTAKEBACK, true))
                 .andThen(new WaitCommand(1.9))
                 .andThen(moveArm(SALUTE, true)),
@@ -1094,6 +1123,7 @@ public class RobotContainer {
                 .andThen(new WaitCommand(2))
                 .andThen(new WaitCommand(1).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -1)))));
   }
+
   public Command dcmpAuto2NOBAL() {
     return new SequentialCommandGroup(
         moveArm(ZEROES, true),
@@ -1127,7 +1157,7 @@ public class RobotContainer {
         moveArm(ZEROES, true),
         new WaitCommand(0.5),
         moveArm(ArmPosition.FRONTCUBEHIGH, true),
-        new WaitCommand(0.25),
+        new WaitCommand(0.5),
         new WaitCommand(0.25).deadlineWith(
             new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))),
         moveArm(ArmPosition.PRE_FRONTCUBEHIGH, true),
@@ -1138,29 +1168,28 @@ public class RobotContainer {
                     PathPlanner.loadPath("dcmp3.2", 4.0, 3.0)))
                 .andThen(new WaitCommand(4)
                     .deadlineWith(
-                        new AutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem, false, true))),
+                        new NewAutoBalanceCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem))),
             new WaitCommand(0.5).andThen(moveArm(ArmPosition.INTAKEBACK, true))
                 .andThen(new WaitCommand(2.5))
                 .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
                 .andThen(new WaitCommand(3.5))
                 .andThen(moveArm(ArmPosition.INTAKEBACKCUBESLIGHTLYLOWER, true))
-                .andThen(new WaitCommand(2.5))
-                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
-                ,
+                .andThen(new WaitCommand(2.7))
+                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true)),
             new WaitCommand(1.5)
                 .andThen(new WaitCommand(1.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
                 .andThen(new WaitCommand(3))
-                .andThen(new WaitCommand(0.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -(3.0/5.0))))
+                .andThen(new WaitCommand(0.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))))
                 .andThen(new WaitCommand(2))
-                .andThen(new WaitCommand(3.2).deadlineWith(new ClawPowerCommand(m_clawSubsystem,  1)))
-                ));
+                .andThen(new WaitCommand(3.2).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))));
   }
+
   public Command dcmpAuto3NOBAL() {
     return new SequentialCommandGroup(
         moveArm(ZEROES, true),
         new WaitCommand(0.5),
         moveArm(ArmPosition.FRONTCUBEHIGH, true),
-        new WaitCommand(0.25),
+        new WaitCommand(0.5),
         new WaitCommand(0.25).deadlineWith(
             new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))),
         moveArm(ArmPosition.PRE_FRONTCUBEHIGH, true),
@@ -1174,15 +1203,13 @@ public class RobotContainer {
                 .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
                 .andThen(new WaitCommand(3.5))
                 .andThen(moveArm(ArmPosition.INTAKEBACKCUBESLIGHTLYLOWER, true))
-                .andThen(new WaitCommand(2.5))
-                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
-                ,
+                .andThen(new WaitCommand(2.7))
+                .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true)),
             new WaitCommand(1.5)
                 .andThen(new WaitCommand(1.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
                 .andThen(new WaitCommand(3))
-                .andThen(new WaitCommand(0.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -(3.0/5.0))))
+                .andThen(new WaitCommand(0.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -(3.0 / 5.0))))
                 .andThen(new WaitCommand(2))
-                .andThen(new WaitCommand(3.2).deadlineWith(new ClawPowerCommand(m_clawSubsystem,  1)))
-                ));
+                .andThen(new WaitCommand(3.2).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))));
   }
 }

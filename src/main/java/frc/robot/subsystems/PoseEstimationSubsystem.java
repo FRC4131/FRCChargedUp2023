@@ -87,6 +87,10 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     return m_navX.getYaw();
   }
 
+  public double[] getTargetTagData(){
+    return m_visionSubsystem.getTargetTagData();
+  }
+
   @Override
   public void periodic() {
     EstimatedRobotPose aprilTagPose = m_visionSubsystem.getAprilTagRobotPose().orElse(null);
@@ -104,6 +108,8 @@ public class PoseEstimationSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Robot Pitch", getPitch());
     SmartDashboard.putNumber("Robot Roll", getRoll());
     SmartDashboard.putNumber("Robot Yaw", getYaw());
+
+    SmartDashboard.putNumber("Mi Distanco Por Favor", m_visionSubsystem.getTargetTagData()[0]);
     
     SmartDashboard.putData(field2d);
 

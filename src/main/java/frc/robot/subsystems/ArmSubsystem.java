@@ -49,6 +49,8 @@ public class ArmSubsystem extends SubsystemBase {
     // m_actuator.configFeed
     m_rightEncoder = m_rightRot.getEncoder();
     m_leftEncoder = m_leftRot.getEncoder();
+
+    // Use m_leftRot if DEIMOS
     m_rightRotPIDController = m_rightRot.getPIDController();
     m_rightEncoder.setPositionConversionFactor(1);
     m_rightEncoder.setVelocityConversionFactor(1);
@@ -121,7 +123,7 @@ public class ArmSubsystem extends SubsystemBase {
   public void resetPosition(double position) {
     m_rightEncoder.setPosition(angleToMotorRotations(position));
     m_leftEncoder.setPosition(angleToMotorRotations(position));
-    // m_rightRotPIDController.setReference(0, ControlType.kPosition);
+    // m_rightRotPIDController.setReference(0, ControlType.kDutyCycle);
   }
 
   private double angleToMotorRotations(double angleDegrees) {
@@ -140,6 +142,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public double getArmAngle(){
+    // CHANGE TO LEFT IF DEIMOS
     return m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360;
   }
 
@@ -157,7 +160,6 @@ public class ArmSubsystem extends SubsystemBase {
       // clampSpeed(SmartDashboard.getNumber("CLAMP ARM SPEED", 1));
 
 
-    SmartDashboard.putNumber("Arm Velocity", m_rightEncoder.getVelocity());
     SmartDashboard.putString("Arm Position",
         m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + " Degrees");
     SmartDashboard.putString("Left Arm Motor Pos", m_rightEncoder.getPosition() / ARM_MOTOR_GEAR_RATIO * 360 + "Degrees");

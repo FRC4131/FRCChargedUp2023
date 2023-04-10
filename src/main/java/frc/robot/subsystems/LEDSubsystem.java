@@ -17,7 +17,12 @@ public class LEDSubsystem extends SubsystemBase {
     private int lastValue = 0;
 
     public LEDSubsystem() {
-        setHSV(-1, 65, 255, 255);
+        // Blue
+        // setHSV(-1, 65, 255, 255);
+
+        // Green
+        setHSV(-1, 125, 255, 255);
+
         m_LED.setLength(m_LEDBuffer.getLength());
         m_LED.setData(m_LEDBuffer);
         m_LED.start();
@@ -104,7 +109,12 @@ public class LEDSubsystem extends SubsystemBase {
     public void pulse(int hue) {
         for (var i = 0; i < 17; i++) {
             final var value = (lastValue + (i * 255 / 17)) % 255;
-            m_LEDBuffer.setHSV(i, hue, 255, 180 - value);
+            if(hue == 170){
+                m_LEDBuffer.setHSV(i, hue, 255, 255 - value);
+            } else {
+                m_LEDBuffer.setHSV(i, hue, 255, 180 - value);
+
+            }
         }
 
         lastValue += 3;
