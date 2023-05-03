@@ -17,7 +17,6 @@ import static frc.robot.Constants.ArmPosition.HIGHCOMMIT;
 import static frc.robot.Constants.ArmPosition.INTAKEFRONT;
 import static frc.robot.Constants.ArmPosition.LOW;
 import static frc.robot.Constants.ArmPosition.SALUTE;
-import static frc.robot.Constants.ArmPosition.SHOOTPOSITION;
 import static frc.robot.Constants.ArmPosition.STOW;
 import static frc.robot.Constants.ArmPosition.ZEROES;
 import static frc.robot.Constants.Swerve.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
@@ -30,7 +29,6 @@ import java.util.function.DoubleSupplier;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -52,7 +50,6 @@ import frc.robot.commands.CalibrateOdometryCommand;
 import frc.robot.commands.ClawPowerCommand;
 import frc.robot.commands.ClawTimedCommand;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.EmergencyDrive;
 import frc.robot.commands.ExtensionJoystickCommand;
 import frc.robot.commands.GoToPoseTeleopCommand;
 import frc.robot.commands.NewAutoBalanceCommand;
@@ -793,6 +790,7 @@ public class RobotContainer {
      * 
      * A-Intake from front
      * B-Intake from back
+     * Click right stick - Intake position for cones from the back
      */
     new Trigger(
         () -> m_operatorController.getLeftTriggerAxis() > 0.2 && m_operatorController.getLeftTriggerAxis() < 0.9)
@@ -807,6 +805,7 @@ public class RobotContainer {
           m_extensionSubsystem.extendTo(SALUTE.length);
         }).alongWith(new InstantCommand(() -> {
           m_armSubsystem.adjustSpeed(FAST_MAX_VELOCITY, FAST_MAX_ACCEL);
+          m_armSubsystem.clampSpeed(1);
           m_armSubsystem.snapToAngle(SALUTE.rotation);
         }, m_armSubsystem)));
 
@@ -823,8 +822,8 @@ public class RobotContainer {
 
     m_operatorController.b().onFalse(moveArm(SALUTE, true));
 
-    // Click left stick to move arm to the shoot position.
-    m_operatorController.leftStick().onTrue(moveArm(SHOOTPOSITION));
+    // Click right stick to move arm to the shoot position.
+    m_operatorController.rightStick().onTrue(moveArm(ArmPosition.INTAKEBACKCONE));
 
     m_operatorController.x().whileTrue(
         new ClawPowerCommand(m_clawSubsystem, -(5.0 / 3.0)));
@@ -880,12 +879,12 @@ public class RobotContainer {
 
   private void configureDriver1Bindings() {
 
-    m_driverController.start().onTrue(new InstantCommand(() -> {
-      m_LEDSubsystem.setHSV(-1, 130, 255, 255);
-    }));
-    m_driverController.back().onTrue(new InstantCommand(() -> {
-      m_LEDSubsystem.setHSV(-1, 65, 255, 255);
-    }));
+    // m_driverController.start().onTrue(new InstantCommand(() -> {
+    // m_LEDSubsystem.setHSV(-1, 130, 255, 255);
+    // }));
+    // m_driverController.back().onTrue(new InstantCommand(() -> {
+    // m_LEDSubsystem.setHSV(-1, 65, 255, 255);
+    // }));
 
     new Trigger(() -> isInDefaultDriveMode)
         .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
@@ -897,25 +896,25 @@ public class RobotContainer {
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
             () -> m_driverController.getLeftTriggerAxis(),
             true))
-        // .whileFalse(
-        //     new EmergencyDrive(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-        //         () -> -modifyAxis(m_driverController.getLeftY(), false) *
-        //             Constants.Swerve.maxSpeed,
-        //         () -> -modifyAxis(m_driverController.getLeftX(), false) *
-        //             Constants.Swerve.maxSpeed,
-        //         () -> -modifyAxis(m_driverController.getRightX(), false) *
-        //             MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-        //         () -> m_driverController.getLeftTriggerAxis(),
-        //         true))
-                ;
+    // .whileFalse(
+    // new EmergencyDrive(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    // () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    // Constants.Swerve.maxSpeed,
+    // () -> -modifyAxis(m_driverController.getRightX(), false) *
+    // MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    // () -> m_driverController.getLeftTriggerAxis(),
+    // true))
+    ;
 
-    m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroGyro()));
+    m_driverController.back().onTrue(new InstantCommand(() -> m_poseEstimationSubsystem.zeroAngle()));
 
-    m_driverController.x()
-        .onTrue(new InstantCommand(() -> {
-          isInDefaultDriveMode = isInDefaultDriveMode ? false : true;
-          SmartDashboard.putBoolean("EMERGENCY DRIVE ON", !isInDefaultDriveMode);
-        }));
+    // m_driverController.x()
+    // .onTrue(new InstantCommand(() -> {
+    // isInDefaultDriveMode = isInDefaultDriveMode ? false : true;
+    // SmartDashboard.putBoolean("EMERGENCY DRIVE ON", !isInDefaultDriveMode);
+    // }));
 
     m_driverController.leftBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
         m_poseEstimationSubsystem,
@@ -1174,7 +1173,8 @@ public class RobotContainer {
                 .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
                 .andThen(new WaitCommand(3.5))
                 .andThen(moveArm(ArmPosition.INTAKEBACKCUBESLIGHTLYLOWER, true))
-                .andThen(new WaitCommand(2.7))
+                .andThen(new WaitCommand(3))
+                // added .3 seconds to grab easilier
                 .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true)),
             new WaitCommand(1.5)
                 .andThen(new WaitCommand(1.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
@@ -1203,7 +1203,8 @@ public class RobotContainer {
                 .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true))
                 .andThen(new WaitCommand(3.5))
                 .andThen(moveArm(ArmPosition.INTAKEBACKCUBESLIGHTLYLOWER, true))
-                .andThen(new WaitCommand(2.7))
+                .andThen(new WaitCommand(3))
+                // Add 0.3 sec to grab
                 .andThen(moveArm(ArmPosition.MIDCUBEFRONT, true)),
             new WaitCommand(1.5)
                 .andThen(new WaitCommand(1.5).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))
@@ -1212,4 +1213,9 @@ public class RobotContainer {
                 .andThen(new WaitCommand(2))
                 .andThen(new WaitCommand(3.2).deadlineWith(new ClawPowerCommand(m_clawSubsystem, 1)))));
   }
+
+  // public Command threePieceCable() {
+  //   return (new WaitCommand(14.25).deadlineWith(dcmpAuto3NOBAL()))
+  //       .andThen(new WaitCommand(1).deadlineWith(new ClawPowerCommand(m_clawSubsystem, -(5.0 / 3.0))));
+  // }
 }

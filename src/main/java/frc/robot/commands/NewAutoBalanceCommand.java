@@ -37,11 +37,15 @@ public class NewAutoBalanceCommand extends CommandBase {
 
     offset = new Translation2d(m_PoseEstimationSubsystem.getRoll(), -m_PoseEstimationSubsystem.getPitch());
 
-    if (!(startOffset.getNorm() - offset.getNorm() > startOffset.getNorm() / 8.5)) {
-      if(Math.abs(offset.getNorm()) <= 10)
-      offset.times(0.5);
-      if(Math.abs(offset.getNorm()) <= 8)
-      offset.times(0.5);
+    if (!(startOffset.getNorm() - offset.getNorm() > startOffset.getNorm() / 7.5)) {
+      if (Math.abs(offset.getNorm()) <= 12)
+        offset.times(0.3);
+      if (Math.abs(offset.getNorm()) <= 10)
+        offset.times(0.125);
+      if (Math.abs(offset.getNorm()) <= 8)
+        offset.times(0.08);
+      if (Math.abs(offset.getNorm()) <= 5)
+        offset.times(0);
       m_DrivetrainSubsystem.drive(offset.times(0.045), 0.0,
           m_PoseEstimationSubsystem.getPose().getRotation(), false,
           false);

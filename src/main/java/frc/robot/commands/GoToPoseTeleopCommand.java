@@ -100,7 +100,7 @@ public class GoToPoseTeleopCommand extends CommandBase {
 
     boolean isBlue = DriverStation.getAlliance().equals(Alliance.Blue);
     double pidDesiredRotation = m_thetaController.calculate(
-        m_poseEstimationSubsystem.getPose().getRotation().getRadians(), m_desiredPose.getRotation().getRadians());
+        m_poseEstimationSubsystem.getYaw(), m_desiredPose.getRotation().getRadians());
     double pidDesiredX = m_xController.calculate(m_poseEstimationSubsystem.getPose().getX(), m_desiredPose.getX());
     double pidDesiredY = m_yController.calculate(m_poseEstimationSubsystem.getPose().getY(), m_desiredPose.getY());
     SmartDashboard.putNumber("xErr", m_desiredPose.getX());
