@@ -828,19 +828,19 @@ public class RobotContainer {
     m_operatorController.x().whileTrue(
         new ClawPowerCommand(m_clawSubsystem, -(5.0 / 3.0)));
 
-    m_operatorController.y().onTrue(
+    m_operatorController.y().onTrue( //y on operator spins wrist 
         new InstantCommand(() -> {
           m_wristSubsystem.rotate();
         }));
 
     m_operatorController.rightBumper().whileTrue(
-        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false)));
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY(), false))); 
 
     m_operatorController.rightBumper().whileTrue(new ExtensionJoystickCommand(m_extensionSubsystem,
         () -> modifyAxis(m_operatorController.getLeftY(), false)));
 
-    m_operatorController.povLeft().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
-    m_operatorController.povRight().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
+    m_operatorController.povLeft().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1)); //left dpad intakes
+    m_operatorController.povRight().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1)); //right dpad outakes 
 
     m_operatorController.povUp().onTrue(new InstantCommand(() -> {
       m_armSubsystem.resetPosition(currentArmAngle.getAsDouble() + 0.5);
