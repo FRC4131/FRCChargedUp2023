@@ -134,10 +134,10 @@ public class RobotContainer {
     // Configure the trigger bindings
     setDefaultCommands();
     configureDriver1Bindings();
-    configureCompOperatorBindings();
+    // configureCompOperatorBindings();
 
     // Only for debugging.
-    // configureDriver2Bindings();
+    configureDriver2Bindings();
 
   }
 
@@ -861,20 +861,19 @@ public class RobotContainer {
   }
 
   private void configureDriver2Bindings() {
-    // m_operatorController.a().onTrue(moveArm(ArmPosition.MEDIUM));
-    // m_operatorController.b().onTrue(moveArm(SALUTE));
-    // m_operatorController.x().onTrue(moveArm(ArmPosition.INTAKEBACK));
-    // m_operatorController.y().onTrue(moveArm(ZEROES));
-    // m_operatorController.povUp().onTrue(moveArm(INTAKEFRONT));
-    // m_operatorController.povDown().onTrue(new InstantCommand(() ->
-    // {m_extensionSubsystem.extendTo(10);}));
-    // m_operatorController.rightBumper().whileTrue(
-    // new ArmJoystickCommand(m_armSubsystem, () ->
-    // modifyAxis(m_operatorController.getRightY(), false)));
+    m_operatorController.rightBumper().whileTrue(
+        new ArmJoystickCommand(m_armSubsystem, () -> modifyAxis(m_operatorController.getRightY() * 0.5, false)));
 
-    // m_operatorController.rightBumper().whileTrue(new
-    // ExtensionJoystickCommand(m_extensionSubsystem,
-    // () -> modifyAxis(m_operatorController.getLeftY(), false)));
+    m_operatorController.rightBumper().whileTrue(new ExtensionJoystickCommand(m_extensionSubsystem,
+        () -> modifyAxis(m_operatorController.getLeftY() * 0.5, false)));
+
+    m_operatorController.povLeft().whileTrue(new ClawPowerCommand(m_clawSubsystem, 1));
+    m_operatorController.povRight().whileTrue(new ClawPowerCommand(m_clawSubsystem, -1));
+
+    m_operatorController.y().onTrue(
+        new InstantCommand(() -> {
+          m_wristSubsystem.rotate();
+        }));
   }
 
   private void configureDriver1Bindings() {
@@ -916,41 +915,41 @@ public class RobotContainer {
     // SmartDashboard.putBoolean("EMERGENCY DRIVE ON", !isInDefaultDriveMode);
     // }));
 
-    m_driverController.leftBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
-        m_poseEstimationSubsystem,
-        m_targetingSubsystem,
-        () -> -modifyAxis(m_driverController.getLeftY(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getLeftX(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getRightX(), false) *
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-        () -> m_driverController.getLeftTriggerAxis()));
+    // m_driverController.leftBumper().whileTrue(new GoToPoseTeleopCommand(m_drivetrainSubsystem,
+    //     m_poseEstimationSubsystem,
+    //     m_targetingSubsystem,
+    //     () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    //         Constants.Swerve.maxSpeed,
+    //     () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    //         Constants.Swerve.maxSpeed,
+    //     () -> -modifyAxis(m_driverController.getRightX(), false) *
+    //         MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    //     () -> m_driverController.getLeftTriggerAxis()));
 
-    m_driverController.rightBumper().whileTrue(new RampingDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
-        () -> -modifyAxis(m_driverController.getLeftY(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getLeftX(), false) *
-            Constants.Swerve.maxSpeed,
-        () -> -modifyAxis(m_driverController.getRightX(), false) *
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-        () -> m_driverController.getLeftTriggerAxis(),
-        true));
+    // m_driverController.rightBumper().whileTrue(new RampingDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
+    //     () -> -modifyAxis(m_driverController.getLeftY(), false) *
+    //         Constants.Swerve.maxSpeed,
+    //     () -> -modifyAxis(m_driverController.getLeftX(), false) *
+    //         Constants.Swerve.maxSpeed,
+    //     () -> -modifyAxis(m_driverController.getRightX(), false) *
+    //         MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+    //     () -> m_driverController.getLeftTriggerAxis(),
+    //     true));
 
-    new Trigger(
-        () -> m_driverController.getRightTriggerAxis() > 0.1 && m_driverController.getRightTriggerAxis() < 0.9)
-        .onTrue(
-            new InstantCommand(
-                () -> {
-                  m_armSubsystem.snapToAngle(commitAngle.getAsDouble());
-                  SmartDashboard.putNumber("COMMIT ANG", commitAngle.getAsDouble());
-                }, m_armSubsystem));
+    // new Trigger(
+    //     () -> m_driverController.getRightTriggerAxis() > 0.1 && m_driverController.getRightTriggerAxis() < 0.9)
+    //     .onTrue(
+    //         new InstantCommand(
+    //             () -> {
+    //               m_armSubsystem.snapToAngle(commitAngle.getAsDouble());
+    //               SmartDashboard.putNumber("COMMIT ANG", commitAngle.getAsDouble());
+    //             }, m_armSubsystem));
 
-    new Trigger(() -> m_driverController.getRightTriggerAxis() >= 0.9).whileTrue(
-        new ClawPowerCommand(m_clawSubsystem, -1).alongWith(
-            new InstantCommand(() -> {
-              m_extensionSubsystem.extendTo(0);
-            }, m_extensionSubsystem)));
+    // new Trigger(() -> m_driverController.getRightTriggerAxis() >= 0.9).whileTrue(
+    //     new ClawPowerCommand(m_clawSubsystem, -1).alongWith(
+    //         new InstantCommand(() -> {
+    //           m_extensionSubsystem.extendTo(0);
+    //         }, m_extensionSubsystem)));
 
     m_driverController.povUp().onTrue(new InstantCommand(() -> {
       m_LEDSubsystem.setHSV(-1, 125, 255, 255);
