@@ -145,11 +145,11 @@ public class RobotContainer {
 
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
         () -> -modifyAxis(m_driverController.getLeftY(), false) *
-            Constants.Swerve.maxSpeed,
+            Constants.Swerve.maxSpeed * 0.5,
         () -> -modifyAxis(m_driverController.getLeftX(), false) *
-            Constants.Swerve.maxSpeed,
+            Constants.Swerve.maxSpeed * 0.5,
         () -> -modifyAxis(m_driverController.getRightX(), false) *
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 0.5,
         () -> m_driverController.getLeftTriggerAxis(),
         true));
 
@@ -889,11 +889,11 @@ public class RobotContainer {
     new Trigger(() -> isInDefaultDriveMode)
         .whileTrue(new DefaultDriveCommand(m_drivetrainSubsystem, m_poseEstimationSubsystem,
             () -> -modifyAxis(m_driverController.getLeftY(), false) *
-                Constants.Swerve.maxSpeed,
+                Constants.Swerve.maxSpeed / 2.0,
             () -> -modifyAxis(m_driverController.getLeftX(), false) *
-                Constants.Swerve.maxSpeed,
+                Constants.Swerve.maxSpeed / 2.0,
             () -> -modifyAxis(m_driverController.getRightX(), false) *
-                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2.0,
             () -> m_driverController.getLeftTriggerAxis(),
             true))
     // .whileFalse(
